@@ -6,10 +6,10 @@
              MinimumWidthRequest="1000">
     
     <ScrollView>
-        <VerticalStackLayout BackgroundColor="#242424">
+        <VerticalStackLayout BackgroundColor="#666666">
 
             <!-- Header Section -->
-            <Grid BackgroundColor="#87bc76" HeightRequest="100">
+            <Grid BackgroundColor="#98cb00" HeightRequest="100">
                 <Label                    
                     HorizontalOptions="Center"
                     VerticalOptions="Center"
@@ -17,11 +17,6 @@
                     FontSize="60"
                     Text="MADINA ENTERPRISES"
                     TextColor="White">
-                    <Label.Shadow>
-                        <Shadow Brush="Black"
-                            Opacity="0.7"
-                            Radius="4"/>
-                    </Label.Shadow>
                 </Label>
             </Grid>
 
@@ -52,7 +47,7 @@
 
                     <!-- Email Entry -->
                     <Grid Margin="0,30,0,0" ColumnDefinitions=".2*,.8*">
-                        <RoundRectangle BackgroundColor="#87bc76" 
+                        <RoundRectangle BackgroundColor="#98cb00" 
                                         CornerRadius="0"
                                         HeightRequest="45"
                                         WidthRequest="130"
@@ -64,11 +59,6 @@
                                TextColor="White"
                                FontAttributes="Bold"
                                FontSize="Medium">
-                            <Label.Shadow>
-                                <Shadow Brush="Black"
-                            Opacity="0.7"
-                            Radius="4"/>
-                            </Label.Shadow>
                         </Label>
                         <Entry x:Name="emailEntry"
                             Grid.Column="1"
@@ -81,7 +71,7 @@
 
                     <!-- Password Entry -->
                     <Grid Margin="0,30,0,0" ColumnDefinitions=".2*,.6*,.2*">
-                        <RoundRectangle BackgroundColor="#87bc76" 
+                        <RoundRectangle BackgroundColor="#98cb00" 
                                         CornerRadius="0"
                                         HeightRequest="45"
                                         WidthRequest="130"/>
@@ -92,11 +82,6 @@
                                FontAttributes="Bold"
                                TextColor="White"
                                FontSize="Medium">
-                            <Label.Shadow>
-                                <Shadow Brush="Black"
-                            Opacity="0.7"
-                            Radius="4"/>
-                            </Label.Shadow>
                         </Label>
                         <Entry 
                             x:Name="passwordEntry"
@@ -109,11 +94,12 @@
                             Opacity=".9"/>
 
                         <Button x:Name="showHidePasswordButton"
-                                BackgroundColor="#87bc76"
+                                BackgroundColor="#98cb00"
                                 Text="Show"
                                 FontAttributes="Bold"
                                 WidthRequest="100"
                                 CornerRadius="0"
+                                TextColor="White"
                                 Clicked="showHidePasswordButton_Clicked"
                                 Grid.Column="2">
                             <Button.Shadow>
@@ -127,7 +113,7 @@
 
                     <!-- Login Button -->
                     <Button               
-                        BackgroundColor="#87bc76"
+                        BackgroundColor="#98cb00"
                         Text="Login"  
                         FontAttributes="Bold"
                         FontSize="Small"
@@ -149,9 +135,10 @@
 
                     <!-- Create Account Button -->
                     <Button    
-                        BackgroundColor="#87bc76"
+                        BackgroundColor="#98cb00"
                         HeightRequest="40"
                         Margin="10"
+                        CornerRadius="0"
                         Text="Create a new account"
                         MaximumWidthRequest="200"
                         TextColor="White"

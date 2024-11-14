@@ -13,7 +13,7 @@
             <!-- Left Sidebar Background -->
             <BoxView 
                 Grid.Column="0"         
-                Color="#87bc76" />
+                Color="#98cb00" />
             <!-- Right Column Background -->
             <BoxView 
                 Grid.Column="1"           
