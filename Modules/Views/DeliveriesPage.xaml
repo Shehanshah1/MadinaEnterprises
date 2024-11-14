@@ -2,11 +2,103 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MadinaEnterprises.Modules.Views.DeliveriesPage"
-             Title="DeliveriesPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             Title=""
+             BackgroundColor="#242424"
+             MinimumHeightRequest="600"
+             MinimumWidthRequest="1200">
+
+    <ScrollView>
+        <Grid ColumnDefinitions="253,*">
+
+            <!-- Left Sidebar Background -->
+            <BoxView 
+                Grid.Column="0"
+                Grid.RowSpan="7"
+                Color="#87bc76" />
+            <!-- Right Column Background -->
+            <BoxView 
+                Grid.Column="1"
+                Grid.RowSpan="7"
+                Color="White"  />
+            <!-- Sidebar Buttons and Logo -->
+            <StackLayout Grid.Column="0" Padding="10" Spacing="30" Grid.RowSpan="7">
+
+                <!-- Sidebar Buttons -->
+                <Button 
+                    Text="Dashboard" 
+                    FontSize="Small" 
+                    BackgroundColor="Black" 
+                    TextColor="White" 
+                    HorizontalOptions="FillAndExpand"
+                    CornerRadius="0"
+                    Margin="0,50,0,0"
+                    Clicked="OnDashboardPageButtonClicked"
+                    />
+                <Button 
+                    Text="Ginners"
+                    FontSize="Small" 
+                    BackgroundColor="Black" 
+                    TextColor="White"
+                    CornerRadius="0"
+                    HorizontalOptions="FillAndExpand" 
+                    Clicked="OnGinnersPageButtonClicked"
+                    />
+                <Button 
+                    Text="Mills" 
+                    FontSize="Small" 
+                    BackgroundColor="Black" 
+                    TextColor="White" 
+                    CornerRadius="0"
+                    HorizontalOptions="FillAndExpand"
+                    Clicked="OnMillsPageButtonClicked"/>
+                <Button 
+                    Text="Contracts" 
+                    FontSize="Small" 
+                    BackgroundColor="Black" 
+                    TextColor="White" 
+                    CornerRadius="0"
+                    HorizontalOptions="FillAndExpand" 
+                    Clicked="OnContractsPageButtonClicked"/>
+                <Button 
+                   Text="Deliveries" 
+                   FontSize="Small" 
+                    BackgroundColor="White" 
+                    TextColor="Black" 
+                   CornerRadius="0"
+                   HorizontalOptions="FillAndExpand"/>
+                <Button 
+                   Text="Payments" 
+                   FontSize="Small" 
+                   BackgroundColor="Black" 
+                   TextColor="White"
+                   CornerRadius="0"
+                   HorizontalOptions="FillAndExpand"
+                    Clicked="OnPaymentsPageButtonClicked"/>
+                <Button 
+                   Text="Log Out" 
+                   FontSize="Small" 
+                   BackgroundColor="Black" 
+                   TextColor="White" 
+                   CornerRadius="0"
+                   HorizontalOptions="FillAndExpand"
+                    Clicked="OnLogOutButtonClicked"/>
+            </StackLayout>
+            <Grid Grid.Column="2" Grid.RowSpan="7"
+              ColumnDefinitions="*,*" RowDefinitions=".2*,.2*, .8*">
+
+                <!-- Deliveries Greeting -->
+
+                <Label Grid.Column="0" Grid.Row="0" Text="Deliveries" Margin="20,0,0,20" HorizontalOptions="Start" VerticalOptions="End" FontSize="Header" FontAttributes="Bold" TextColor="Black" />
+
+                <!-- Divider Line -->
+                <Line 
+                Grid.ColumnSpan="3"
+                Stroke="Black"  
+                X1="0"
+                Y1="90"
+                X2="2000" 
+                Y2="90"/>
+            </Grid>
+        </Grid>
+    </ScrollView>
 </ContentPage>

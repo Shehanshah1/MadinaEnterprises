@@ -6,50 +6,70 @@
              MinimumWidthRequest="1000">
     
     <ScrollView>
-        <VerticalStackLayout BackgroundColor="DarkGreen">
+        <VerticalStackLayout BackgroundColor="#242424">
 
             <!-- Header Section -->
-            <Grid BackgroundColor="Black" HeightRequest="100">
-                <Label 
+            <Grid BackgroundColor="#87bc76" HeightRequest="100">
+                <Label                    
                     HorizontalOptions="Center"
                     VerticalOptions="Center"
                     FontAttributes="Bold"
-                    FontSize="Header"
+                    FontSize="60"
                     Text="MADINA ENTERPRISES"
-                    TextColor="White"/>
+                    TextColor="White">
+                    <Label.Shadow>
+                        <Shadow Brush="Black"
+                            Opacity="0.7"
+                            Radius="4"/>
+                    </Label.Shadow>
+                </Label>
             </Grid>
+
             <Label x:Name="errorMessageLabel"
                TextColor="Red"
                IsVisible="False"
                HorizontalOptions="Center"/>
+                
+             
             
             <!-- Content Section -->
-            <Grid BackgroundColor="#242424" Padding="30, 0, 30, 0">
-                <VerticalStackLayout>
+            <Grid BackgroundColor="White" Padding="30, 0, 30, 0">
+                <Image Source="C:\Users\lenovo\Pictures\Madina Enterprises.png" Aspect="AspectFill" WidthRequest="370" HeightRequest="300" Opacity=".5"/>
+
+                <VerticalStackLayout Spacing="10" Padding="20">
+
 
                     <Label FontAttributes="Bold"
                            FontSize="Medium"
                            Text="Welcome!"
-                           TextColor="White"/>
+                           TextColor="Black">
+                    </Label>
                     <Label 
                         FontSize="Medium"
                         Text="Login to continue!"
-                        TextColor="white"/>
+                        TextColor="Black">
+                    </Label>
 
                     <!-- Email Entry -->
                     <Grid Margin="0,30,0,0" ColumnDefinitions=".2*,.8*">
-                        <RoundRectangle BackgroundColor="Black" 
+                        <RoundRectangle BackgroundColor="#87bc76" 
                                         CornerRadius="0"
                                         HeightRequest="45"
                                         WidthRequest="130"
-                                        Opacity=".8"/>
+                                        />
                         <Label Text="Email:" 
                                Grid.Column="0" 
                                HorizontalOptions="Center"
                                VerticalOptions="Center"
                                TextColor="White"
                                FontAttributes="Bold"
-                               FontSize="Medium"/>
+                               FontSize="Medium">
+                            <Label.Shadow>
+                                <Shadow Brush="Black"
+                            Opacity="0.7"
+                            Radius="4"/>
+                            </Label.Shadow>
+                        </Label>
                         <Entry x:Name="emailEntry"
                             Grid.Column="1"
                             Placeholder="Enter your email..."
@@ -61,7 +81,7 @@
 
                     <!-- Password Entry -->
                     <Grid Margin="0,30,0,0" ColumnDefinitions=".2*,.6*,.2*">
-                        <RoundRectangle BackgroundColor="Black" 
+                        <RoundRectangle BackgroundColor="#87bc76" 
                                         CornerRadius="0"
                                         HeightRequest="45"
                                         WidthRequest="130"/>
@@ -71,7 +91,13 @@
                                VerticalOptions="Center"
                                FontAttributes="Bold"
                                TextColor="White"
-                               FontSize="Medium"/>
+                               FontSize="Medium">
+                            <Label.Shadow>
+                                <Shadow Brush="Black"
+                            Opacity="0.7"
+                            Radius="4"/>
+                            </Label.Shadow>
+                        </Label>
                         <Entry 
                             x:Name="passwordEntry"
                             Grid.Column="1"
@@ -83,43 +109,71 @@
                             Opacity=".9"/>
 
                         <Button x:Name="showHidePasswordButton"
+                                BackgroundColor="#87bc76"
                                 Text="Show"
+                                FontAttributes="Bold"
                                 WidthRequest="100"
+                                CornerRadius="0"
                                 Clicked="showHidePasswordButton_Clicked"
-                                Grid.Column="2"/>
+                                Grid.Column="2">
+                            <Button.Shadow>
+                                <Shadow Radius="4"
+                                    Brush="Black"
+                                    Offset="5,5"/>
+                            </Button.Shadow>
+                        </Button>
 
                     </Grid>
 
                     <!-- Login Button -->
                     <Button               
-                        BackgroundColor="#322f5c"
-                        Text="Login"
+                        BackgroundColor="#87bc76"
+                        Text="Login"  
+                        FontAttributes="Bold"
+                        FontSize="Small"
                         TextColor="White"
+                        CornerRadius="0"
                         HeightRequest="60"
                         Margin="0,20,0,0"
-                        MaximumWidthRequest="150"
+                        WidthRequest="100"
                         x:Name="loginButton"
-                        />
+                        Clicked="OnLoginButtonClicked"
+                        >
+                        <Button.Shadow>
+                            <Shadow Radius="4"
+                                    Brush="Black"
+                                    Offset="5,5"/>
+                        </Button.Shadow>
+                        </Button>
+
+
+                    <!-- Create Account Button -->
+                    <Button    
+                        BackgroundColor="#87bc76"
+                        HeightRequest="40"
+                        Margin="10"
+                        Text="Create a new account"
+                        MaximumWidthRequest="200"
+                        TextColor="White"
+                        Clicked="OnCreateAccountButtonClicked">
+                        <Button.Shadow>
+                            <Shadow Radius="4"
+                                    Brush="Black"
+                                    Offset="5,5"/>
+                        </Button.Shadow>
+                    </Button>
+
 
                     <!-- Forgot Password Link -->
-                    <Button Margin="0,20,0,0" 
+                    <Button 
                             HorizontalOptions="Center"
                             Text="Forgot your password?"
                             HeightRequest="30"
                             MaximumWidthRequest="200"
                             TextColor="Blue"
-                            BackgroundColor="#7664a9"
+                            BackgroundColor="White"
+                            Clicked="OnForgotPasswordButtonClicked"  
                             />
-
-                    <!-- Create Account Button -->
-                    <Button    
-                        BackgroundColor="#322f5c"
-                        HeightRequest="60"
-                        Text="Create a new account"
-                        MaximumWidthRequest="200"
-                        TextColor="White"
-                        Margin="0,20,0,40"
-                        />
 
                 </VerticalStackLayout>
             </Grid>
