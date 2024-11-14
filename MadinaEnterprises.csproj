@@ -66,10 +66,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Modules\Models\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <MauiXaml Update="Modules\Views\ContractsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
