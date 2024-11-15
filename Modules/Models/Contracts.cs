@@ -15,7 +15,7 @@ namespace MadinaEnterprises.Modules.Models
         public double PricePerBatch { get; set; }
         public double TotalAmount { get; set; }
         public double CommissionPercentage { get; set; }
-        public string DateCreated { get; set; }
+        public DateTime DateCreated { get; set; }
         public string DeliveryNotes { get; set; }
         public string PaymentNotes { get; set; }
     }

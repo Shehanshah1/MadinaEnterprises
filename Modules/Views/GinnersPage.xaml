@@ -83,12 +83,13 @@
                     Clicked="OnLogOutButtonClicked"/>
             </StackLayout>
             <Grid Grid.Column="2" Grid.RowSpan="7"
-              ColumnDefinitions="*,*" RowDefinitions=".2*,.2*, .8*">
+              ColumnDefinitions="*,*" RowDefinitions=".2*,.1*, .9*">
 
                 <!-- Ginners Greeting -->
 
                 <Label Grid.Column="0" Grid.Row="0" Text="Ginners" Margin="20,0,0,20" HorizontalOptions="Start" VerticalOptions="End" FontSize="Header" FontAttributes="Bold" TextColor="Black" />
-
+                <Button Grid.Column="1" Grid.Row="0" HorizontalOptions="End" Margin="20" Text="Add New Ginner" WidthRequest="200" CornerRadius="0" Background="Black" TextColor="White" Clicked="OnAddNewGinnerButtonClicked"/>
+                <Button Grid.ColumnSpan="2" Grid.Row="0" HorizontalOptions="Center" Margin="300,20,20,20" Text="Ginner Ledger" WidthRequest="200" CornerRadius="0" Background="Black" TextColor="White" Clicked="OnGinnerLedgerButtonClicked"/>
                 <!-- Divider Line -->
                 <Line 
                 Grid.ColumnSpan="3"
@@ -97,6 +98,42 @@
                 Y1="90"
                 X2="2000" 
                 Y2="90"/>
+
+                    <!-- Column Headings for Employee Management -->
+                <Grid ColumnDefinitions="*,*,*,*,*,*,*,*" Grid.ColumnSpan="2" Grid.Row="1"
+                              Padding="5" 
+                              Margin="5">
+                        <Label Text="Ginner ID" TextColor="Black" FontAttributes="Bold" Grid.Column="0"/>
+                        <Label Text="Name" TextColor="Black" FontAttributes="Bold" Grid.Column="1"/>
+                        <Label Text="Contact" TextColor="Black" FontAttributes="Bold" Grid.Column="2"/>
+                        <Label Text="Address" TextColor="Black" FontAttributes="Bold" Grid.Column="3"/>
+                        <Label Text="IBAN" TextColor="Black" FontAttributes="Bold" Grid.Column="4"/>
+                        <Label Text="NTN" TextColor="Black" FontAttributes="Bold" Grid.Column="5"/>
+                        <Label Text="STN" TextColor="Black" FontAttributes="Bold" Grid.Column="6"/>
+                        <Label Text="Action" TextColor="Black" FontAttributes="Bold" Grid.Column="7"/>
+                    </Grid>
+
+                    <!-- Employee List -->
+                <CollectionView ItemsSource="{Binding Ginners}" BackgroundColor="#90bd10" Grid.ColumnSpan="2" Grid.Row="2" Margin="10">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="*,*,*,*,*,*" Padding="5" Margin="0,5,0,5">
+                                <Label Text="{Binding GinnerID}" TextColor="Black" Grid.Column="0"/>
+                                <Label Text="{Binding Name}" TextColor="Black" Grid.Column="1"/>
+                                <Label Text="{Binding Contact}" TextColor="Black" Grid.Column="2"/>
+                                <Label Text="{Binding Address}" TextColor="Black" Grid.Column="3"/>
+                                <Label Text="{Binding IBAN}" TextColor="Black" Grid.Column="4"/>
+                                <Label Text="{Binding NTN}" TextColor="Black" Grid.Column="5"/>
+                                <Label Text="{Binding STN}" TextColor="Black" Grid.Column="6"/>
+                                <!-- Edit and Delete Buttons -->
+                                <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Grid.Column="7">
+                                    <Button Text="Edit" BackgroundColor="Gray" TextColor="White" Clicked="OnEditGinnerButtonClicked"/>
+                                    <Button Text="Delete" BackgroundColor="Red" TextColor="White" Clicked="OnDeleteGinnerButtonClicked"/>
+                                </StackLayout>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
             </Grid>
         </Grid>
     </ScrollView>

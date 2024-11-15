@@ -38,4 +38,24 @@ public partial class GinnersPage : ContentPage
         // Navigate back to the LoginView
         await App.NavigateToPage(new LoginPage());
     }
+
+    private void OnGinnerLedgerButtonClicked(object sender, EventArgs e)
+    {
+
+    }
+
+    private void OnAddNewGinnerButtonClicked(object sender, EventArgs e)
+    {
+
+    }
+
+    private void OnEditGinnerButtonClicked(object sender, EventArgs e)
+    {
+
+    }
+
+    private void OnDeleteGinnerButtonClicked(object sender, EventArgs e)
+    {
+
+    }
 }
