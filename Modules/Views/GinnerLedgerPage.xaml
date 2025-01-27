@@ -1,0 +1,34 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MadinaEnterprises.Modules.Views.GinnerLedgerPage"
+             Title="Ginner Ledger">
+    <StackLayout Padding="20">
+        
+        
+        <!-- Dropdown for Ginners -->
+        <Label Text="Select a Ginner:" FontSize="Medium" />
+        <Picker x:Name="GinnerPicker" />
+
+        <!-- Ledger List -->
+        <Label Text="Ledger Details:" FontSize="Medium" Margin="0,20,0,5" />
+        <ListView x:Name="LedgerListView">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout Orientation="Vertical" Padding="10">
+                            <Label Text="{Binding DealID}" FontSize="Medium" />
+                            <Label Text="Contract Amount: {Binding ContractAmount, StringFormat='{}{0:C}'}" FontSize="Small" />
+                            <Label Text="Amount Paid: {Binding TotalAmountPaid, StringFormat='{}{0:C}'}" FontSize="Small" />
+                            <Label Text="Amount Left: {Binding TotalAmountLeft, StringFormat='{}{0:C}'}" FontSize="Small" />
+                            <Label Text="Bales Sold: {Binding BalesSold}" FontSize="Small" />
+                            <Label Text="Mills Due To: {Binding MillsDueTo}" FontSize="Small" />
+                            <Label Text="Last Payment Date: {Binding DatePaid}" FontSize="Small" />
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <Button Text="Back" Clicked="OnBackButtonClicked" WidthRequest="100"/>
+    </StackLayout>
+</ContentPage>

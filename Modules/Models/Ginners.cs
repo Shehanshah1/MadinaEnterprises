@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 
 namespace MadinaEnterprises.Modules.Models
 {
@@ -15,5 +11,12 @@ namespace MadinaEnterprises.Modules.Models
         public string IBAN { get; set; }
         public string NTN { get; set; }
         public string STN { get; set; }
+
+        // ObservableCollection for Ginners
+        public ObservableCollection<Ginners> GinnerList { get; set; } = new ObservableCollection<Ginners>();
+
+        // Commands for Edit/Delete actions
+        public Command<Ginners> EditGinnerCommand { get; set; }
+        public Command<Ginners> DeleteGinnerCommand { get; set; }
     }
 }

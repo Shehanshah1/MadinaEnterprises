@@ -1,34 +1,29 @@
-﻿using System;
+﻿using MadinaEnterprises.Modules.Models;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SQLite;
 using System.IO;
-using MadinaEnterprises.Modules.Models;
-using System.Reflection;
-using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace MadinaEnterprises
-
 {
     public class DatabaseService
     {
-        private const string DatabaseFileName = "MadinaEnterprises.db";
+        private const string DatabaseFileName = "MadinaEnterprises.db"; // SQLite database file name
         private readonly string _databasePath;
         private readonly string _connectionString;
 
         public DatabaseService()
         {
+            // Set the database path and connection string
             _databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DatabaseFileName);
             _connectionString = $"Data Source={_databasePath};Version=3;";
-
-            InitializeDatabase();
+            InitializeDatabase(); // Initialize the database on service creation
         }
 
+        // Method to initialize the database (create file and table if not exists)
         private void InitializeDatabase()
         {
-            // Create the database file if it doesn't exist
             if (!File.Exists(_databasePath))
             {
                 SQLiteConnection.CreateFile(_databasePath);
@@ -39,160 +34,156 @@ namespace MadinaEnterprises
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
-                    // Ginners Table
-                    command.CommandText = @"CREATE TABLE IF NOT EXISTS Ginners (
-                                            GinnerID TEXT UNIQUE PRIMARY KEY,
-                                            Name TEXT NOT NULL,
-                                            Contact TEXT,
-                                            Address TEXT,
-                                            IBAN    TEXT,
-                                            NTN TEXT,
-                                            STN TEXT
-                                        );";
-                    command.ExecuteNonQuery();
-
-                    // Mills Table
-                    command.CommandText = @"CREATE TABLE IF NOT EXISTS Mills (
-                                            MillID TEXT UNIQUE PRIMARY KEY NOT NULL,
-                                            Name TEXT NOT NULL,
-                                            Contact TEXT,
-                                            Address TEXT,
-                                            NTN TEXT,
-                                            STN TEXT
-                                        );";
-                    command.ExecuteNonQuery();
-
-                    // Contracts Table
-                    command.CommandText = @"CREATE TABLE IF NOT EXISTS Contracts (
-                                            ContractID TEXT UNIQUE PRIMARY KEY NOT NULL,
-                                            GinnerID TEXT NOT NULL,
-                                            MillID TEXT NOT NULL,
-                                            TotalBales INTEGER,
-                                            PricePerBatch REAL,
-                                            TotalAmount REAL,
-                                            CommissionPercentage REAL DEFAULT 2.0,
-                                            DateCreated DATE,
-                                            DeliveryNotes TEXT,
-                                            PaymentNotes TEXT,
-                                            FOREIGN KEY (GinnerID) REFERENCES Ginners (GinnerID),
-                                            FOREIGN KEY (MillID) REFERENCES Mills (MillID)
-                                        );";
-                    command.ExecuteNonQuery();
-
-                    // Deliveries Table
-                    command.CommandText = @"CREATE TABLE IF NOT EXISTS Deliveries (
-                                            DeliveryID TEXT PRIMARY KEY UNIQUE NOT NULL,
-                                            ContractID TEXT NOT NULL,
-                                            TruckNumber TEXT,
-                                            DriverContact TEXT,
-                                            NumberOfBales INTEGER,
-                                            DateBooked DATE,
-                                            DateDelivered DATE,
-                                            FOREIGN KEY (ContractID) REFERENCES Contracts (ContractID)
-                                        );";
-                    command.ExecuteNonQuery();
-
-                    // Payments Table
-                    command.CommandText = @"CREATE TABLE IF NOT EXISTS Payments (
-                                            PaymentID TEXT UNIQUE PRIMARY KEY NOT NULL,
-                                            ContractID TEXT NOT NULL,
-                                            AmountPaid REAL,
-                                            Date DATE,
-                                            TransactionID TEXT,
-                                            FOREIGN KEY (ContractID) REFERENCES Contracts (ContractID)
-                                        );";
+                    // Create Ginners table if it doesn't exist
+                    command.CommandText = @"
+                        CREATE TABLE IF NOT EXISTS Ginners (
+                            GinnerID TEXT UNIQUE PRIMARY KEY,
+                            Name TEXT NOT NULL,
+                            Contact TEXT,
+                            Address TEXT,
+                            IBAN TEXT,
+                            NTN TEXT,
+                            STN TEXT
+                        );";
                     command.ExecuteNonQuery();
                 }
             }
         }
 
-        public SQLiteConnection GetConnection()
-        {
-            return new SQLiteConnection(_connectionString);
-        }
+        // Method to add a new Ginner to the database
         public bool AddGinner(Ginners ginner)
         {
-            using (var connection = new SQLiteConnection(_connectionString))
+            try
             {
-                connection.Open();
-                using (var command = new SQLiteCommand(connection))
+                using (var connection = new SQLiteConnection(_connectionString))
                 {
-                    command.CommandText = @"INSERT INTO Ginners (Name, Contact, Address, IBAN, NTN, STN)
-                                    VALUES (@Name, @Contact, @Address, @IBAN, @NTN, @STN)";
-                    command.Parameters.AddWithValue("@Name", ginner.Name);
-                    command.Parameters.AddWithValue("@Contact", ginner.Contact);
-                    command.Parameters.AddWithValue("@Address", ginner.Address);
-                    command.Parameters.AddWithValue("@IBAN", ginner.IBAN);
-                    command.Parameters.AddWithValue("@NTN", ginner.NTN);
-                    command.Parameters.AddWithValue("@STN", ginner.STN);
-                    return command.ExecuteNonQuery() > 0;
-                }
-            }
-        }
-
-        public List<Ginners> GetAllGinners()
-        {
-            var ginners = new List<Ginners>();
-            using (var connection = new SQLiteConnection(_connectionString))
-            {
-                connection.Open();
-                using (var command = new SQLiteCommand("SELECT * FROM Ginners", connection))
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
+                    connection.Open();
+                    using (var command = new SQLiteCommand(connection))
                     {
-                        ginners.Add(new Ginners
-                        {
-                            GinnerID = reader.GetString(0),
-                            Name = reader.GetString(1),
-                            Contact = reader.IsDBNull(2) ? null : reader.GetString(2),
-                            Address = reader.IsDBNull(3) ? null : reader.GetString(3),
-                            IBAN = reader.IsDBNull(4) ? null : reader.GetString(4),
-                            NTN = reader.IsDBNull(5) ? null : reader.GetString(5),
-                            STN = reader.IsDBNull(6) ? null : reader.GetString(6)
-                        });
+                        command.CommandText = @"
+                            INSERT INTO Ginners (GinnerID, Name, Contact, Address, IBAN, NTN, STN)
+                            VALUES (@ID, @Name, @Contact, @Address, @IBAN, @NTN, @STN)";
+
+                        command.Parameters.AddWithValue("@ID", ginner.GinnerID);
+                        command.Parameters.AddWithValue("@Name", ginner.Name);
+                        command.Parameters.AddWithValue("@Contact", ginner.Contact);
+                        command.Parameters.AddWithValue("@Address", ginner.Address);
+                        command.Parameters.AddWithValue("@IBAN", ginner.IBAN);
+                        command.Parameters.AddWithValue("@NTN", ginner.NTN);
+                        command.Parameters.AddWithValue("@STN", ginner.STN);
+
+                        return command.ExecuteNonQuery() > 0; // If rows are affected, return true
                     }
                 }
             }
-            return ginners;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding Ginner: {ex.Message}");
+                return false;
+            }
         }
 
+        // Method to get all Ginners from the database
+        public List<Ginners> GetAllGinners()
+        {
+            var ginnersList = new List<Ginners>();
+
+            try
+            {
+                using (var connection = new SQLiteConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (var command = new SQLiteCommand("SELECT * FROM Ginners", connection))
+                    {
+                        using (var reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                var ginner = new Ginners
+                                {
+                                    GinnerID = reader["GinnerID"].ToString(),
+                                    Name = reader["Name"].ToString(),
+                                    Contact = reader["Contact"].ToString(),
+                                    Address = reader["Address"].ToString(),
+                                    IBAN = reader["IBAN"].ToString(),
+                                    NTN = reader["NTN"].ToString(),
+                                    STN = reader["STN"].ToString()
+                                };
+                                ginnersList.Add(ginner);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching Ginners: {ex.Message}");
+            }
+
+            return ginnersList;
+        }
+
+        // Method to update an existing Ginner's details
         public bool UpdateGinner(Ginners ginner)
         {
-            using (var connection = new SQLiteConnection(_connectionString))
+            try
             {
-                connection.Open();
-                using (var command = new SQLiteCommand(connection))
+                using (var connection = new SQLiteConnection(_connectionString))
                 {
-                    command.CommandText = @"UPDATE Ginners
-                                    SET Name = @Name, Contact = @Contact, Address = @Address, IBAN = @IBAN, NTN = @NTN, STN = @STN
-                                    WHERE GinnerID = @GinnerID";
-                    command.Parameters.AddWithValue("@Name", ginner.Name);
-                    command.Parameters.AddWithValue("@Contact", ginner.Contact);
-                    command.Parameters.AddWithValue("@Address", ginner.Address);
-                    command.Parameters.AddWithValue("@IBAN", ginner.IBAN);
-                    command.Parameters.AddWithValue("@NTN", ginner.NTN);
-                    command.Parameters.AddWithValue("@STN", ginner.STN);
-                    command.Parameters.AddWithValue("@GinnerID", ginner.GinnerID);
-                    return command.ExecuteNonQuery() > 0;
+                    connection.Open();
+                    using (var command = new SQLiteCommand(connection))
+                    {
+                        command.CommandText = @"
+                            UPDATE Ginners
+                            SET Name = @Name, Contact = @Contact, Address = @Address, IBAN = @IBAN, NTN = @NTN, STN = @STN
+                            WHERE GinnerID = @ID";
+
+                        command.Parameters.AddWithValue("@ID", ginner.GinnerID);
+                        command.Parameters.AddWithValue("@Name", ginner.Name);
+                        command.Parameters.AddWithValue("@Contact", ginner.Contact);
+                        command.Parameters.AddWithValue("@Address", ginner.Address);
+                        command.Parameters.AddWithValue("@IBAN", ginner.IBAN);
+                        command.Parameters.AddWithValue("@NTN", ginner.NTN);
+                        command.Parameters.AddWithValue("@STN", ginner.STN);
+
+                        return command.ExecuteNonQuery() > 0; // If rows are affected, return true
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating Ginner: {ex.Message}");
+                return false;
             }
         }
 
-        public bool DeleteGinner(string ginnerID)
+        // Method to delete a Ginner by ID
+        public bool DeleteGinner(string ginnerId)
         {
-            using (var connection = new SQLiteConnection(_connectionString))
+            try
             {
-                connection.Open();
-                using (var command = new SQLiteCommand(connection))
+                using (var connection = new SQLiteConnection(_connectionString))
                 {
-                    command.CommandText = "DELETE FROM Ginners WHERE GinnerID = @GinnerID";
-                    command.Parameters.AddWithValue("@GinnerID", ginnerID);
-                    return command.ExecuteNonQuery() > 0;
+                    connection.Open();
+                    using (var command = new SQLiteCommand(connection))
+                    {
+                        command.CommandText = "DELETE FROM Ginners WHERE GinnerID = @ID";
+                        command.Parameters.AddWithValue("@ID", ginnerId);
+
+                        return command.ExecuteNonQuery() > 0; // If rows are affected, return true
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting Ginner: {ex.Message}");
+                return false;
+            }
         }
-        public bool AddMill(Mills mill)
+    
+
+// MILL METHODS
+public bool AddMill(Mills mill)
         {
             using (var connection = new SQLiteConnection(_connectionString))
             {
@@ -210,7 +201,6 @@ namespace MadinaEnterprises
                 }
             }
         }
-
         public List<Mills> GetAllMills()
         {
             var mills = new List<Mills>();
@@ -236,7 +226,6 @@ namespace MadinaEnterprises
             }
             return mills;
         }
-
         public bool UpdateMill(Mills mill)
         {
             using (var connection = new SQLiteConnection(_connectionString))
@@ -257,7 +246,6 @@ namespace MadinaEnterprises
                 }
             }
         }
-
         public bool DeleteMill(int millID)
         {
             using (var connection = new SQLiteConnection(_connectionString))
@@ -271,7 +259,7 @@ namespace MadinaEnterprises
                 }
             }
         }
-
+        //CONTRACT METHODS
         public bool AddContract(Contracts contract)
         {
             using (var connection = new SQLiteConnection(_connectionString))
@@ -327,7 +315,6 @@ namespace MadinaEnterprises
             }
             return contracts;
         }
-
         public bool UpdateContract(Contracts contract)
         {
             using (var connection = new SQLiteConnection(_connectionString))
@@ -354,7 +341,6 @@ namespace MadinaEnterprises
                 }
             }
         }
-
         public bool DeleteContract(int contractID)
         {
             using (var connection = new SQLiteConnection(_connectionString))
@@ -368,7 +354,7 @@ namespace MadinaEnterprises
                 }
             }
         }
-
+        // DELIVERY MEHTODS
         public bool AddDelivery(Deliveries delivery)
         {
             using (var connection = new SQLiteConnection(_connectionString))
@@ -388,7 +374,6 @@ namespace MadinaEnterprises
                 }
             }
         }
-
         public List<Deliveries> GetAllDeliveries()
         {
             var deliveries = new List<Deliveries>();
@@ -415,7 +400,6 @@ namespace MadinaEnterprises
             }
             return deliveries;
         }
-
         public bool UpdateDelivery(Deliveries delivery)
         {
             using (var connection = new SQLiteConnection(_connectionString))
@@ -451,7 +435,7 @@ namespace MadinaEnterprises
                 }
             }
         }
-
+        // PAYMENT METHODS
         public bool AddPayment(Payment payment)
         {
             using (var connection = new SQLiteConnection(_connectionString))
@@ -493,7 +477,6 @@ namespace MadinaEnterprises
             }
             return payments;
         }
-
         public bool UpdatePayment(Payment payment)
         {
             using (var connection = new SQLiteConnection(_connectionString))
@@ -513,7 +496,6 @@ namespace MadinaEnterprises
                 }
             }
         }
-
         public bool DeletePayment(int paymentID)
         {
             using (var connection = new SQLiteConnection(_connectionString))
@@ -527,6 +509,105 @@ namespace MadinaEnterprises
                 }
             }
         }
-    }
+        public List<Contracts> GetContractsByGinner(string ginnerID)
+        {
+            var contracts = new List<Contracts>();
+
+            using (var connection = new SQLiteConnection(_connectionString))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand("SELECT * FROM Contracts WHERE GinnerID = @GinnerID", connection))
+                {
+                    command.Parameters.AddWithValue("@GinnerID", ginnerID);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            contracts.Add(new Contracts
+                            {
+                                ContractID = reader.GetString(0),
+                                GinnerID = reader.GetString(1),
+                                MillID = reader.GetString(2),
+                                TotalBales = reader.GetInt32(3),
+                                PricePerBatch = reader.GetDouble(4),
+                                TotalAmount = reader.GetDouble(5),
+                                CommissionPercentage = reader.GetDouble(6),
+                                DateCreated = reader.GetDateTime(7),
+                                DeliveryNotes = reader.IsDBNull(8) ? null : reader.GetString(8),
+                                PaymentNotes = reader.IsDBNull(9) ? null : reader.GetString(9)
+                            });
+                        }
+                    }
+                }
+            }
+
+            return contracts;
+        }
+        public List<Payment> GetPaymentsByContract(string contractID)
+        {
+            var payments = new List<Payment>();
+
+            using (var connection = new SQLiteConnection(_connectionString))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand("SELECT * FROM Payments WHERE ContractID = @ContractID", connection))
+                {
+                    command.Parameters.AddWithValue("@ContractID", contractID);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            payments.Add(new Payment
+                            {
+                                PaymentID = reader.GetString(0),
+                                ContractID = reader.GetString(1),
+                                AmountPaid = reader.GetDouble(2),
+                                Date = reader.GetDateTime(3),
+                                TransactionID = reader.IsDBNull(4) ? null : reader.GetString(4)
+                            });
+                        }
+                    }
+                }
+            }
+
+            return payments;
+        }
+        public List<Deliveries> GetDeliveriesByContract(string contractID)
+        {
+            var deliveries = new List<Deliveries>();
+
+            using (var connection = new SQLiteConnection(_connectionString))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand("SELECT * FROM Deliveries WHERE ContractID = @ContractID", connection))
+                {
+                    command.Parameters.AddWithValue("@ContractID", contractID);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            deliveries.Add(new Deliveries
+                            {
+                                DeliveryID = reader.GetString(0),
+                                ContractID = reader.GetString(1),
+                                TruckNumber = reader.IsDBNull(2) ? null : reader.GetString(2),
+                                DriverContact = reader.IsDBNull(3) ? null : reader.GetString(3),
+                                NumberOfBales = reader.GetInt32(4),
+                                DateBooked = reader.GetDateTime(5),
+                                DateDelivered = reader.GetDateTime(6)
+                            });
+                        }
+                    }
+                }
+            }
+
+            return deliveries;
+        }
+
+}
+
 }
 

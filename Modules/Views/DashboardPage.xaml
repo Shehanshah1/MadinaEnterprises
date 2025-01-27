@@ -17,7 +17,7 @@
             <!-- Right Column Background -->
             <BoxView 
                 Grid.Column="1"           
-                 Color="White"  />
+                Color="White"  />
             <!-- Sidebar Buttons and Logo -->
             <StackLayout Grid.Column="0" Padding="10" Spacing="30" Grid.RowSpan="7">
 
@@ -80,6 +80,8 @@
                    HorizontalOptions="FillAndExpand"
                     Clicked="OnLogOutButtonClicked"/>
             </StackLayout>
+
+
             <Grid Grid.Column="2" Grid.RowSpan="7"
               ColumnDefinitions="*,*" RowDefinitions=".2*,.2*, .8*">
 
@@ -95,8 +97,67 @@
                 Y1="90"
                 X2="2000" 
                 Y2="90"/>
-                
-                
+
+
+      
+        <!-- Right Side Widgets -->
+            <Grid Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="3" Padding="20" RowDefinitions="*,*,*" ColumnDefinitions=".5*,.5*">
+
+                    <VerticalStackLayout Grid.Column="0" Grid.RowSpan="3" Spacing="20">
+                        <!-- Total Commission -->
+                        <Label Text="Total Commission:" 
+                                FontSize="Medium" 
+                                FontAttributes="Bold" 
+                                TextColor="Black" />
+                        <Label x:Name="TotalCommissionLabel" 
+                                Text="Calculating..." 
+                                FontSize="Small" 
+                                TextColor="Gray" />
+
+                        <!-- Payment Due -->
+                        <Label Text="Payment Due:" 
+                                FontSize="Medium" 
+                                FontAttributes="Bold" 
+                                TextColor="Black" />
+                        <Label x:Name="PaymentDueLabel" 
+                                Text="Calculating..." 
+                                FontSize="Small" 
+                                TextColor="Gray" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Column="1" Spacing="20">
+
+                        <!-- Payment Made -->
+                        <Label Text="Payment Made:" 
+                       FontSize="Medium" 
+                       FontAttributes="Bold" 
+                       TextColor="Black" />
+                        <Label x:Name="PaymentMadeLabel" 
+                       Text="Calculating..." 
+                       FontSize="Small" 
+                       TextColor="Gray" />
+
+                        <!-- Bales Sold -->
+                        <Label Text="Bales Sold:" 
+                       FontSize="Medium" 
+                       FontAttributes="Bold" 
+                       TextColor="Black" />
+                        <Label x:Name="BalesSoldLabel" 
+                       Text="Calculating..." 
+                       FontSize="Small" 
+                       TextColor="Gray" />
+
+                        <!-- Total Ginners -->
+                        <Label Text="Total Ginners:" 
+                       FontSize="Medium" 
+                       FontAttributes="Bold" 
+                       TextColor="Black" />
+                        <Label x:Name="TotalGinnersLabel" 
+                       Text="Calculating..." 
+                       FontSize="Small" 
+                       TextColor="Gray" />
+                    </VerticalStackLayout>
+            </Grid>
             </Grid>
         </Grid>
     </ScrollView>

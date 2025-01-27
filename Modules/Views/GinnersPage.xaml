@@ -81,59 +81,35 @@
                    CornerRadius="0"
                    HorizontalOptions="FillAndExpand"
                     Clicked="OnLogOutButtonClicked"/>
+
             </StackLayout>
             <Grid Grid.Column="2" Grid.RowSpan="7"
-              ColumnDefinitions="*,*" RowDefinitions=".2*,.1*, .9*">
+              ColumnDefinitions="*,*" RowDefinitions=".2*,.1*, .7*,.2*">
+                <StackLayout Padding="10" Spacing="10">
+                    <Entry x:Name="GinnerIDEntry" Placeholder="Enter Ginner ID" />
+                    <Entry x:Name="GinnerNameEntry" Placeholder="Enter Ginner Name" />
+                    <Entry x:Name="GinnerContactEntry" Placeholder="Enter Contact Number" />
+                    <Entry x:Name="GinnerAddressEntry" Placeholder="Enter Address" />
+                    <Entry x:Name="GinnerIBANEntry" Placeholder="Enter IBAN" />
+                    <Entry x:Name="GinnerNTNEntry" Placeholder="Enter NTN" />
+                    <Entry x:Name="GinnerSTNEntry" Placeholder="Enter STN" />
+                    <Button Text="Add Ginner" Clicked="OnAddGinnerClicked" />
+                    <Button Text="Update Ginner" Clicked="OnUpdateGinnerClicked" />
+                    <Button Text="Delete Ginner" Clicked="OnDeleteGinnerClicked" />
 
-                <!-- Ginners Greeting -->
-
-                <Label Grid.Column="0" Grid.Row="0" Text="Ginners" Margin="20,0,0,20" HorizontalOptions="Start" VerticalOptions="End" FontSize="Header" FontAttributes="Bold" TextColor="Black" />
-                <Button Grid.Column="1" Grid.Row="0" HorizontalOptions="End" Margin="20" Text="Add New Ginner" WidthRequest="200" CornerRadius="0" Background="Black" TextColor="White" Clicked="OnAddNewGinnerButtonClicked"/>
-                <Button Grid.ColumnSpan="2" Grid.Row="0" HorizontalOptions="Center" Margin="300,20,20,20" Text="Ginner Ledger" WidthRequest="200" CornerRadius="0" Background="Black" TextColor="White" Clicked="OnGinnerLedgerButtonClicked"/>
-                <!-- Divider Line -->
-                <Line 
-                Grid.ColumnSpan="3"
-                Stroke="Black"  
-                X1="0"
-                Y1="90"
-                X2="2000" 
-                Y2="90"/>
-
-                    <!-- Column Headings for Employee Management -->
-                <Grid ColumnDefinitions="*,*,*,*,*,*,*,*" Grid.ColumnSpan="2" Grid.Row="1"
-                              Padding="5" 
-                              Margin="5">
-                        <Label Text="Ginner ID" TextColor="Black" FontAttributes="Bold" Grid.Column="0"/>
-                        <Label Text="Name" TextColor="Black" FontAttributes="Bold" Grid.Column="1"/>
-                        <Label Text="Contact" TextColor="Black" FontAttributes="Bold" Grid.Column="2"/>
-                        <Label Text="Address" TextColor="Black" FontAttributes="Bold" Grid.Column="3"/>
-                        <Label Text="IBAN" TextColor="Black" FontAttributes="Bold" Grid.Column="4"/>
-                        <Label Text="NTN" TextColor="Black" FontAttributes="Bold" Grid.Column="5"/>
-                        <Label Text="STN" TextColor="Black" FontAttributes="Bold" Grid.Column="6"/>
-                        <Label Text="Action" TextColor="Black" FontAttributes="Bold" Grid.Column="7"/>
-                    </Grid>
-
-                    <!-- Employee List -->
-                <CollectionView ItemsSource="{Binding Ginners}" BackgroundColor="#90bd10" Grid.ColumnSpan="2" Grid.Row="2" Margin="10">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Grid ColumnDefinitions="*,*,*,*,*,*" Padding="5" Margin="0,5,0,5">
-                                <Label Text="{Binding GinnerID}" TextColor="Black" Grid.Column="0"/>
-                                <Label Text="{Binding Name}" TextColor="Black" Grid.Column="1"/>
-                                <Label Text="{Binding Contact}" TextColor="Black" Grid.Column="2"/>
-                                <Label Text="{Binding Address}" TextColor="Black" Grid.Column="3"/>
-                                <Label Text="{Binding IBAN}" TextColor="Black" Grid.Column="4"/>
-                                <Label Text="{Binding NTN}" TextColor="Black" Grid.Column="5"/>
-                                <Label Text="{Binding STN}" TextColor="Black" Grid.Column="6"/>
-                                <!-- Edit and Delete Buttons -->
-                                <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Grid.Column="7">
-                                    <Button Text="Edit" BackgroundColor="Gray" TextColor="White" Clicked="OnEditGinnerButtonClicked"/>
-                                    <Button Text="Delete" BackgroundColor="Red" TextColor="White" Clicked="OnDeleteGinnerButtonClicked"/>
-                                </StackLayout>
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                    <ListView x:Name="GinnersListView" HasUnevenRows="True">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <StackLayout Orientation="Vertical">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <Label Text="{Binding Contact}" FontAttributes="Italic"/>
+                                    </StackLayout>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackLayout>
             </Grid>
         </Grid>
     </ScrollView>
