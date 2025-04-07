@@ -18,69 +18,17 @@
             <BoxView 
                 Grid.Column="1"           
                 Color="White"  />
-            <!-- Sidebar Buttons and Logo -->
-            <StackLayout Grid.Column="0" Padding="10" Spacing="30" Grid.RowSpan="7">
-
-                <!-- Sidebar Buttons -->
-                <Button 
-                    Text="Dashboard" 
-                    FontSize="Small" 
-                    BackgroundColor="White" 
-                    TextColor="Black" 
-                    HorizontalOptions="FillAndExpand"
-                    CornerRadius="0"
-                    Margin="0,50,0,0"/>
-                <Button 
-                    Text="Ginners"
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White"
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand" 
-                    Clicked="OnGinnersPageButtonClicked"
-                    />
-                <Button 
-                    Text="Mills" 
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White" 
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand"
-                    Clicked="OnMillsPageButtonClicked"/>
-                <Button 
-                    Text="Contracts" 
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White" 
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand" 
-                    Clicked="OnContractsPageButtonClicked"/>
-                <Button 
-                   Text="Deliveries" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White" 
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnDeliveriesPageButtonClicked"/>
-                <Button 
-                   Text="Payments" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White"
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnPaymentsPageButtonClicked"/>
-                <Button 
-                   Text="Log Out" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White" 
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnLogOutButtonClicked"/>
+            
+            <!-- Sidebar Navigation -->
+            <StackLayout Grid.Column="0" Padding="10" Spacing="30">
+                <Button Text="Dashboard" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0" Margin="0,50,0,0"/>
+                <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnersPageButtonClicked"/>
+                <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked" />
+                <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
+                <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
+                <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
+                <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
             </StackLayout>
-
 
             <Grid Grid.Column="2" Grid.RowSpan="7"
               ColumnDefinitions="*,*" RowDefinitions=".2*,.2*, .8*">

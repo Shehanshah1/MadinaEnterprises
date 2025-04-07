@@ -84,10 +84,12 @@ namespace MadinaEnterprises
                 );
 
                 CREATE TABLE IF NOT EXISTS Mills (
-                    MillName TEXT PRIMARY KEY,
+                    MillName TEXT,
+                    MillID TEXT PRIMARY KEY,
                     Address TEXT,
                     OwnerName TEXT
                 );
+               
             ";
             command.ExecuteNonQuery();
         }
@@ -415,6 +417,7 @@ namespace MadinaEnterprises
                 list.Add(new Mills
                 {
                     MillName = reader["MillName"].ToString(),
+                    MillID = reader["MillID"].ToString(),
                     Address = reader["Address"].ToString(),
                     OwnerName = reader["OwnerName"].ToString()
                 });
@@ -426,8 +429,9 @@ namespace MadinaEnterprises
         {
             using var conn = new SQLiteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand("INSERT INTO Mills (MillName, Address, OwnerName) VALUES (@MillName, @Address, @OwnerName)", conn);
+            var cmd = new SQLiteCommand("INSERT INTO Mills (MillName, MillID, Address, OwnerName) VALUES (@MillName, @MillID, @Address, @OwnerName)", conn);
             cmd.Parameters.AddWithValue("@MillName", m.MillName);
+            cmd.Parameters.AddWithValue("@MillID", m.MillID);
             cmd.Parameters.AddWithValue("@Address", m.Address);
             cmd.Parameters.AddWithValue("@OwnerName", m.OwnerName);
             await cmd.ExecuteNonQueryAsync();
@@ -437,7 +441,8 @@ namespace MadinaEnterprises
         {
             using var conn = new SQLiteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand("UPDATE Mills SET Address=@Address, OwnerName=@OwnerName WHERE MillName=@MillName", conn);
+            var cmd = new SQLiteCommand("UPDATE Mills SET MillName = @MillName, Address=@Address, OwnerName=@OwnerName WHERE MillID=@MillID", conn);
+            cmd.Parameters.AddWithValue("@MillID", m.MillID);
             cmd.Parameters.AddWithValue("@MillName", m.MillName);
             cmd.Parameters.AddWithValue("@Address", m.Address);
             cmd.Parameters.AddWithValue("@OwnerName", m.OwnerName);
@@ -448,8 +453,8 @@ namespace MadinaEnterprises
         {
             using var conn = new SQLiteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand("DELETE FROM Mills WHERE MillName = @name", conn);
-            cmd.Parameters.AddWithValue("@name", millName);
+            var cmd = new SQLiteCommand("DELETE FROM Mills WHERE MillName = @MillName", conn);
+            cmd.Parameters.AddWithValue("@MillName", millName);
             await cmd.ExecuteNonQueryAsync();
         }
         public async Task<List<GinnerLedger>> GetAllGinnerLedger()

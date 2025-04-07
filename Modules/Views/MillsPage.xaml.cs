@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Storage;
 
 namespace MadinaEnterprises.Modules.Views
 {
@@ -22,22 +21,20 @@ namespace MadinaEnterprises.Modules.Views
         private async Task LoadMills()
         {
             _mills = await _db.GetAllMills();
-            millPicker.ItemsSource = _mills.Select(m => m.MillName).ToList();
+            millListView.ItemsSource = _mills;
         }
 
-        private void OnMillSelected(object sender, EventArgs e)
+        private void OnMillSelected(object sender, SelectedItemChangedEventArgs e)
         {
-            if (millPicker.SelectedItem is not string selectedName) return;
+            if (e.SelectedItem is not Mills selected) return;
 
-            var mill = _mills.FirstOrDefault(m => m.MillName == selectedName);
-            if (mill == null) return;
-
-            millNameEntry.Text = mill.MillName;
-            millAddressEntry.Text = mill.Address;
-            millOwnerNameEntry.Text = mill.OwnerName;
+            millNameEntry.Text = selected.MillName;
+            millIDEntry.Text = selected.MillID;
+            millAddressEntry.Text = selected.Address;
+            millOwnerNameEntry.Text = selected.OwnerName;
         }
 
-        private async void OnSaveMillClicked(object sender, EventArgs e)
+        private async void OnAddMillClicked(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(millNameEntry.Text))
             {
@@ -47,30 +44,49 @@ namespace MadinaEnterprises.Modules.Views
 
             var mill = new Mills
             {
-                MillName = millNameEntry.Text ?? "",
-                Address = millAddressEntry.Text ?? "",
-                OwnerName = millOwnerNameEntry.Text ?? ""
-            };
+                MillName = millNameEntry.Text,
+                MillID = millIDEntry.Text,
+                Address = millAddressEntry.Text,
+                OwnerName = millOwnerNameEntry.Text
+            };  
 
-            var existing = _mills.FirstOrDefault(m => m.MillName == mill.MillName);
+            var existing = _mills.FirstOrDefault(m => m.MillID == mill.MillID);
             if (existing == null)
                 await _db.AddMill(mill);
             else
-                await _db.UpdateMill(mill);
+                await DisplayAlert("Exists", "Mill already exists. Try updating instead.", "OK");
 
             await DisplayAlert("Success", "Mill saved successfully!", "OK");
             ClearForm();
             await LoadMills();
         }
 
+        private async void OnUpdateMillClicked(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(millNameEntry.Text)) return;
+
+            var mill = new Mills
+            {
+                MillName = millNameEntry.Text,
+                MillID = millIDEntry.Text,
+                Address = millAddressEntry.Text,
+                OwnerName = millOwnerNameEntry.Text
+            };
+
+            await _db.UpdateMill(mill);
+            await DisplayAlert("Updated", "Mill updated successfully.", "OK");
+            ClearForm();
+            await LoadMills();
+        }
+
         private async void OnDeleteMillClicked(object sender, EventArgs e)
         {
-            if (millPicker.SelectedItem is not string selectedName) return;
+            if (millListView.SelectedItem is not Mills selected) return;
 
-            var confirm = await DisplayAlert("Confirm", $"Delete mill '{selectedName}'?", "Yes", "No");
+            bool confirm = await DisplayAlert("Confirm", $"Delete mill '{selected.MillName}'?", "Yes", "No");
             if (!confirm) return;
 
-            await _db.DeleteMill(selectedName);
+            await _db.DeleteMill(selected.MillName);
             await DisplayAlert("Deleted", "Mill deleted successfully.", "OK");
             ClearForm();
             await LoadMills();
@@ -79,12 +95,13 @@ namespace MadinaEnterprises.Modules.Views
         private void ClearForm()
         {
             millNameEntry.Text = "";
+            millIDEntry.Text = "";
             millAddressEntry.Text = "";
             millOwnerNameEntry.Text = "";
-            millPicker.SelectedItem = null;
+            millListView.SelectedItem = null;
         }
 
-        // Navigation Buttons
+        // Navigation
         private async void OnDashboardPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new DashboardPage());
         private async void OnGinnersPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new GinnersPage());
         private async void OnContractsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new ContractsPage());
