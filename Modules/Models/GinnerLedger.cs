@@ -2,8 +2,11 @@
 
 namespace MadinaEnterprises.Modules.Models
 {
-    internal class GinnerLedger
+
+
+    public class GinnerLedger
     {
+        private readonly string _dbPath = Path.Combine(FileSystem.AppDataDirectory, "madina.db3");
         // Properties
         public string ContractID { get; set; }
         public string DealID { get; set; }
@@ -13,9 +16,11 @@ namespace MadinaEnterprises.Modules.Models
         public double TotalAmountPaid { get; set; }
         public double ContractAmountPaid { get; set; }
         public double TotalAmountLeft { get; set; }
-        public string DatePaid { get; set; }
+        public DateTime DatePaid { get; set; }
         public int BalesSold { get; set; }
         public string MillsDueTo { get; set; }
+        public double AmountPaid { get; set; } // Or decimal, depends on your design
+
 
         // Constructor
         public GinnerLedger()
@@ -31,7 +36,7 @@ namespace MadinaEnterprises.Modules.Models
             double totalAmountPaid,
             double contractAmountPaid,
             double totalAmountLeft,
-            string datePaid,
+            DateTime datePaid,
             int balesSold,
             string millsDueTo)
         {

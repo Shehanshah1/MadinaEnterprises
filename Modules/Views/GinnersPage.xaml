@@ -7,110 +7,72 @@
              MinimumHeightRequest="600"
              MinimumWidthRequest="1200">
 
-    <ScrollView>
-        <Grid ColumnDefinitions="253,*">
+    <Grid ColumnDefinitions="253,*">
+        <!-- Sidebar Background -->
+        <BoxView Grid.Column="0" Color="#98cb00" />
+        <BoxView Grid.Column="1" Color="White" />
 
-            <!-- Left Sidebar Background -->
-            <BoxView 
-                Grid.Column="0"
-                Grid.RowSpan="7"
-                Color="#98cb00" />
-            <!-- Right Column Background -->
-            <BoxView 
-                Grid.Column="1"
-                Grid.RowSpan="7"
-                Color="White"  />
-            <!-- Sidebar Buttons and Logo -->
-            <StackLayout Grid.Column="0" Padding="10" Spacing="30" Grid.RowSpan="7">
+        <!-- Sidebar Buttons -->
+        <StackLayout Grid.Column="0" Padding="10" Spacing="30" Grid.RowSpan="7">
+            <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked"/>
+            <Button Text="Ginners" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0" HorizontalOptions="FillAndExpand" />
+            <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnMillsPageButtonClicked"/>
+            <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnContractsPageButtonClicked"/>
+            <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnDeliveriesPageButtonClicked"/>
+            <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnPaymentsPageButtonClicked"/>
+            <Button Text="Export" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" />
+            <Button Text="Logout" FontSize="Small" BackgroundColor="Red" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand"/>
+        </StackLayout>
 
-                <!-- Sidebar Buttons -->
-                <Button 
-                    Text="Dashboard" 
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White" 
-                    HorizontalOptions="FillAndExpand"
-                    CornerRadius="0"
-                    Margin="0,50,0,0"
-                    Clicked="OnDashboardPageButtonClicked"
-                    />
-                <Button 
-                    Text="Ginners"
-                    FontSize="Small" 
-                    BackgroundColor="White" 
-                    TextColor="Black" 
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand"/>
-                <Button 
-                    Text="Mills" 
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White" 
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand"
-                    Clicked="OnMillsPageButtonClicked"/>
-                <Button 
-                    Text="Contracts" 
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White" 
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand" 
-                    Clicked="OnContractsPageButtonClicked"/>
-                <Button 
-                   Text="Deliveries" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White" 
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnDeliveriesPageButtonClicked"/>
-                <Button 
-                   Text="Payments" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White"
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnPaymentsPageButtonClicked"/>
-                <Button 
-                   Text="Log Out" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White" 
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnLogOutButtonClicked"/>
+        <!-- Main Content -->
+        <ScrollView Grid.Column="1" Padding="20">
+            <StackLayout Spacing="20">
+                <Label Text="Ginner Management" FontSize="24" TextColor="Black" HorizontalOptions="Center" />
 
-            </StackLayout>
-            <Grid Grid.Column="2" Grid.RowSpan="7"
-              ColumnDefinitions="*,*" RowDefinitions=".2*,.1*, .7*,.2*">
-                <StackLayout Padding="10" Spacing="10">
-                    <Entry x:Name="GinnerIDEntry" Placeholder="Enter Ginner ID" />
-                    <Entry x:Name="GinnerNameEntry" Placeholder="Enter Ginner Name" />
-                    <Entry x:Name="GinnerContactEntry" Placeholder="Enter Contact Number" />
-                    <Entry x:Name="GinnerAddressEntry" Placeholder="Enter Address" />
-                    <Entry x:Name="GinnerIBANEntry" Placeholder="Enter IBAN" />
-                    <Entry x:Name="GinnerNTNEntry" Placeholder="Enter NTN" />
-                    <Entry x:Name="GinnerSTNEntry" Placeholder="Enter STN" />
-                    <Button Text="Add Ginner" Clicked="OnAddGinnerClicked" />
-                    <Button Text="Update Ginner" Clicked="OnUpdateGinnerClicked" />
-                    <Button Text="Delete Ginner" Clicked="OnDeleteGinnerClicked" />
+                <!-- Form Entries Grid -->
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                    <Label Text="Ginner ID" Grid.Row="0" Grid.Column="0" />
+                    <Entry x:Name="GinnerIDEntry" Grid.Row="0" Grid.Column="1" />
 
-                    <ListView x:Name="GinnersListView" HasUnevenRows="True">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <ViewCell>
-                                    <StackLayout Orientation="Vertical">
-                                        <Label Text="{Binding Name}" FontAttributes="Bold"/>
-                                        <Label Text="{Binding Contact}" FontAttributes="Italic"/>
-                                    </StackLayout>
-                                </ViewCell>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <Label Text="Ginner Name" Grid.Row="1" Grid.Column="0" />
+                    <Entry x:Name="GinnerNameEntry" Grid.Row="1" Grid.Column="1" />
+
+                    <Label Text="Contact" Grid.Row="2" Grid.Column="0" />
+                    <Entry x:Name="GinnerContactEntry" Grid.Row="2" Grid.Column="1" />
+
+                    <Label Text="Address" Grid.Row="3" Grid.Column="0" />
+                    <Entry x:Name="GinnerAddressEntry" Grid.Row="3" Grid.Column="1" />
+
+                    <Label Text="IBAN" Grid.Row="4" Grid.Column="0" />
+                    <Entry x:Name="GinnerIBANEntry" Grid.Row="4" Grid.Column="1" />
+
+                    <Label Text="NTN" Grid.Row="5" Grid.Column="0" />
+                    <Entry x:Name="GinnerNTNEntry" Grid.Row="5" Grid.Column="1" />
+
+                    <Label Text="STN" Grid.Row="6" Grid.Column="0" />
+                    <Entry x:Name="GinnerSTNEntry" Grid.Row="6" Grid.Column="1" />
+                </Grid>
+
+                <!-- Buttons -->
+                <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="10">
+                    <Button Text="Add Ginner" BackgroundColor="#98cb00" TextColor="White" Clicked="OnAddGinnerClicked"/>
+                    <Button Text="Update" BackgroundColor="#ff9800" TextColor="White" Clicked="OnUpdateGinnerClicked"/>
+                    <Button Text="Delete" BackgroundColor="Red" TextColor="White" Clicked="OnDeleteGinnerClicked"/>
                 </StackLayout>
-            </Grid>
-        </Grid>
-    </ScrollView>
+
+                <!-- Ginners List -->
+                <ListView x:Name="GinnersListView"
+                          ItemsSource="{Binding}"
+                          SelectionMode="Single"
+                          ItemSelected="OnGinnerSelected"
+                          HeightRequest="300">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextCell Text="{Binding GinnerName}" Detail="{Binding ContactPerson}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

@@ -1,11 +1,11 @@
 ﻿using MadinaEnterprises.Modules.Views;
-namespace MadinaEnterprises
 
+namespace MadinaEnterprises
 {
     public partial class App : Application
     {
-        // Instance of DatabaseService
-        public static DatabaseService DatabaseService { get; private set; }
+        // Instance of DatabaseService (guaranteed initialized)
+        public static DatabaseService DatabaseService { get; private set; } = new();
 
         public App()
         {
@@ -14,10 +14,10 @@ namespace MadinaEnterprises
             // Initialize the database service
             DatabaseService = new DatabaseService();
 
-
-            // Setting up the initial page to LoginView using a NavigationPage
+            // Set the startup page
             MainPage = new NavigationPage(new LoginPage());
         }
+
         protected override void OnStart()
         {
             // Handle when your app starts
@@ -33,21 +33,19 @@ namespace MadinaEnterprises
             // Handle when your app resumes
         }
 
-
-
-
-        // A helper method to simplify navigation
+        // Navigation helper
         public static async Task NavigateToPage(Page page)
         {
-            if (Current.MainPage is NavigationPage navigationPage)
+            if (Current?.MainPage is NavigationPage navigationPage)
             {
                 await navigationPage.PushAsync(page);
             }
         }
-        // A helper method for navigating back
+
+        // Back navigation helper
         public static async Task GoBack()
         {
-            if (Current.MainPage is NavigationPage navigationPage)
+            if (Current?.MainPage is NavigationPage navigationPage)
             {
                 await navigationPage.PopAsync();
             }

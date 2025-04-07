@@ -11,93 +11,57 @@
         <Grid ColumnDefinitions="253,*">
 
             <!-- Left Sidebar Background -->
-            <BoxView 
-                Grid.Column="0"
-                Grid.RowSpan="7"
-                Color="#98cb00" />
+            <BoxView Grid.Column="0" Grid.RowSpan="7" Color="#98cb00" />
             <!-- Right Column Background -->
-            <BoxView 
-                Grid.Column="1"
-                Grid.RowSpan="7"
-                Color="White" />
-            <!-- Sidebar Buttons and Logo -->
+            <BoxView Grid.Column="1" Grid.RowSpan="7" Color="White" />
+
+            <!-- Sidebar Buttons -->
             <StackLayout Grid.Column="0" Padding="10" Spacing="30" Grid.RowSpan="7">
-
-                <!-- Sidebar Buttons -->
-                <Button 
-                    Text="Dashboard" 
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White" 
-                    HorizontalOptions="FillAndExpand"
-                    CornerRadius="0"
-                    Margin="0,50,0,0"
-                    Clicked="OnDashboardPageButtonClicked"
-                    />
-                <Button 
-                    Text="Ginners"
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White"
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand" 
-                    Clicked="OnGinnersPageButtonClicked"
-                    />
-                <Button 
-                    Text="Mills" 
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White" 
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand"
-                    Clicked="OnMillsPageButtonClicked"/>
-                <Button 
-                    Text="Contracts" 
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White" 
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand" 
-                    Clicked="OnContractsPageButtonClicked"/>
-                <Button 
-                   Text="Deliveries" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White" 
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnDeliveriesPageButtonClicked"/>
-                <Button 
-                   Text="Payments" 
-                   FontSize="Small" 
-                    BackgroundColor="White" 
-                    TextColor="Black" 
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"/>
-                <Button 
-                   Text="Log Out" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White" 
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnLogOutButtonClicked"/>
+                <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked" />
+                <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Clicked="OnGinnersPageButtonClicked" />
+                <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Clicked="OnMillsPageButtonClicked" />
+                <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Clicked="OnContractsPageButtonClicked" />
+                <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked" />
+                <Button Text="Payments" FontSize="Small" BackgroundColor="White" TextColor="Black" HorizontalOptions="FillAndExpand" CornerRadius="0" />
+                <Button Text="Log Out" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Clicked="OnLogOutButtonClicked" />
             </StackLayout>
-            <Grid Grid.Column="2" Grid.RowSpan="7"
-              ColumnDefinitions="*,*" RowDefinitions=".2*,.2*, .8*">
 
-                <!-- Payments Greeting -->
+            <!-- Main Payment Form -->
+            <Grid Grid.Column="1" Padding="30" RowSpacing="15"
+                  RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                  ColumnDefinitions="Auto,*">
 
-                <Label Grid.Column="0" Grid.Row="0" Text="Payments" Margin="20,0,0,20" HorizontalOptions="Start" VerticalOptions="End" FontSize="Header" FontAttributes="Bold" TextColor="Black" />
+                <Label Grid.ColumnSpan="2" Text="Payments" FontSize="24" FontAttributes="Bold" TextColor="Black" Margin="0,0,0,20" />
 
-                <!-- Divider Line -->
-                <Line 
-                Grid.ColumnSpan="3"
-                Stroke="Black"  
-                X1="0"
-                Y1="90"
-                X2="2000" 
-                Y2="90"/>
+                <Label Grid.Row="1" Text="Select Payment:" TextColor="Black" />
+                <Picker x:Name="paymentPicker" Grid.Row="1" Grid.Column="1" Title="Choose Payment" SelectedIndexChanged="OnPaymentSelected" />
+
+                <Label Grid.Row="2" Text="Payment ID:" TextColor="Black" />
+                <Entry x:Name="paymentIDEntry" Grid.Row="2" Grid.Column="1" Placeholder="Payment ID" />
+
+                <Label Grid.Row="3" Text="Contract ID:" TextColor="Black" />
+                <Picker x:Name="contractPicker" Grid.Row="3" Grid.Column="1" Title="Choose Contract" />
+
+                <Label Grid.Row="4" Text="Total Deal Amount:" TextColor="Black" />
+                <Entry x:Name="totalAmountEntry" Grid.Row="4" Grid.Column="1" IsReadOnly="True" />
+
+                <Label Grid.Row="5" Text="Amount Paid:" TextColor="Black" />
+                <Entry x:Name="paidAmountEntry" Grid.Row="5" Grid.Column="1" Placeholder="Amount Paid" Keyboard="Numeric" TextChanged="OnPaidAmountChanged" />
+
+                <Label Grid.Row="6" Text="Remaining Amount:" TextColor="Black" />
+                <Entry x:Name="remainingAmountEntry" Grid.Row="6" Grid.Column="1" IsReadOnly="True" />
+
+                <Label Grid.Row="7" Text="Total Bales:" TextColor="Black" />
+                <Entry x:Name="balesEntry" Grid.Row="7" Grid.Column="1" Placeholder="Total Bales" Keyboard="Numeric" />
+
+                <Label Grid.Row="8" Text="Payment Date:" TextColor="Black" />
+                <DatePicker x:Name="paymentDatePicker" Grid.Row="8" Grid.Column="1" />
+
+                <!-- Buttons -->
+                <StackLayout Grid.Row="9" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10" HorizontalOptions="Start">
+                    <Button Text="Save Payment" Clicked="OnSavePaymentClicked" BackgroundColor="#98cb00" TextColor="Black" />
+                    <Button Text="Delete Payment" Clicked="OnDeletePaymentClicked" BackgroundColor="Red" TextColor="White" />
+                </StackLayout>
             </Grid>
         </Grid>
     </ScrollView>

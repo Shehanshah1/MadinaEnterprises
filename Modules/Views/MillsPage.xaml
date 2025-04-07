@@ -7,98 +7,60 @@
              MinimumHeightRequest="600"
              MinimumWidthRequest="1200">
 
-    <ScrollView>
-        <Grid ColumnDefinitions="253,*">
+    <Grid ColumnDefinitions="253,*">
+        <!-- Sidebar Background -->
+        <BoxView Grid.Column="0" Color="#98cb00" />
+        <BoxView Grid.Column="1" Color="White" />
 
-            <!-- Left Sidebar Background -->
-            <BoxView 
-                Grid.Column="0"
-                Grid.RowSpan="7"
-                Color="#98cb00" />
-            <!-- Right Column Background -->
-            <BoxView 
-                Grid.Column="1"
-                Grid.RowSpan="7"
-                Color="White"  />
-            <!-- Sidebar Buttons and Logo -->
-            <StackLayout Grid.Column="0" Padding="10" Spacing="30" Grid.RowSpan="7">
+        <!-- Sidebar Navigation -->
+        <StackLayout Grid.Column="0" Padding="10" Spacing="30">
+            <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked"/>
+            <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnersPageButtonClicked"/>
+            <Button Text="Mills" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0" />
+            <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
+            <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
+            <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
+            <Button Text="Export" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0"  />
+            <Button Text="Logout" FontSize="Small" BackgroundColor="Red" TextColor="White" CornerRadius="0"/>
+        </StackLayout>
 
-                <!-- Sidebar Buttons -->
-                <Button 
-                    Text="Dashboard" 
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White" 
-                    HorizontalOptions="FillAndExpand"
-                    CornerRadius="0"
-                    Margin="0,50,0,0"
-                    Clicked="OnDashboardPageButtonClicked"
-                    />
-                <Button 
-                    Text="Ginners"
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White"
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand" 
-                    Clicked="OnGinnersPageButtonClicked"
-                    />
-                <Button 
-                    Text="Mills" 
-                    FontSize="Small" 
-                    BackgroundColor="White" 
-                    TextColor="Black" 
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand"/>
-                <Button 
-                    Text="Contracts" 
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White" 
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand" 
-                    Clicked="OnContractsPageButtonClicked"/>
-                <Button 
-                   Text="Deliveries" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White" 
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnDeliveriesPageButtonClicked"/>
-                <Button 
-                   Text="Payments" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White"
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnPaymentsPageButtonClicked"/>
-                <Button 
-                   Text="Log Out" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White" 
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnLogOutButtonClicked"/>
+        <!-- Main Content Area -->
+        <ScrollView Grid.Column="1" Padding="20">
+            <StackLayout Spacing="20">
+                <Label Text="Mill Management" FontSize="24" TextColor="Black" HorizontalOptions="Center" />
+
+                <!-- Input Grid -->
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto">
+                    <Label Text="Mill Name" Grid.Row="0" Grid.Column="0" />
+                    <Entry x:Name="millNameEntry" Grid.Row="0" Grid.Column="1" />
+
+                    <Label Text="Address" Grid.Row="1" Grid.Column="0" />
+                    <Entry x:Name="millAddressEntry" Grid.Row="1" Grid.Column="1" />
+
+                    <Label Text="Owner Name" Grid.Row="2" Grid.Column="0" />
+                    <Entry x:Name="millOwnerNameEntry" Grid.Row="2" Grid.Column="1" />
+                </Grid>
+
+                <!-- Buttons -->
+                <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="10">
+                    <Button Text="Add Mill" BackgroundColor="#98cb00" TextColor="White" />
+                    <Button Text="Update" BackgroundColor="#ff9800" TextColor="White" />
+                    <Button Text="Delete" BackgroundColor="Red" TextColor="White"/>
+                </StackLayout>
+
+                <!-- List of Mills -->
+                <ListView x:Name="millPicker"
+                          ItemsSource="{Binding}"
+                          SelectionMode="Single"
+                          ItemSelected="OnMillSelected"
+                          HeightRequest="300">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextCell Text="{Binding MillName}" Detail="{Binding OwnerName}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
             </StackLayout>
-            <Grid Grid.Column="2" Grid.RowSpan="7"
-              ColumnDefinitions="*,*" RowDefinitions=".2*,.2*, .8*">
-
-                <!-- Mills Greeting -->
-
-                <Label Grid.Column="0" Grid.Row="0" Text="Mills" Margin="20,0,0,20" HorizontalOptions="Start" VerticalOptions="End" FontSize="Header" FontAttributes="Bold" TextColor="Black" />
-
-                <!-- Divider Line -->
-                <Line 
-                Grid.ColumnSpan="3"
-                Stroke="Black"  
-                X1="0"
-                Y1="90"
-                X2="2000" 
-                Y2="90"/>
-            </Grid>
-        </Grid>
-    </ScrollView>
+        </ScrollView>
+    </Grid>
 </ContentPage>

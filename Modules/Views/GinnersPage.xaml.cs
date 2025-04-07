@@ -5,64 +5,32 @@ namespace MadinaEnterprises.Modules.Views;
 
 public partial class GinnersPage : ContentPage
 {
-    // DatabaseService instance for handling database operations
     private readonly DatabaseService _databaseService;
-    // Observable collection for displaying the list of Ginners in the UI
     private readonly ObservableCollection<Ginners> _ginnersList;
 
     public GinnersPage()
     {
         InitializeComponent();
-        _databaseService = new DatabaseService();
+        _databaseService = App.DatabaseService!;
         _ginnersList = new ObservableCollection<Ginners>();
-        // Binding the ListView to the observable collection
         GinnersListView.ItemsSource = _ginnersList;
-        LoadGinners(); // Load ginners when the page is initialized
+        _ = LoadGinners();
     }
 
-
-    //*****************************************************************************
+    //****************************************************************************
     //                       NAVIGATION BUTTONS
-    //*****************************************************************************
-    private async void OnDashboardPageButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new DashboardPage());
-    }
-    private async void OnGinnersPageButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new GinnersPage());
-    }
-    private async void OnMillsPageButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new MillsPage());
-    }
-    private async void OnContractsPageButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new ContractsPage());
-    }
-    private async void OnDeliveriesPageButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new DeliveriesPage());
-    }
-    private async void OnPaymentsPageButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new PaymentsPage());
-    }
-    private async void OnLogOutButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new LoginPage());
-    }
-    private async void OnLedgerButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new GinnerLedgerPage());
-    }
+    //****************************************************************************
+    private async void OnDashboardPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new DashboardPage());
+    private async void OnMillsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new MillsPage());
+    private async void OnContractsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new ContractsPage());
+    private async void OnDeliveriesPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new DeliveriesPage());
+    private async void OnPaymentsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new PaymentsPage());
+    private async void OnLogOutButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new LoginPage());
 
-    //*****************************************************************************
+    //****************************************************************************
     //                       GINNER MANAGEMENT
-    //*****************************************************************************
+    //****************************************************************************
 
-
-    // Event handler for adding a new ginner
     private async void OnAddGinnerClicked(object sender, EventArgs e)
     {
         if (string.IsNullOrWhiteSpace(GinnerIDEntry.Text) || string.IsNullOrWhiteSpace(GinnerNameEntry.Text))
@@ -74,33 +42,23 @@ public partial class GinnersPage : ContentPage
         var ginner = new Ginners
         {
             GinnerID = GinnerIDEntry.Text,
-            Name = GinnerNameEntry.Text,
+            GinnerName = GinnerNameEntry.Text,
             Contact = GinnerContactEntry.Text,
             Address = GinnerAddressEntry.Text,
             IBAN = GinnerIBANEntry.Text,
             NTN = GinnerNTNEntry.Text,
             STN = GinnerSTNEntry.Text
         };
-
-        bool isAdded = _databaseService.AddGinner(ginner);
-
-        if (isAdded)
-        {
-            await DisplayAlert("Success", "Ginner added successfully.", "OK");
-            ClearEntries(); // Clear input fields
-            LoadGinners(); // Refresh the list of ginners
-        }
-        else
-        {
-            await DisplayAlert("Error", "Failed to add Ginner. It may already exist.", "OK");
-        }
+        await _databaseService.AddGinner(ginner);
+        await DisplayAlert("Success", "Ginner profile created successfully.", "OK");
+        ClearEntries();
+        await LoadGinners();
     }
 
-    // Event handler for loading all ginners into the list
-    private void LoadGinners()
+    private async Task LoadGinners()
     {
         _ginnersList.Clear();
-        var ginners = _databaseService.GetAllGinners();
+        var ginners = await _databaseService.GetAllGinners();
 
         foreach (var ginner in ginners)
         {
@@ -108,7 +66,6 @@ public partial class GinnersPage : ContentPage
         }
     }
 
-    // Event handler for updating an existing ginner
     private async void OnUpdateGinnerClicked(object sender, EventArgs e)
     {
         if (string.IsNullOrWhiteSpace(GinnerIDEntry.Text))
@@ -120,7 +77,7 @@ public partial class GinnersPage : ContentPage
         var ginner = new Ginners
         {
             GinnerID = GinnerIDEntry.Text,
-            Name = GinnerNameEntry.Text,
+            GinnerName = GinnerNameEntry.Text,
             Contact = GinnerContactEntry.Text,
             Address = GinnerAddressEntry.Text,
             IBAN = GinnerIBANEntry.Text,
@@ -128,21 +85,12 @@ public partial class GinnersPage : ContentPage
             STN = GinnerSTNEntry.Text
         };
 
-        bool isUpdated = _databaseService.UpdateGinner(ginner);
-
-        if (isUpdated)
-        {
-            await DisplayAlert("Success", "Ginner updated successfully.", "OK");
-            ClearEntries();
-            LoadGinners();
-        }
-        else
-        {
-            await DisplayAlert("Error", "Failed to update Ginner. Ginner not found.", "OK");
-        }
+       await _databaseService.UpdateGinner(ginner);
+       await DisplayAlert("Success", "Ginner profile created successfully.", "OK");
+        ClearEntries();
+        await LoadGinners();
     }
 
-    // Event handler for deleting a ginner
     private async void OnDeleteGinnerClicked(object sender, EventArgs e)
     {
         if (string.IsNullOrWhiteSpace(GinnerIDEntry.Text))
@@ -151,21 +99,26 @@ public partial class GinnersPage : ContentPage
             return;
         }
 
-        bool isDeleted = _databaseService.DeleteGinner(GinnerIDEntry.Text);
+        await _databaseService.DeleteGinner(GinnerIDEntry.Text);
+        await DisplayAlert("Success", "Ginner profile created successfully.", "OK");
+        ClearEntries();
+        await LoadGinners();
+    }
 
-        if (isDeleted)
+    private void OnGinnerSelected(object sender, SelectedItemChangedEventArgs e)
+    {
+        if (e.SelectedItem is Ginners selectedGinner)
         {
-            await DisplayAlert("Success", "Ginner deleted successfully.", "OK");
-            ClearEntries();
-            LoadGinners();
-        }
-        else
-        {
-            await DisplayAlert("Error", "Failed to delete Ginner. Ginner not found.", "OK");
+            GinnerIDEntry.Text = selectedGinner.GinnerID;
+            GinnerNameEntry.Text = selectedGinner.GinnerName;
+            GinnerContactEntry.Text = selectedGinner.Contact;
+            GinnerAddressEntry.Text = selectedGinner.Address;
+            GinnerIBANEntry.Text = selectedGinner.IBAN;
+            GinnerNTNEntry.Text = selectedGinner.NTN;
+            GinnerSTNEntry.Text = selectedGinner.STN;
         }
     }
 
-    // Clear the input fields
     private void ClearEntries()
     {
         GinnerIDEntry.Text = string.Empty;

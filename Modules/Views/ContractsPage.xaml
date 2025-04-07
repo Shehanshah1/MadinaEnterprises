@@ -20,85 +20,40 @@
                 Grid.Column="1"
                 Grid.RowSpan="7"
                 Color="White"  />
+
             <!-- Sidebar Buttons and Logo -->
             <StackLayout Grid.Column="0" Padding="10" Spacing="30" Grid.RowSpan="7">
-
-                <!-- Sidebar Buttons -->
-                <Button 
-                    Text="Dashboard" 
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White" 
-                    HorizontalOptions="FillAndExpand"
-                    CornerRadius="0"
-                    Margin="0,50,0,0"
-                    Clicked="OnDashboardPageButtonClicked"
-                    />
-                <Button 
-                    Text="Ginners"
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White"
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand" 
-                    Clicked="OnGinnersPageButtonClicked"
-                    />
-                <Button 
-                    Text="Mills" 
-                    FontSize="Small" 
-                    BackgroundColor="Black" 
-                    TextColor="White" 
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand"
-                    Clicked="OnMillsPageButtonClicked"/>
-                <Button 
-                    Text="Contracts" 
-                    FontSize="Small" 
-                    BackgroundColor="White" 
-                    TextColor="Black" 
-                    CornerRadius="0"
-                    HorizontalOptions="FillAndExpand" />
-                <Button 
-                   Text="Deliveries" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White" 
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnDeliveriesPageButtonClicked"/>
-                <Button 
-                   Text="Payments" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White"
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnPaymentsPageButtonClicked"/>
-                <Button 
-                   Text="Log Out" 
-                   FontSize="Small" 
-                   BackgroundColor="Black" 
-                   TextColor="White" 
-                   CornerRadius="0"
-                   HorizontalOptions="FillAndExpand"
-                    Clicked="OnLogOutButtonClicked"/>
+                <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked" />
+                <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnGinnersPageButtonClicked" />
+                <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnMillsPageButtonClicked" />
+                <Button Text="Contracts" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0" HorizontalOptions="FillAndExpand" />
+                <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnDeliveriesPageButtonClicked" />
+                <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnPaymentsPageButtonClicked" />
+                <Button Text="Log Out" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnLogOutButtonClicked" />
             </StackLayout>
 
-            <Grid Grid.Column="2" Grid.RowSpan="7"
-              ColumnDefinitions="*,*" RowDefinitions=".2*,.2*, .8*">
+            <!-- Right Content Area -->
+            <Grid Grid.Column="1" Padding="40" RowSpacing="20"
+                  ColumnDefinitions="*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
 
-                <!-- Contracts Greeting -->
+                <Label Grid.Row="0" Text="Contracts" FontSize="Large" FontAttributes="Bold" TextColor="Black" />
+                <Line Grid.Row="1" Stroke="Black" X1="0" Y1="0" X2="1000" Y2="0" />
 
-                <Label Grid.Column="0" Grid.Row="0" Text="Contracts" Margin="20,0,0,20" HorizontalOptions="Start" VerticalOptions="End" FontSize="Header" FontAttributes="Bold" TextColor="Black" />
+                <Picker Grid.Row="2" x:Name="contractPicker" Title="Select Contract to Edit/Delete" SelectedIndexChanged="OnContractSelected" />
+                <Entry Grid.Row="3" x:Name="contractIDEntry" Placeholder="Contract ID" />
+                <Picker Grid.Row="4" x:Name="ginnerPicker" Title="Select Ginner" />
+                <Picker Grid.Row="5" x:Name="millPicker" Title="Select Mill" />
+                <Entry Grid.Row="6" x:Name="totalBalesEntry" Placeholder="Total Bales" Keyboard="Numeric" />
+                <Entry Grid.Row="7" x:Name="pricePerBatchEntry" Placeholder="Price per Batch" Keyboard="Numeric" />
+                <Entry Grid.Row="8" x:Name="commissionEntry" Placeholder="Commission (%)" Keyboard="Numeric" />
+                <DatePicker Grid.Row="9" x:Name="contractDatePicker" />
+                <Editor Grid.Row="10" x:Name="deliveryNotesEditor" Placeholder="Delivery Notes" AutoSize="TextChanges" />
+                <Editor Grid.Row="11" x:Name="paymentNotesEditor" Placeholder="Payment Notes" AutoSize="TextChanges" />
 
-                <!-- Divider Line -->
-                <Line 
-                Grid.ColumnSpan="3"
-                Stroke="Black"  
-                X1="0"
-                Y1="90"
-                X2="2000" 
-                Y2="90"/>
+                <StackLayout Grid.Row="12" Orientation="Horizontal" Spacing="10">
+                    <Button Text="Save Contract" Clicked="OnSaveContractClicked" BackgroundColor="#98cb00" TextColor="Black" />
+                    <Button Text="Delete Contract" Clicked="OnDeleteContractClicked" BackgroundColor="Red" TextColor="White" />
+                </StackLayout>
             </Grid>
         </Grid>
     </ScrollView>
