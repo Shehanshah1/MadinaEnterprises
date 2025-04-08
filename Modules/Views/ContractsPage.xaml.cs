@@ -1,11 +1,9 @@
-namespace MadinaEnterprises.Modules.Views;
-
 using MadinaEnterprises.Modules.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 using Microsoft.Maui.Controls;
+using MadinaEnterprises.Modules.Util;
+
+namespace MadinaEnterprises.Modules.Views;
 
 public partial class ContractsPage : ContentPage
 {
@@ -13,6 +11,7 @@ public partial class ContractsPage : ContentPage
     private List<Contracts> contracts = new();
     private List<Ginners> ginners = new();
     private List<Mills> mills = new();
+    private ObservableCollection<Contracts> filteredContracts = new();
 
     public ContractsPage()
     {
@@ -27,8 +26,11 @@ public partial class ContractsPage : ContentPage
         mills = await _db.GetAllMills();
 
         contractPicker.ItemsSource = contracts.Select(c => c.ContractID).ToList();
-        ginnerPicker.ItemsSource = ginners.Select(g => g.GinnerName).ToList();
-        millPicker.ItemsSource = mills.Select(m => m.MillName).ToList();
+        ginnerPicker.ItemsSource = ginners.Select(g => $"{g.GinnerName} ({g.GinnerID})").ToList();
+        millPicker.ItemsSource = mills.Select(m => $"{m.MillName} ({m.MillID})").ToList();
+
+        filteredContracts = new ObservableCollection<Contracts>(contracts);
+        contractListView.ItemsSource = filteredContracts;
     }
 
     private void OnContractSelected(object sender, EventArgs e)
@@ -36,17 +38,30 @@ public partial class ContractsPage : ContentPage
         if (contractPicker.SelectedIndex == -1) return;
 
         var selected = contracts.FirstOrDefault(c => c.ContractID == contractPicker.SelectedItem?.ToString());
-        if (selected == null) return;
+        if (selected != null)
+            PopulateForm(selected);
+    }
 
-        contractIDEntry.Text = selected.ContractID;
-        ginnerPicker.SelectedIndex = ginners.FindIndex(g => g.GinnerID == selected.GinnerID);
-        millPicker.SelectedIndex = mills.FindIndex(m => m.MillID == selected.MillID);
-        totalBalesEntry.Text = selected.TotalBales.ToString();
-        pricePerBatchEntry.Text = selected.PricePerBatch.ToString("F2");
-        commissionEntry.Text = selected.CommissionPercentage.ToString("F2");
-        contractDatePicker.Date = selected.DateCreated;
-        deliveryNotesEditor.Text = selected.DeliveryNotes;
-        paymentNotesEditor.Text = selected.PaymentNotes;
+    private void OnContractListSelected(object sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault() is Contracts selected)
+        {
+            contractPicker.SelectedItem = selected.ContractID;
+            PopulateForm(selected);
+        }
+    }
+
+    private void PopulateForm(Contracts c)
+    {
+        contractIDEntry.Text = c.ContractID;
+        ginnerPicker.SelectedIndex = ginners.FindIndex(g => g.GinnerID == c.GinnerID);
+        millPicker.SelectedIndex = mills.FindIndex(m => m.MillID == c.MillID);
+        totalBalesEntry.Text = c.TotalBales.ToString();
+        pricePerBatchEntry.Text = c.PricePerBatch.ToString("F2");
+        commissionEntry.Text = c.CommissionPercentage.ToString("F2");
+        contractDatePicker.Date = c.DateCreated;
+        deliveryNotesEditor.Text = c.DeliveryNotes;
+        paymentNotesEditor.Text = c.PaymentNotes;
     }
 
     private async void OnSaveContractClicked(object sender, EventArgs e)
@@ -57,56 +72,76 @@ public partial class ContractsPage : ContentPage
             return;
         }
 
-        try
+        var contract = new Contracts
         {
-            var contract = new Contracts
-            {
-                ContractID = contractIDEntry.Text ?? "",
-                GinnerID = ginners[ginnerPicker.SelectedIndex].GinnerID,
-                MillID = mills[millPicker.SelectedIndex].MillID,
-                TotalBales = int.Parse(totalBalesEntry.Text),
-                PricePerBatch = double.Parse(pricePerBatchEntry.Text),
-                CommissionPercentage = double.Parse(commissionEntry.Text),
-                DateCreated = contractDatePicker.Date,
-                DeliveryNotes = deliveryNotesEditor.Text ?? "",
-                PaymentNotes = paymentNotesEditor.Text ?? ""
-            };
+            ContractID = contractIDEntry.Text ?? "",
+            GinnerID = ginners[ginnerPicker.SelectedIndex].GinnerID,
+            MillID = mills[millPicker.SelectedIndex].MillID,
+            TotalBales = int.TryParse(totalBalesEntry.Text, out var bales) ? bales : 0,
+            PricePerBatch = double.TryParse(pricePerBatchEntry.Text, out var price) ? price : 0,
+            CommissionPercentage = double.TryParse(commissionEntry.Text, out var comm) ? comm : 0,
+            DateCreated = contractDatePicker.Date,
+            DeliveryNotes = deliveryNotesEditor.Text ?? "",
+            PaymentNotes = paymentNotesEditor.Text ?? ""
+        };
 
-            var exists = contracts.Any(c => c.ContractID == contract.ContractID);
-            if (exists)
-                await _db.UpdateContract(contract);
-            else
-                await _db.AddContract(contract);
+        if (contracts.Any(c => c.ContractID == contract.ContractID))
+            await _db.UpdateContract(contract);
+        else
+            await _db.AddContract(contract);
 
-            await DisplayAlert("Success", "Contract saved.", "OK");
-            await LoadData();
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Error", $"Failed to save contract. Details: {ex.Message}", "OK");
-        }
+        await DisplayAlert("Success", "Contract saved.", "OK");
+        await LoadData();
     }
 
     private async void OnDeleteContractClicked(object sender, EventArgs e)
     {
-        if (contractPicker.SelectedIndex == -1) return;
-
-        var contractID = contractPicker.SelectedItem?.ToString();
-        if (!string.IsNullOrWhiteSpace(contractID))
+        if (contractPicker.SelectedItem is string id)
         {
-            await _db.DeleteContract(contractID);
+            await _db.DeleteContract(id);
             await DisplayAlert("Deleted", "Contract deleted.", "OK");
             await LoadData();
         }
     }
 
-    //*****************************************************************************
-    //                       NAVIGATION BUTTONS
-    //*****************************************************************************
+    private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+    {
+        var search = e.NewTextValue?.ToLower() ?? "";
+        contractListView.ItemsSource = new ObservableCollection<Contracts>(
+            contracts.Where(c => c.ContractID.ToLower().Contains(search))
+        );
+    }
+
+    private async void OnExportDocClicked(object sender, EventArgs e)
+    {
+        if (contractPicker.SelectedItem is not string selectedId) return;
+        var contract = contracts.FirstOrDefault(c => c.ContractID == selectedId);
+        if (contract == null) return;
+
+        var ginner = ginners.FirstOrDefault(g => g.GinnerID == contract.GinnerID);
+        var mill = mills.FirstOrDefault(m => m.MillID == contract.MillID);
+
+        var path = ExportHelper.ExportContractToWord(contract, ginner!, mill!);
+        await DisplayAlert("Export", $"DOCX export complete: {path}", "OK");
+    }
+
+    private async void OnExportExcelClicked(object sender, EventArgs e)
+    {
+        if (contractPicker.SelectedItem is not string selectedId) return;
+        var contract = contracts.FirstOrDefault(c => c.ContractID == selectedId);
+        if (contract == null) return;
+
+        var ginner = ginners.FirstOrDefault(g => g.GinnerID == contract.GinnerID);
+        var mill = mills.FirstOrDefault(m => m.MillID == contract.MillID);
+
+        var path = ExportHelper.ExportContractToExcel(contract, ginner!, mill!);
+        await DisplayAlert("Export", $"Excel export complete: {path}", "OK");
+    }
+
+    // Navigation
     private async void OnDashboardPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new DashboardPage());
     private async void OnGinnersPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new GinnersPage());
     private async void OnMillsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new MillsPage());
-    private async void OnContractsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new ContractsPage());
     private async void OnDeliveriesPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new DeliveriesPage());
     private async void OnPaymentsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new PaymentsPage());
     private async void OnLogOutButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new LoginPage());
