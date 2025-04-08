@@ -2,168 +2,130 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MadinaEnterprises.Modules.Views.LoginPage"
+             BackgroundColor="#666666"
              MinimumHeightRequest="700"
              MinimumWidthRequest="1000">
-    
+
     <ScrollView>
-        <VerticalStackLayout BackgroundColor="#666666">
+        <VerticalStackLayout Spacing="0" Padding="0">
 
-            <!-- Header Section -->
+            <!-- Header Bar -->
             <Grid BackgroundColor="#98cb00" HeightRequest="100">
-                <Label                    
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center"
-                    FontAttributes="Bold"
-                    FontSize="60"
-                    Text="MADINA ENTERPRISES"
-                    TextColor="White">
-                </Label>
+                <Label Text="MADINA ENTERPRISES"
+                       FontAttributes="Bold"
+                       FontSize="60"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"/>
             </Grid>
 
+            <!-- Error Message -->
             <Label x:Name="errorMessageLabel"
-               TextColor="Red"
-               IsVisible="False"
-               HorizontalOptions="Center"/>
-                
-             
-            
-            <!-- Content Section -->
-            <Grid BackgroundColor="White" Padding="30, 0, 30, 0">
-                <Image Source="C:\Users\lenovo\Pictures\Madina Enterprises.png" Aspect="AspectFill" WidthRequest="370" HeightRequest="300" Opacity=".5"/>
+                   TextColor="Red"
+                   FontAttributes="Bold"
+                   FontSize="14"
+                   IsVisible="False"
+                   HorizontalOptions="Center"
+                   Margin="0,10"/>
 
-                <VerticalStackLayout Spacing="10" Padding="20">
+            <!-- Login Card -->
+            <Frame CornerRadius="10"
+                   Margin="40,30"
+                   Padding="30"
+                   BackgroundColor="White"
+                   HasShadow="True">
 
+                <Grid RowDefinitions="Auto,Auto"
+                      ColumnDefinitions="Auto,Auto"
+                      ColumnSpacing="20">
 
-                    <Label FontAttributes="Bold"
-                           FontSize="Medium"
-                           Text="Welcome!"
-                           TextColor="Black">
-                    </Label>
-                    <Label 
-                        FontSize="Medium"
-                        Text="Login to continue!"
-                        TextColor="Black">
-                    </Label>
+                    <!-- Logo -->
+                    <Image Source="madina_logo.png"
+                    Grid.RowSpan="2"
+                           HeightRequest="300"
+                           WidthRequest="300"
+                           HorizontalOptions="Start"
+                           VerticalOptions="Center"
+                           Aspect="AspectFit"
+                           Margin="0,0,30,0"/>
 
-                    <!-- Email Entry -->
-                    <Grid Margin="0,30,0,0" ColumnDefinitions=".2*,.8*">
-                        <RoundRectangle BackgroundColor="#98cb00" 
-                                        CornerRadius="0"
-                                        HeightRequest="45"
-                                        WidthRequest="130"
-                                        />
-                        <Label Text="Email:" 
-                               Grid.Column="0" 
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               TextColor="White"
+                    <!-- Login Fields -->
+                    <VerticalStackLayout Grid.Column="1" Spacing="20" VerticalOptions="Center">
+
+                        <Label Text="Welcome!"
                                FontAttributes="Bold"
-                               FontSize="Medium">
-                        </Label>
-                        <Entry x:Name="emailEntry"
-                            Grid.Column="1"
-                            Placeholder="Enter your email..."
-                            BackgroundColor="AliceBlue"
-                            VerticalOptions="Center"
-                            TextColor="Black"
-                            Opacity=".9"/>
-                    </Grid>
+                               FontSize="24"
+                               TextColor="Black"/>
 
-                    <!-- Password Entry -->
-                    <Grid Margin="0,30,0,0" ColumnDefinitions=".2*,.6*,.2*">
-                        <RoundRectangle BackgroundColor="#98cb00" 
-                                        CornerRadius="0"
-                                        HeightRequest="45"
-                                        WidthRequest="130"/>
-                        <Label Text="Password:" 
-                               Grid.Column="0" 
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               FontAttributes="Bold"
-                               TextColor="White"
-                               FontSize="Medium">
-                        </Label>
-                        <Entry 
-                            x:Name="passwordEntry"
-                            Grid.Column="1"
-                            Placeholder="Enter your password here..."
-                            BackgroundColor="AliceBlue"
-                            IsPassword="True"
-                            VerticalOptions="Center"
-                            TextColor="Black"
-                            Opacity=".9"/>
+                        <Label Text="Login to continue"
+                               FontSize="16"
+                               TextColor="Black"/>
 
-                        <Button x:Name="showHidePasswordButton"
+                        <!-- Email -->
+                        <Grid ColumnDefinitions="100,*">
+                            <Label Text="Email:"
+                                   TextColor="#98cb00"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center"/>
+                            <Entry x:Name="emailEntry"
+                                   Placeholder="Enter your email"
+                                   BackgroundColor="AliceBlue"
+                                   TextColor="Black"
+                                   Grid.Column="1"
+                                   WidthRequest="300"/>
+                        </Grid>
+
+                        <!-- Password -->
+                        <Grid ColumnDefinitions="100,*,Auto">
+                            <Label Text="Password:"
+                                   TextColor="#98cb00"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center"/>
+                            <Entry x:Name="passwordEntry"
+                                   Placeholder="Enter your password"
+                                   IsPassword="True"
+                                   BackgroundColor="AliceBlue"
+                                   TextColor="Black"
+                                   Grid.Column="1"/>
+                            <Button x:Name="showHidePasswordButton"
+                                    Text="Show"
+                                    BackgroundColor="#98cb00"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    CornerRadius="0"
+                                    Padding="10,5"
+                                    Clicked="showHidePasswordButton_Clicked"
+                                    Grid.Column="2"/>
+                        </Grid>
+
+                        <!-- Login -->
+                        <Button x:Name="loginButton"
+                                Text="Login"
                                 BackgroundColor="#98cb00"
-                                Text="Show"
-                                FontAttributes="Bold"
-                                WidthRequest="100"
-                                CornerRadius="0"
                                 TextColor="White"
-                                Clicked="showHidePasswordButton_Clicked"
-                                Grid.Column="2">
-                            <Button.Shadow>
-                                <Shadow Radius="4"
-                                    Brush="Black"
-                                    Offset="5,5"/>
-                            </Button.Shadow>
-                        </Button>
+                                FontAttributes="Bold"
+                                CornerRadius="5"
+                                HeightRequest="50"
+                                Clicked="OnLoginButtonClicked"/>
 
-                    </Grid>
+                        <!-- Create Account -->
+                        <Button Text="Create a new account"
+                                BackgroundColor="#eeeeee"
+                                TextColor="#98cb00"
+                                FontAttributes="Bold"
+                                Clicked="OnCreateAccountButtonClicked"
+                                CornerRadius="5"
+                                HeightRequest="40"/>
 
-                    <!-- Login Button -->
-                    <Button               
-                        BackgroundColor="#98cb00"
-                        Text="Login"  
-                        FontAttributes="Bold"
-                        FontSize="Small"
-                        TextColor="White"
-                        CornerRadius="0"
-                        HeightRequest="60"
-                        Margin="0,20,0,0"
-                        WidthRequest="100"
-                        x:Name="loginButton"
-                        Clicked="OnLoginButtonClicked"
-                        >
-                        <Button.Shadow>
-                            <Shadow Radius="4"
-                                    Brush="Black"
-                                    Offset="5,5"/>
-                        </Button.Shadow>
-                        </Button>
-
-
-                    <!-- Create Account Button -->
-                    <Button    
-                        BackgroundColor="#98cb00"
-                        HeightRequest="40"
-                        Margin="10"
-                        CornerRadius="0"
-                        Text="Create a new account"
-                        MaximumWidthRequest="200"
-                        TextColor="White"
-                        Clicked="OnCreateAccountButtonClicked">
-                        <Button.Shadow>
-                            <Shadow Radius="4"
-                                    Brush="Black"
-                                    Offset="5,5"/>
-                        </Button.Shadow>
-                    </Button>
-
-
-                    <!-- Forgot Password Link -->
-                    <Button 
-                            HorizontalOptions="Center"
-                            Text="Forgot your password?"
-                            HeightRequest="30"
-                            MaximumWidthRequest="200"
-                            TextColor="Blue"
-                            BackgroundColor="White"
-                            Clicked="OnForgotPasswordButtonClicked"  
-                            />
-
-                </VerticalStackLayout>
-            </Grid>
+                        <!-- Forgot Password -->
+                        <Button Text="Forgot your password?"
+                                BackgroundColor="Transparent"
+                                TextColor="Blue"
+                                FontSize="Small"
+                                Clicked="OnForgotPasswordButtonClicked"/>
+                    </VerticalStackLayout>
+                </Grid>
+            </Frame>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
