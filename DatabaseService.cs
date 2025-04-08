@@ -63,12 +63,15 @@ namespace MadinaEnterprises
                     TotalBales INTEGER,
                     Date TEXT
                 );
+
                 CREATE TABLE IF NOT EXISTS Ginners (
-                    GinnerName TEXT PRIMARY KEY,
+                    GinnerID TEXT PRIMARY KEY,
+                    GinnerName TEXT,
+                    Contact TEXT,
+                    IBAN TEXT,
                     Address TEXT,
                     NTN TEXT,
                     STN TEXT,
-                    BankAccount TEXT,
                     BankAddress TEXT,
                     ContactPerson TEXT,
                     Station TEXT
@@ -341,11 +344,13 @@ namespace MadinaEnterprises
             {
                 list.Add(new Ginners
                 {
+                    GinnerID = reader["GinnerID"].ToString(),
                     GinnerName = reader["GinnerName"].ToString(),
+                    Contact = reader["Contact"].ToString(),
+                    IBAN = reader["IBAN"].ToString(),
                     Address = reader["Address"].ToString(),
                     NTN = reader["NTN"].ToString(),
                     STN = reader["STN"].ToString(),
-                    BankAccount = reader["BankAccount"].ToString(),
                     BankAddress = reader["BankAddress"].ToString(),
                     ContactPerson = reader["ContactPerson"].ToString(),
                     Station = reader["Station"].ToString()
@@ -359,14 +364,16 @@ namespace MadinaEnterprises
             using var conn = new SQLiteConnection(_connectionString);
             await conn.OpenAsync();
             var cmd = new SQLiteCommand(@"
-                INSERT INTO Ginners (GinnerName, Address, NTN, STN, BankAccount, BankAddress, ContactPerson, Station)
-                VALUES (@GinnerName, @Address, @NTN, @STN, @BankAccount, @BankAddress, @ContactPerson, @Station)", conn);
+                INSERT INTO Ginners (GinnerID, GinnerName, Contact, IBAN, Address, NTN, STN, BankAddress, ContactPerson, Station)
+                VALUES (@GinnerID, @GinnerName, @Contact, @IBAN, @Address, @NTN, @STN, @BankAddress, @ContactPerson, @Station)", conn);
 
+            cmd.Parameters.AddWithValue("@GinnerID", g.GinnerID);
             cmd.Parameters.AddWithValue("@GinnerName", g.GinnerName);
+            cmd.Parameters.AddWithValue("@Contact", g.Contact);
+            cmd.Parameters.AddWithValue("@IBAN", g.IBAN);
             cmd.Parameters.AddWithValue("@Address", g.Address);
             cmd.Parameters.AddWithValue("@NTN", g.NTN);
             cmd.Parameters.AddWithValue("@STN", g.STN);
-            cmd.Parameters.AddWithValue("@BankAccount", g.BankAccount);
             cmd.Parameters.AddWithValue("@BankAddress", g.BankAddress);
             cmd.Parameters.AddWithValue("@ContactPerson", g.ContactPerson);
             cmd.Parameters.AddWithValue("@Station", g.Station);
@@ -379,14 +386,16 @@ namespace MadinaEnterprises
             using var conn = new SQLiteConnection(_connectionString);
             await conn.OpenAsync();
             var cmd = new SQLiteCommand(@"
-                UPDATE Ginners SET Address=@Address, NTN=@NTN, STN=@STN, BankAccount=@BankAccount, BankAddress=@BankAddress, ContactPerson=@ContactPerson, Station=@Station
-                WHERE GinnerName=@GinnerName", conn);
+                UPDATE Ginners SET GinnerName=@GinnerName, Contact=@Contact, IBAN=@IBAN, Address=@Address, NTN=@NTN, STN=@STN, BankAddress=@BankAddress, ContactPerson=@ContactPerson, Station=@Station
+                WHERE GinnerID=@GinnerID", conn);
 
+            cmd.Parameters.AddWithValue("@GinnerID", g.GinnerID);
             cmd.Parameters.AddWithValue("@GinnerName", g.GinnerName);
+            cmd.Parameters.AddWithValue("@Contact", g.Contact);
+            cmd.Parameters.AddWithValue("@IBAN", g.IBAN);
             cmd.Parameters.AddWithValue("@Address", g.Address);
             cmd.Parameters.AddWithValue("@NTN", g.NTN);
             cmd.Parameters.AddWithValue("@STN", g.STN);
-            cmd.Parameters.AddWithValue("@BankAccount", g.BankAccount);
             cmd.Parameters.AddWithValue("@BankAddress", g.BankAddress);
             cmd.Parameters.AddWithValue("@ContactPerson", g.ContactPerson);
             cmd.Parameters.AddWithValue("@Station", g.Station);
@@ -394,12 +403,12 @@ namespace MadinaEnterprises
             await cmd.ExecuteNonQueryAsync();
         }
 
-        public async Task DeleteGinner(string ginnerName)
+        public async Task DeleteGinner(string GinnerID)
         {
             using var conn = new SQLiteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand("DELETE FROM Ginners WHERE GinnerName = @name", conn);
-            cmd.Parameters.AddWithValue("@name", ginnerName);
+            var cmd = new SQLiteCommand("DELETE FROM Ginners WHERE GinnerID = @GinnerID", conn);
+            cmd.Parameters.AddWithValue("@GinnerID", GinnerID);
             await cmd.ExecuteNonQueryAsync();
         }
 

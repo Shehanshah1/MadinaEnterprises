@@ -39,16 +39,28 @@ public partial class GinnersPage : ContentPage
             return;
         }
 
+        // Check for duplicate GinnerID
+        var existingGinners = await _databaseService.GetAllGinners();
+        if (existingGinners.Any(g => g.GinnerID == GinnerIDEntry.Text))
+        {
+            await DisplayAlert("Duplicate GinnerID", "A ginner with this Ginner ID already exists.", "OK");
+            return;
+        }
+
         var ginner = new Ginners
         {
             GinnerID = GinnerIDEntry.Text,
             GinnerName = GinnerNameEntry.Text,
-            Contact = GinnerContactEntry.Text,
-            Address = GinnerAddressEntry.Text,
-            IBAN = GinnerIBANEntry.Text,
-            NTN = GinnerNTNEntry.Text,
-            STN = GinnerSTNEntry.Text
+            Contact = GinnerContactEntry.Text ?? "",
+            Address = GinnerAddressEntry.Text ?? "",
+            IBAN = GinnerIBANEntry.Text ?? "",
+            NTN = GinnerNTNEntry.Text ?? "",
+            STN = GinnerSTNEntry.Text ?? "",
+            BankAddress = GinnerBankAddressEntry.Text ?? "",
+            ContactPerson = GinnerContactPersonEntry.Text ?? "",
+            Station = GinnerStationEntry.Text ?? ""
         };
+
         await _databaseService.AddGinner(ginner);
         await DisplayAlert("Success", "Ginner profile created successfully.", "OK");
         ClearEntries();
@@ -59,11 +71,8 @@ public partial class GinnersPage : ContentPage
     {
         _ginnersList.Clear();
         var ginners = await _databaseService.GetAllGinners();
-
         foreach (var ginner in ginners)
-        {
             _ginnersList.Add(ginner);
-        }
     }
 
     private async void OnUpdateGinnerClicked(object sender, EventArgs e)
@@ -74,19 +83,31 @@ public partial class GinnersPage : ContentPage
             return;
         }
 
+        // Make sure GinnerID exists before updating
+        var allGinners = await _databaseService.GetAllGinners();
+        var existingGinner = allGinners.FirstOrDefault(g => g.GinnerID == GinnerIDEntry.Text);
+        if (existingGinner == null)
+        {
+            await DisplayAlert("Not Found", "No ginner found with this Ginner ID to update.", "OK");
+            return;
+        }
+
         var ginner = new Ginners
         {
             GinnerID = GinnerIDEntry.Text,
             GinnerName = GinnerNameEntry.Text,
-            Contact = GinnerContactEntry.Text,
-            Address = GinnerAddressEntry.Text,
-            IBAN = GinnerIBANEntry.Text,
-            NTN = GinnerNTNEntry.Text,
-            STN = GinnerSTNEntry.Text
+            Contact = GinnerContactEntry.Text ?? "",
+            Address = GinnerAddressEntry.Text ?? "",
+            IBAN = GinnerIBANEntry.Text ?? "",
+            NTN = GinnerNTNEntry.Text ?? "",
+            STN = GinnerSTNEntry.Text ?? "",
+            BankAddress = GinnerBankAddressEntry.Text ?? "",
+            ContactPerson = GinnerContactPersonEntry.Text ?? "",
+            Station = GinnerStationEntry.Text ?? ""
         };
 
-       await _databaseService.UpdateGinner(ginner);
-       await DisplayAlert("Success", "Ginner profile created successfully.", "OK");
+        await _databaseService.UpdateGinner(ginner);
+        await DisplayAlert("Success", "Ginner profile updated successfully.", "OK");
         ClearEntries();
         await LoadGinners();
     }
@@ -100,7 +121,7 @@ public partial class GinnersPage : ContentPage
         }
 
         await _databaseService.DeleteGinner(GinnerIDEntry.Text);
-        await DisplayAlert("Success", "Ginner profile created successfully.", "OK");
+        await DisplayAlert("Success", "Ginner profile deleted successfully.", "OK");
         ClearEntries();
         await LoadGinners();
     }
@@ -116,17 +137,24 @@ public partial class GinnersPage : ContentPage
             GinnerIBANEntry.Text = selectedGinner.IBAN;
             GinnerNTNEntry.Text = selectedGinner.NTN;
             GinnerSTNEntry.Text = selectedGinner.STN;
+            GinnerBankAddressEntry.Text = selectedGinner.BankAddress;
+            GinnerContactPersonEntry.Text = selectedGinner.ContactPerson;
+            GinnerStationEntry.Text = selectedGinner.Station;
         }
     }
 
     private void ClearEntries()
     {
-        GinnerIDEntry.Text = string.Empty;
-        GinnerNameEntry.Text = string.Empty;
-        GinnerContactEntry.Text = string.Empty;
-        GinnerAddressEntry.Text = string.Empty;
-        GinnerIBANEntry.Text = string.Empty;
-        GinnerNTNEntry.Text = string.Empty;
-        GinnerSTNEntry.Text = string.Empty;
+        GinnerIDEntry.Text = "";
+        GinnerNameEntry.Text = "";
+        GinnerContactEntry.Text = "";
+        GinnerAddressEntry.Text = "";
+        GinnerIBANEntry.Text = "";
+        GinnerNTNEntry.Text = "";
+        GinnerSTNEntry.Text = "";
+        GinnerBankAddressEntry.Text = "";
+        GinnerContactPersonEntry.Text = "";
+        GinnerStationEntry.Text = "";
+        GinnersListView.SelectedItem = null;
     }
 }
