@@ -31,6 +31,7 @@ namespace MadinaEnterprises
             using var command = new SQLiteCommand(connection);
 
             command.CommandText = @"
+
                 CREATE TABLE IF NOT EXISTS Contracts (
                     ContractID TEXT PRIMARY KEY,
                     GinnerID TEXT,

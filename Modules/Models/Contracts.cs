@@ -18,5 +18,6 @@ namespace MadinaEnterprises.Modules.Models
         public DateTime DateCreated { get; set; }
         public string DeliveryNotes { get; set; }
         public string PaymentNotes { get; set; }
+        public string GinnerName { get; set; }
     }
 }

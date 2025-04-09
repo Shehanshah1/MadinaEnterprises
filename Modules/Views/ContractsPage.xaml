@@ -11,51 +11,87 @@
         <BoxView Grid.Column="0" Color="#98cb00" />
         <BoxView Grid.Column="1" Color="White" />
 
+        <!-- Sidebar Buttons -->
         <StackLayout Grid.Column="0" Padding="10" Spacing="30">
-            <Button Text="Dashboard" BackgroundColor="Black" TextColor="White" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked"/>
-            <Button Text="Ginners" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnersPageButtonClicked"/>
-            <Button Text="Mills" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked"/>
-            <Button Text="Contracts" BackgroundColor="White" TextColor="Black" CornerRadius="0"/>
-            <Button Text="Deliveries" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
-            <Button Text="Payments" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
-            <Button Text="Log Out" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
+            <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked"/>
+            <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnersPageButtonClicked"/>
+            <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked"/>
+            <Button Text="Contracts" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0"/>
+            <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
+            <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
+            <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
         </StackLayout>
-
         <!-- Main Content -->
         <ScrollView Grid.Column="1">
-            <VerticalStackLayout Padding="30" Spacing="20">
-                <Label Text="Contracts" FontSize="Large" FontAttributes="Bold" TextColor="Black"/>
-                <Line Stroke="Black" X1="0" Y1="0" X2="1000" Y2="0"/>
+            <VerticalStackLayout Padding="20" Spacing="20">
+                <!-- Title -->
+                <Label Text="Contract Management"
+            FontSize="Header"
+            FontAttributes="Bold"
+            TextColor="Black"
+            HorizontalOptions="Start"/>
 
-                <Picker x:Name="contractPicker" Title="Select Contract to Edit/Delete" SelectedIndexChanged="OnContractSelected"/>
-                <Entry x:Name="contractIDEntry" Placeholder="Contract ID"/>
-                <Picker x:Name="ginnerPicker" Title="Select Ginner"/>
-                <Picker x:Name="millPicker" Title="Select Mill"/>
-                <Entry x:Name="totalBalesEntry" Placeholder="Total Bales" Keyboard="Numeric"/>
-                <Entry x:Name="pricePerBatchEntry" Placeholder="Price per Batch" Keyboard="Numeric"/>
-                <Entry x:Name="commissionEntry" Placeholder="Commission (%)" Keyboard="Numeric"/>
-                <DatePicker x:Name="contractDatePicker"/>
-                <Editor x:Name="deliveryNotesEditor" Placeholder="Delivery Notes" AutoSize="TextChanges"/>
-                <Editor x:Name="paymentNotesEditor" Placeholder="Payment Notes" AutoSize="TextChanges"/>
+                <BoxView HeightRequest="2" BackgroundColor="Black" />
 
-                <HorizontalStackLayout Spacing="10">
-                    <Button Text="Save Contract" Clicked="OnSaveContractClicked" BackgroundColor="#98cb00" TextColor="Black"/>
-                    <Button Text="Delete Contract" Clicked="OnDeleteContractClicked" BackgroundColor="Red" TextColor="White"/>
-                    <Button Text="Export to DOCX" Clicked="OnExportDocClicked" BackgroundColor="#1976d2" TextColor="White"/>
-                    <Button Text="Export to Excel" Clicked="OnExportExcelClicked" BackgroundColor="#43a047" TextColor="White"/>
-                </HorizontalStackLayout>
+                <!-- Contract Form -->
+                <Frame Padding="20" BackgroundColor="#f5f5f5" CornerRadius="10" HasShadow="True">
+                    <VerticalStackLayout Spacing="15">
 
-                <!-- Contract List Below -->
-                <SearchBar x:Name="contractSearchBar" Placeholder="Search Contract ID..." TextChanged="OnSearchTextChanged"/>
-                <CollectionView x:Name="contractListView" HeightRequest="300" SelectionMode="Single" SelectionChanged="OnContractListSelected">
+                        <Picker x:Name="contractPicker" Title="Select Contract to Edit/Delete" BackgroundColor="LightGray" TextColor="Black"/>
+                        <Entry x:Name="contractIDEntry" Placeholder="Contract ID" BackgroundColor="White" TextColor="Black"/>
+                        <Picker x:Name="ginnerPicker" Title="Select Ginner" BackgroundColor="LightGray" TextColor="Black"/>
+                        <Picker x:Name="millPicker" Title="Select Mill" BackgroundColor="LightGray" TextColor="Black"/>
+                        <Entry x:Name="totalBalesEntry" Placeholder="Total Bales" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                        <Entry x:Name="pricePerBatchEntry" Placeholder="Price per Batch" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                        <Entry x:Name="commissionEntry" Placeholder="Commission (%)" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                        <DatePicker x:Name="contractDatePicker" TextColor="Black"/>
+                        <Editor x:Name="deliveryNotesEditor" Placeholder="Delivery Notes" AutoSize="TextChanges" BackgroundColor="White" TextColor="Black"/>
+                        <Editor x:Name="paymentNotesEditor" Placeholder="Payment Notes" AutoSize="TextChanges" BackgroundColor="White" TextColor="Black"/>
+
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                            <Button Text="Save Contract" Clicked="OnSaveContractClicked" BackgroundColor="#98cb00" TextColor="White" CornerRadius="5"/>
+                            <Button Text="Update Contract" Clicked="OnUpdateContractClicked" BackgroundColor="#ff9800" TextColor="White" CornerRadius="5"/>
+                            <Button Text="Delete Contract" Clicked="OnDeleteContractClicked" BackgroundColor="Red" TextColor="White" CornerRadius="5"/>
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                            <Button Text="Export to DOCX" Clicked="OnExportDocClicked" BackgroundColor="#1976d2" TextColor="White" CornerRadius="5"/>
+                            <Button Text="Export to Excel" Clicked="OnExportExcelClicked" BackgroundColor="#43a047" TextColor="White" CornerRadius="5"/>
+                        </HorizontalStackLayout>
+
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Contract List with Search -->
+                <Label Text="Existing Contracts" FontSize="20" FontAttributes="Bold" TextColor="Black"/>
+                <SearchBar x:Name="contractSearchBar" Placeholder="Search Contract ID..." TextChanged="OnSearchTextChanged" BackgroundColor="White" TextColor="Black"/>
+
+                <CollectionView x:Name="contractListView"
+                BackgroundColor="WhiteSmoke"
+                HeightRequest="300"
+                SelectionMode="Single"
+                SelectionChanged="OnContractListSelected"
+                Margin="0,0,0,20">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Grid Padding="10">
-                                <Label Text="{Binding ContractID}" FontSize="Medium" TextColor="Black"/>
-                            </Grid>
+                            <Frame Padding="10" Margin="5" BorderColor="#1976d2" CornerRadius="5" BackgroundColor="White">
+                                <Label FontSize="16" TextColor="Black">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding ContractID}" FontAttributes="Bold" TextColor="Black"/>
+                                            <Span Text=" (" TextColor="Black"/>
+                                            <Span Text="{Binding GinnerName}" TextColor="Black"/>
+                                            <Span Text=" (" TextColor="Black"/>
+                                            <Span Text="{Binding GinnerID}" TextColor="Black"/>
+                                            <Span Text="))" TextColor="Black"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </Frame>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
+
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

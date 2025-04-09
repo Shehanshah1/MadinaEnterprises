@@ -29,8 +29,48 @@ public partial class ContractsPage : ContentPage
         ginnerPicker.ItemsSource = ginners.Select(g => $"{g.GinnerName} ({g.GinnerID})").ToList();
         millPicker.ItemsSource = mills.Select(m => $"{m.MillName} ({m.MillID})").ToList();
 
+        // Inject GinnerName and GinnerID for display in CollectionView
+        foreach (var contract in contracts)
+        {
+            var ginner = ginners.FirstOrDefault(g => g.GinnerID == contract.GinnerID);
+            if (ginner != null)
+            {
+                contract.GinnerName = ginner.GinnerName;
+                contract.GinnerID = ginner.GinnerID;
+            }
+        }
+
         filteredContracts = new ObservableCollection<Contracts>(contracts);
         contractListView.ItemsSource = filteredContracts;
+    }
+
+
+    private void PopulateForm(Contracts c)
+    {
+        contractIDEntry.Text = c.ContractID;
+        ginnerPicker.SelectedIndex = ginners.FindIndex(g => g.GinnerID == c.GinnerID);
+        millPicker.SelectedIndex = mills.FindIndex(m => m.MillID == c.MillID);
+        totalBalesEntry.Text = c.TotalBales.ToString();
+        pricePerBatchEntry.Text = c.PricePerBatch.ToString("F2");
+        commissionEntry.Text = c.CommissionPercentage.ToString("F2");
+        contractDatePicker.Date = c.DateCreated;
+        deliveryNotesEditor.Text = c.DeliveryNotes;
+        paymentNotesEditor.Text = c.PaymentNotes;
+    }
+
+    private void ClearForm()
+    {
+        contractIDEntry.Text = "";
+        ginnerPicker.SelectedIndex = -1;
+        millPicker.SelectedIndex = -1;
+        totalBalesEntry.Text = "";
+        pricePerBatchEntry.Text = "";
+        commissionEntry.Text = "";
+        contractDatePicker.Date = DateTime.Today;
+        deliveryNotesEditor.Text = "";
+        paymentNotesEditor.Text = "";
+        contractPicker.SelectedItem = null;
+        contractListView.SelectedItem = null;
     }
 
     private void OnContractSelected(object sender, EventArgs e)
@@ -49,19 +89,6 @@ public partial class ContractsPage : ContentPage
             contractPicker.SelectedItem = selected.ContractID;
             PopulateForm(selected);
         }
-    }
-
-    private void PopulateForm(Contracts c)
-    {
-        contractIDEntry.Text = c.ContractID;
-        ginnerPicker.SelectedIndex = ginners.FindIndex(g => g.GinnerID == c.GinnerID);
-        millPicker.SelectedIndex = mills.FindIndex(m => m.MillID == c.MillID);
-        totalBalesEntry.Text = c.TotalBales.ToString();
-        pricePerBatchEntry.Text = c.PricePerBatch.ToString("F2");
-        commissionEntry.Text = c.CommissionPercentage.ToString("F2");
-        contractDatePicker.Date = c.DateCreated;
-        deliveryNotesEditor.Text = c.DeliveryNotes;
-        paymentNotesEditor.Text = c.PaymentNotes;
     }
 
     private async void OnSaveContractClicked(object sender, EventArgs e)
@@ -86,11 +113,41 @@ public partial class ContractsPage : ContentPage
         };
 
         if (contracts.Any(c => c.ContractID == contract.ContractID))
-            await _db.UpdateContract(contract);
-        else
-            await _db.AddContract(contract);
+        {
+            await DisplayAlert("Notice", "Contract already exists. Use Update to modify.", "OK");
+            return;
+        }
 
+        await _db.AddContract(contract);
         await DisplayAlert("Success", "Contract saved.", "OK");
+        ClearForm();
+        await LoadData();
+    }
+
+    private async void OnUpdateContractClicked(object sender, EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(contractIDEntry.Text))
+        {
+            await DisplayAlert("Validation Error", "Contract ID is required to update.", "OK");
+            return;
+        }
+
+        var contract = new Contracts
+        {
+            ContractID = contractIDEntry.Text ?? "",
+            GinnerID = ginners[ginnerPicker.SelectedIndex].GinnerID,
+            MillID = mills[millPicker.SelectedIndex].MillID,
+            TotalBales = int.TryParse(totalBalesEntry.Text, out var bales) ? bales : 0,
+            PricePerBatch = double.TryParse(pricePerBatchEntry.Text, out var price) ? price : 0,
+            CommissionPercentage = double.TryParse(commissionEntry.Text, out var comm) ? comm : 0,
+            DateCreated = contractDatePicker.Date,
+            DeliveryNotes = deliveryNotesEditor.Text ?? "",
+            PaymentNotes = paymentNotesEditor.Text ?? ""
+        };
+
+        await _db.UpdateContract(contract);
+        await DisplayAlert("Updated", "Contract updated successfully.", "OK");
+        ClearForm();
         await LoadData();
     }
 
@@ -100,6 +157,7 @@ public partial class ContractsPage : ContentPage
         {
             await _db.DeleteContract(id);
             await DisplayAlert("Deleted", "Contract deleted.", "OK");
+            ClearForm();
             await LoadData();
         }
     }
@@ -123,6 +181,7 @@ public partial class ContractsPage : ContentPage
 
         var path = ExportHelper.ExportContractToWord(contract, ginner!, mill!);
         await DisplayAlert("Export", $"DOCX export complete: {path}", "OK");
+        ClearForm();
     }
 
     private async void OnExportExcelClicked(object sender, EventArgs e)
@@ -136,6 +195,7 @@ public partial class ContractsPage : ContentPage
 
         var path = ExportHelper.ExportContractToExcel(contract, ginner!, mill!);
         await DisplayAlert("Export", $"Excel export complete: {path}", "OK");
+        ClearForm();
     }
 
     // Navigation
