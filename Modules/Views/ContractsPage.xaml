@@ -37,7 +37,7 @@
                 <Frame Padding="20" BackgroundColor="#f5f5f5" CornerRadius="10" HasShadow="True">
                     <VerticalStackLayout Spacing="15">
 
-                        <Picker x:Name="contractPicker" Title="Select Contract to Edit/Delete" BackgroundColor="LightGray" TextColor="Black"/>
+                        <Picker x:Name="contractPicker" Title="Select Contract to Edit/Delete" BackgroundColor="LightGray" TextColor="Black" IsVisible="False"/>
                         <Entry x:Name="contractIDEntry" Placeholder="Contract ID" BackgroundColor="White" TextColor="Black"/>
                         <Picker x:Name="ginnerPicker" Title="Select Ginner" BackgroundColor="LightGray" TextColor="Black"/>
                         <Picker x:Name="millPicker" Title="Select Mill" BackgroundColor="LightGray" TextColor="Black"/>

@@ -29,7 +29,6 @@ public partial class ContractsPage : ContentPage
         ginnerPicker.ItemsSource = ginners.Select(g => $"{g.GinnerName} ({g.GinnerID})").ToList();
         millPicker.ItemsSource = mills.Select(m => $"{m.MillName} ({m.MillID})").ToList();
 
-        // Inject GinnerName and GinnerID for display in CollectionView
         foreach (var contract in contracts)
         {
             var ginner = ginners.FirstOrDefault(g => g.GinnerID == contract.GinnerID);
@@ -43,7 +42,6 @@ public partial class ContractsPage : ContentPage
         filteredContracts = new ObservableCollection<Contracts>(contracts);
         contractListView.ItemsSource = filteredContracts;
     }
-
 
     private void PopulateForm(Contracts c)
     {
@@ -186,15 +184,8 @@ public partial class ContractsPage : ContentPage
 
     private async void OnExportExcelClicked(object sender, EventArgs e)
     {
-        if (contractPicker.SelectedItem is not string selectedId) return;
-        var contract = contracts.FirstOrDefault(c => c.ContractID == selectedId);
-        if (contract == null) return;
-
-        var ginner = ginners.FirstOrDefault(g => g.GinnerID == contract.GinnerID);
-        var mill = mills.FirstOrDefault(m => m.MillID == contract.MillID);
-
-        var path = ExportHelper.ExportContractToExcel(contract, ginner!, mill!);
-        await DisplayAlert("Export", $"Excel export complete: {path}", "OK");
+        var path = ExportHelper.ExportAllContractsToExcel(contracts, ginners, mills);
+        await DisplayAlert("Export", $"Excel exported: {path}", "OK");
         ClearForm();
     }
 
