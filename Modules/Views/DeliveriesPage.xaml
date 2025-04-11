@@ -2,51 +2,93 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MadinaEnterprises.Modules.Views.DeliveriesPage"
-             Title=""
              BackgroundColor="#242424"
              MinimumHeightRequest="600"
              MinimumWidthRequest="1200">
 
-    <ScrollView>
-        <Grid ColumnDefinitions="253,*">
-            <!-- Left Sidebar Background -->
-            <BoxView Grid.Column="0" Grid.RowSpan="7" Color="#98cb00" />
-            <BoxView Grid.Column="1" Grid.RowSpan="7" Color="White" />
+    <Grid ColumnDefinitions="253,*">
+        <!-- Sidebar Styling -->
+        <BoxView Grid.Column="0" Grid.RowSpan="7" Color="#98cb00" />
+        <BoxView Grid.Column="1" Grid.RowSpan="7" Color="White" />
 
-            <!-- Sidebar Buttons -->
-            <StackLayout Grid.Column="0" Padding="10" Spacing="30" Grid.RowSpan="7">
-                <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked" />
-                <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnGinnersPageButtonClicked" />
-                <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnMillsPageButtonClicked" />
-                <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnContractsPageButtonClicked" />
-                <Button Text="Deliveries" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0" HorizontalOptions="FillAndExpand" />
-                <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnPaymentsPageButtonClicked" />
-                <Button Text="Log Out" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" HorizontalOptions="FillAndExpand" Clicked="OnLogOutButtonClicked" />
-            </StackLayout>
+        <!-- Sidebar Buttons -->
+        <StackLayout Grid.Column="0" Padding="10" Spacing="30">
+            <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked"/>
+            <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0"/>
+            <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked"/>
+            <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
+            <Button Text="Deliveries" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
+            <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
+            <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
+        </StackLayout>
 
-            <!-- Main Delivery Form Area -->
-            <Grid Grid.Column="1" Padding="40" RowSpacing="15"
-                  ColumnDefinitions="*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
-                <Label Grid.Row="0" Text="Deliveries" FontSize="Large" FontAttributes="Bold" TextColor="Black" />
-                <Line Grid.Row="1" Stroke="Black" X1="0" Y1="0" X2="1000" Y2="0" />
+        <!-- Main Content Area with Scroll Fix -->
+        <ScrollView Grid.Column="1">
+            <VerticalStackLayout Padding="20" Spacing="20">
+                <!-- Title -->
+                <Label Text="Delivery Management"
+                     FontSize="Header"
+                     FontAttributes="Bold"
+                     TextColor="Black"
+                     HorizontalOptions="Start"/>
 
-                <Picker Grid.Row="2" x:Name="deliveryPicker" Title="Select Delivery to Edit/Delete" SelectedIndexChanged="OnDeliverySelected" />
-                <Entry Grid.Row="3" x:Name="deliveryIDEntry" Placeholder="Delivery ID" />
-                <Picker Grid.Row="4" x:Name="contractPicker" Title="Select Contract" />
-                <Entry Grid.Row="5" x:Name="amountEntry" Placeholder="Amount" Keyboard="Numeric" />
-                <Entry Grid.Row="6" x:Name="totalBalesEntry" Placeholder="Total Bales" Keyboard="Numeric" />
-                <Entry Grid.Row="7" x:Name="factoryWeightEntry" Placeholder="Factory Weight" Keyboard="Numeric" />
-                <Entry Grid.Row="8" x:Name="millWeightEntry" Placeholder="Mill Weight" Keyboard="Numeric" />
-                <Entry Grid.Row="9" x:Name="truckNoEntry" Placeholder="Truck Number" />
-                <Entry Grid.Row="10" x:Name="driverContactEntry" Placeholder="Driver Contact" Keyboard="Telephone" />
-                <DatePicker Grid.Row="11" x:Name="departureDatePicker" />
-                <DatePicker Grid.Row="12" x:Name="deliveryDatePicker" />
+                <BoxView HeightRequest="2" BackgroundColor="Black" />
+                <!-- Main Form -->
+                <Frame Padding="20" BackgroundColor="#f5f5f5" CornerRadius="10" HasShadow="True">
 
-                <StackLayout Grid.Row="13" Orientation="Horizontal" Spacing="10">
-                    <Button Text="Save Delivery" Clicked="OnSaveDeliveryClicked" BackgroundColor="#98cb00" TextColor="Black" />
-                    <Button Text="Delete Delivery" Clicked="OnDeleteDeliveryClicked" BackgroundColor="Red" TextColor="White" />
-                </StackLayout>
-            </Grid>
-        </Grid>
-    </ScrollView>
+                    <Grid Grid.Column="1" Padding="10" RowSpacing="20"
+                  ColumnDefinitions="*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                        <!-- Form Inputs -->
+                        <Picker Grid.Row="2" x:Name="deliveryPicker" Title="Select Delivery to Edit/Delete" SelectedIndexChanged="OnDeliverySelected" IsVisible="False"/>
+                        <Entry Grid.Row="0" x:Name="deliveryIDEntry" Placeholder="Delivery ID" BackgroundColor="White" TextColor="Black"/>
+                        <Picker Grid.Row="1" x:Name="contractPicker" Title="Select Contract" TitleColor="Black" BackgroundColor="LightGray"  TextColor="Black"/>
+                        <Entry Grid.Row="2" x:Name="amountEntry" Placeholder="Amount" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                        <Entry Grid.Row="3" x:Name="totalBalesEntry" Placeholder="Total Bales" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                        <Entry Grid.Row="4" x:Name="factoryWeightEntry" Placeholder="Factory Weight" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                        <Entry Grid.Row="5" x:Name="millWeightEntry" Placeholder="Mill Weight" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                        <Entry Grid.Row="6" x:Name="truckNoEntry" Placeholder="Truck Number" BackgroundColor="White" TextColor="Black"/>
+                        <Entry Grid.Row="7" x:Name="driverContactEntry" Placeholder="Driver Contact" Keyboard="Telephone" BackgroundColor="White" TextColor="Black"/>
+                        <HorizontalStackLayout Grid.Row="8" Spacing="10">
+                            <Label Text="Departure Date:   " TextColor="Black" FontSize="Default" VerticalTextAlignment="Center"/>
+                            <DatePicker x:Name="departureDatePicker" TextColor="Black" Background="LightGray"/>
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Grid.Row="9" Spacing="10">
+                            <Label Text="Delivery Date:   " TextColor="Black" FontSize="Default" VerticalTextAlignment="Center"/>
+                            <DatePicker x:Name="deliveryDatePicker" TextColor="Black" Background="LightGray"/>
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Grid.Row="10" Spacing="10" HorizontalOptions="Center">
+                            <Button Text="Save Delivery" Clicked="OnSaveDeliveryClicked" BackgroundColor="#98cb00" TextColor="White"/>
+                            <Button Text="Update Delivery" Clicked="OnUpdateDeliveryClicked" BackgroundColor="#ff9800" TextColor="White"/>
+                            <Button Text="Delete Delivery" Clicked="OnDeleteDeliveryClicked" BackgroundColor="Red" TextColor="White"/>
+                        </HorizontalStackLayout>
+
+
+
+                    </Grid>
+                </Frame>
+                <!-- Existing Deliveries List -->
+                <Label Text="Existing Deliveries" FontSize="20" FontAttributes="Bold" TextColor="Black"/>
+                <SearchBar x:Name="deliverySearchBar"
+           Placeholder="Search by Delivery ID..."
+           TextChanged="OnSearchTextChanged"
+           BackgroundColor="White"/>
+
+                <CollectionView x:Name="deliveryListView"
+                HeightRequest="300"
+                SelectionMode="Single"
+                SelectionChanged="OnDeliveryListSelected"
+                BackgroundColor="WhiteSmoke"
+                Margin="0,0,0,20">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Padding="10" Margin="5" BorderColor="#1976d2" CornerRadius="5" BackgroundColor="White">
+                                <Label Text="{Binding DeliveryID}" FontSize="16" TextColor="Black"/>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>
