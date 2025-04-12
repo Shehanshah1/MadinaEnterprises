@@ -2,67 +2,76 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MadinaEnterprises.Modules.Views.PaymentsPage"
-             Title=""
              BackgroundColor="#242424"
              MinimumHeightRequest="600"
              MinimumWidthRequest="1200">
 
-    <ScrollView>
-        <Grid ColumnDefinitions="253,*">
+    <Grid ColumnDefinitions="253,*">
+        <!-- Sidebar -->
+        <BoxView Grid.Column="0" Color="#98cb00" />
+        <BoxView Grid.Column="1" Color="White" />
 
-            <!-- Left Sidebar Background -->
-            <BoxView Grid.Column="0" Grid.RowSpan="7" Color="#98cb00" />
-            <!-- Right Column Background -->
-            <BoxView Grid.Column="1" Grid.RowSpan="7" Color="White" />
+        <!-- Sidebar Buttons -->
+        <StackLayout Grid.Column="0" Padding="10" Spacing="30">
+            <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked"/>
+            <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnersPageButtonClicked"/>
+            <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked"/>
+            <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
+            <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
+            <Button Text="Payments" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0"/>
+            <Button Text="Log Out" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
+        </StackLayout>
 
-            <!-- Sidebar Buttons -->
-            <StackLayout Grid.Column="0" Padding="10" Spacing="30" Grid.RowSpan="7">
-                <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked" />
-                <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Clicked="OnGinnersPageButtonClicked" />
-                <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Clicked="OnMillsPageButtonClicked" />
-                <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Clicked="OnContractsPageButtonClicked" />
-                <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked" />
-                <Button Text="Payments" FontSize="Small" BackgroundColor="White" TextColor="Black" HorizontalOptions="FillAndExpand" CornerRadius="0" />
-                <Button Text="Log Out" FontSize="Small" BackgroundColor="Black" TextColor="White" HorizontalOptions="FillAndExpand" CornerRadius="0" Clicked="OnLogOutButtonClicked" />
-            </StackLayout>
+        <!-- Main Content -->
+        <ScrollView Grid.Column="1">
+            <VerticalStackLayout Padding="20" Spacing="20">
 
-            <!-- Main Payment Form -->
-            <Grid Grid.Column="1" Padding="30" RowSpacing="15"
-                  RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
-                  ColumnDefinitions="Auto,*">
+                <Label Text="Payment Management"
+                       FontSize="Header"
+                       FontAttributes="Bold"
+                       TextColor="Black"
+                       HorizontalOptions="Start"/>
+                <BoxView HeightRequest="2" BackgroundColor="Black"/>
 
-                <Label Grid.ColumnSpan="2" Text="Payments" FontSize="24" FontAttributes="Bold" TextColor="Black" Margin="0,0,0,20" />
+                <!-- Form Section -->
+                <Frame Padding="20" BackgroundColor="#f5f5f5" CornerRadius="10" HasShadow="True">
+                    <VerticalStackLayout Spacing="10">
+                        <Picker x:Name="paymentPicker" Title="Select Payment to Edit/Delete" SelectedIndexChanged="OnPaymentSelected" BackgroundColor="White" TextColor="Black" IsVisible="False"/>
+                        <Entry x:Name="paymentIDEntry" Placeholder="Payment ID" BackgroundColor="White" TextColor="Black"/>
+                        <Picker x:Name="contractPicker" Title="Select Contract" BackgroundColor="White" TextColor="Black" TitleColor="Black"/>
+                        <Entry x:Name="totalAmountEntry" Placeholder="Total Deal Amount" IsReadOnly="True" BackgroundColor="White" TextColor="Black"/>
+                        <Entry x:Name="paidAmountEntry" Placeholder="Amount Paid" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" TextChanged="OnPaidAmountChanged"/>
+                        <Entry x:Name="remainingAmountEntry" Placeholder="Remaining Amount" IsReadOnly="True" BackgroundColor="White" TextColor="Black"/>
+                        <Entry x:Name="balesEntry" Placeholder="Total Bales" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="Payment Date" TextColor="Black" VerticalOptions="Center"/>
+                            <DatePicker x:Name="paymentDatePicker" TextColor="Black" BackgroundColor="White"/>
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                            <Button Text="Save Payment" Clicked="OnSavePaymentClicked" BackgroundColor="#98cb00" TextColor="White"/>
+                            <Button Text="Update Payment" Clicked="OnUpdatePaymentClicked" BackgroundColor="#ff9800" TextColor="White"/>
+                            <Button Text="Delete Payment" Clicked="OnDeletePaymentClicked" BackgroundColor="Red" TextColor="White"/>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
 
-                <Label Grid.Row="1" Text="Select Payment:" TextColor="Black" />
-                <Picker x:Name="paymentPicker" Grid.Row="1" Grid.Column="1" Title="Choose Payment" SelectedIndexChanged="OnPaymentSelected" />
-
-                <Label Grid.Row="2" Text="Payment ID:" TextColor="Black" />
-                <Entry x:Name="paymentIDEntry" Grid.Row="2" Grid.Column="1" Placeholder="Payment ID" />
-
-                <Label Grid.Row="3" Text="Contract ID:" TextColor="Black" />
-                <Picker x:Name="contractPicker" Grid.Row="3" Grid.Column="1" Title="Choose Contract" />
-
-                <Label Grid.Row="4" Text="Total Deal Amount:" TextColor="Black" />
-                <Entry x:Name="totalAmountEntry" Grid.Row="4" Grid.Column="1" IsReadOnly="True" />
-
-                <Label Grid.Row="5" Text="Amount Paid:" TextColor="Black" />
-                <Entry x:Name="paidAmountEntry" Grid.Row="5" Grid.Column="1" Placeholder="Amount Paid" Keyboard="Numeric" TextChanged="OnPaidAmountChanged" />
-
-                <Label Grid.Row="6" Text="Remaining Amount:" TextColor="Black" />
-                <Entry x:Name="remainingAmountEntry" Grid.Row="6" Grid.Column="1" IsReadOnly="True" />
-
-                <Label Grid.Row="7" Text="Total Bales:" TextColor="Black" />
-                <Entry x:Name="balesEntry" Grid.Row="7" Grid.Column="1" Placeholder="Total Bales" Keyboard="Numeric" />
-
-                <Label Grid.Row="8" Text="Payment Date:" TextColor="Black" />
-                <DatePicker x:Name="paymentDatePicker" Grid.Row="8" Grid.Column="1" />
-
-                <!-- Buttons -->
-                <StackLayout Grid.Row="9" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10" HorizontalOptions="Start">
-                    <Button Text="Save Payment" Clicked="OnSavePaymentClicked" BackgroundColor="#98cb00" TextColor="Black" />
-                    <Button Text="Delete Payment" Clicked="OnDeletePaymentClicked" BackgroundColor="Red" TextColor="White" />
-                </StackLayout>
-            </Grid>
-        </Grid>
-    </ScrollView>
+                <!-- List View Section -->
+                <Label Text="Existing Payments" FontSize="20" FontAttributes="Bold" TextColor="Black"/>
+                <SearchBar x:Name="paymentSearchBar" Placeholder="Search Payment ID..." TextChanged="OnSearchTextChanged" BackgroundColor="White"/>
+                <CollectionView x:Name="paymentListView"
+                                BackgroundColor="WhiteSmoke"
+                                HeightRequest="300"
+                                SelectionMode="Single"
+                                SelectionChanged="OnPaymentListSelected">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Padding="10" Margin="5" BorderColor="#1976d2" CornerRadius="5" BackgroundColor="White">
+                                <Label Text="{Binding PaymentID}" FontSize="16" TextColor="Black"/>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>
