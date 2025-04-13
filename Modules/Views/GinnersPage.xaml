@@ -86,7 +86,7 @@
                         <DataTemplate>
                             <TextCell TextColor="Black"
                                       Text="{Binding GinnerName}"
-                                      Detail="{Binding ContactPerson}" />
+                                      />
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>

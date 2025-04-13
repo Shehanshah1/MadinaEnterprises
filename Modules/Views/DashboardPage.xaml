@@ -2,111 +2,81 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MadinaEnterprises.Modules.Views.DashboardPage"
-             Title=""
              BackgroundColor="#242424"
              MinimumHeightRequest="600"
              MinimumWidthRequest="1200">
 
-    <ScrollView>
-        <Grid ColumnDefinitions="253,*">
+    <Grid ColumnDefinitions="253,*">
+        <!-- Sidebar -->
+        <BoxView Grid.Column="0" Color="#98cb00"/>
+        <BoxView Grid.Column="1" Color="White"/>
 
-            <!-- Left Sidebar Background -->
-            <BoxView 
-                Grid.Column="0"         
-                Color="#98cb00" />
-            <!-- Right Column Background -->
-            <BoxView 
-                Grid.Column="1"           
-                Color="White"  />
-            
-            <!-- Sidebar Navigation -->
-            <StackLayout Grid.Column="0" Padding="10" Spacing="30">
-                <Button Text="Dashboard" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0" Margin="0,50,0,0"/>
-                <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnersPageButtonClicked"/>
-                <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked" />
-                <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
-                <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
-                <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
-                <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
-            </StackLayout>
+        <StackLayout Grid.Column="0" Padding="10" Spacing="30">
+            <Button Text="Dashboard" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0" Margin="0,50,0,0"/>
+            <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnersPageButtonClicked"/>
+            <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked"/>
+            <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
+            <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
+            <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
+            <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
+        </StackLayout>
 
-            <Grid Grid.Column="2" Grid.RowSpan="7"
-              ColumnDefinitions="*,*" RowDefinitions=".2*,.2*, .8*">
+        <!-- Main Content -->
+        <ScrollView Grid.Column="1">
+            <VerticalStackLayout Padding="30" Spacing="20">
+                <Label Text="Dashboard"
+                       FontSize="Header"
+                       FontAttributes="Bold"
+                       TextColor="Black"
+                       HorizontalOptions="Start"/>
+                <BoxView HeightRequest="2" BackgroundColor="Black"/>
 
-                <!-- Dashboard Greeting -->
+                <!-- Widgets Grid -->
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="20" RowSpacing="20">
 
-                <Label Grid.Column="0" Grid.Row="0" Text="Dashboard" Margin="20,0,0,20" HorizontalOptions="Start" VerticalOptions="End" FontSize="Header" FontAttributes="Bold" TextColor="Black" />
-
-                <!-- Divider Line -->
-                <Line 
-                Grid.ColumnSpan="3"
-                Stroke="Black"  
-                X1="0"
-                Y1="90"
-                X2="2000" 
-                Y2="90"/>
-
-
-      
-        <!-- Right Side Widgets -->
-            <Grid Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="3" Padding="20" RowDefinitions="*,*,*" ColumnDefinitions=".5*,.5*">
-
-                    <VerticalStackLayout Grid.Column="0" Grid.RowSpan="3" Spacing="20">
-                        <!-- Total Commission -->
-                        <Label Text="Total Commission:" 
-                                FontSize="Medium" 
-                                FontAttributes="Bold" 
-                                TextColor="Black" />
-                        <Label x:Name="TotalCommissionLabel" 
-                                Text="Calculating..." 
-                                FontSize="Small" 
-                                TextColor="Gray" />
-
-                        <!-- Payment Due -->
-                        <Label Text="Payment Due:" 
-                                FontSize="Medium" 
-                                FontAttributes="Bold" 
-                                TextColor="Black" />
-                        <Label x:Name="PaymentDueLabel" 
-                                Text="Calculating..." 
-                                FontSize="Small" 
-                                TextColor="Gray" />
+                    <!-- Total Commission -->
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="0">
+                        <Label Text="Total Commission" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="TotalCommissionLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
                     </VerticalStackLayout>
 
-                    <VerticalStackLayout Grid.Column="1" Spacing="20">
-
-                        <!-- Payment Made -->
-                        <Label Text="Payment Made:" 
-                       FontSize="Medium" 
-                       FontAttributes="Bold" 
-                       TextColor="Black" />
-                        <Label x:Name="PaymentMadeLabel" 
-                       Text="Calculating..." 
-                       FontSize="Small" 
-                       TextColor="Gray" />
-
-                        <!-- Bales Sold -->
-                        <Label Text="Bales Sold:" 
-                       FontSize="Medium" 
-                       FontAttributes="Bold" 
-                       TextColor="Black" />
-                        <Label x:Name="BalesSoldLabel" 
-                       Text="Calculating..." 
-                       FontSize="Small" 
-                       TextColor="Gray" />
-
-                        <!-- Total Ginners -->
-                        <Label Text="Total Ginners:" 
-                       FontSize="Medium" 
-                       FontAttributes="Bold" 
-                       TextColor="Black" />
-                        <Label x:Name="TotalGinnersLabel" 
-                       Text="Calculating..." 
-                       FontSize="Small" 
-                       TextColor="Gray" />
+                    <!-- Payment Made -->
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="1">
+                        <Label Text="Payment Made" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="PaymentMadeLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
                     </VerticalStackLayout>
-            </Grid>
-            </Grid>
-        </Grid>
-    </ScrollView>
+
+                    <!-- Payment Due -->
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="0">
+                        <Label Text="Payment Due" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="PaymentDueLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
+                    </VerticalStackLayout>
+
+                    <!-- Bales Sold -->
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="1">
+                        <Label Text="Bales Sold" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="BalesSoldLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
+                    </VerticalStackLayout>
+
+                    <!-- Total Ginners -->
+                    <VerticalStackLayout Grid.Row="2" Grid.Column="0">
+                        <Label Text="Total Ginners" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="TotalGinnersLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
+                    </VerticalStackLayout>
+
+                    <!-- Total Mills -->
+                    <VerticalStackLayout Grid.Row="2" Grid.Column="1">
+                        <Label Text="Total Mills" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="TotalMillsLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
+                    </VerticalStackLayout>
+
+                    <!-- Average Commission Rate -->
+                    <VerticalStackLayout Grid.Row="3" Grid.Column="0">
+                        <Label Text="Avg. Commission Rate" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="AvgCommissionRateLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
+                    </VerticalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

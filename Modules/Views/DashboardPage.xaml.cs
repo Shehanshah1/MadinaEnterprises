@@ -1,115 +1,55 @@
+using MadinaEnterprises.Modules.Models;
+using System.Linq;
+using Microsoft.Maui.Controls;
+
 namespace MadinaEnterprises.Modules.Views;
 
 public partial class DashboardPage : ContentPage
 {
+    private readonly DatabaseService _db = App.DatabaseService!;
+
     public DashboardPage()
     {
         InitializeComponent();
-        LoadDashboardData();
+        _ = LoadDashboardData();
     }
 
-    //*****************************************************************************
-    //                       NAVIGATION BUTTONS
-    //*****************************************************************************
-    private async void OnDashboardPageButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new DashboardPage());
-    }
-
-    private async void OnGinnersPageButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new GinnersPage());
-    }
-
-    private async void OnMillsPageButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new MillsPage());
-    }
-
-    private async void OnContractsPageButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new ContractsPage());
-    }
-
-    private async void OnDeliveriesPageButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new DeliveriesPage());
-    }
-
-    private async void OnPaymentsPageButtonClicked(object sender, EventArgs e)
-    {
-        await App.NavigateToPage(new PaymentsPage());
-    }
-
-    private async void OnLogOutButtonClicked(object sender, EventArgs e)
-    {
-        // Navigate back to the LoginView
-        await App.NavigateToPage(new LoginPage());
-    }
-
-    //*****************************************************************************
-    //                       LOAD DASHBOARD DATA
-    //*****************************************************************************
-    private void LoadDashboardData()
+    private async Task LoadDashboardData()
     {
         try
         {
-            // Fetch data from the database
-            decimal totalCommission = GetTotalCommission();
-            decimal paymentDue = GetPaymentDue();
-            decimal paymentMade = GetPaymentMade();
-            int balesSold = GetBalesSold();
-            int totalGinners = GetTotalGinners();
+            var contracts = await _db.GetAllContracts();
+            var payments = await _db.GetAllPayments();
+            var ginners = await _db.GetAllGinners();
+            var mills = await _db.GetAllMills();
 
-            // Update the labels in the UI
+            double totalCommission = contracts.Sum(c => c.TotalAmount * (c.CommissionPercentage / 100));
+            double totalPaid = payments.Sum(p => p.AmountPaid);
+            double totalDue = payments.Sum(p => p.TotalAmount - p.AmountPaid);
+            int balesSold = contracts.Sum(c => c.TotalBales);
+            int ginnerCount = ginners.Count;
+            int millCount = mills.Count;
+            double avgCommission = contracts.Any() ? contracts.Average(c => c.CommissionPercentage) : 0;
+
             TotalCommissionLabel.Text = $"${totalCommission:F2}";
-            PaymentDueLabel.Text = $"${paymentDue:F2}";
-            PaymentMadeLabel.Text = $"${paymentMade:F2}";
+            PaymentMadeLabel.Text = $"${totalPaid:F2}";
+            PaymentDueLabel.Text = $"${totalDue:F2}";
             BalesSoldLabel.Text = balesSold.ToString();
-            TotalGinnersLabel.Text = totalGinners.ToString();
+            TotalGinnersLabel.Text = ginnerCount.ToString();
+            TotalMillsLabel.Text = millCount.ToString();
+            AvgCommissionRateLabel.Text = $"{avgCommission:F2}%";
         }
         catch (Exception ex)
         {
-            // Handle any exceptions that occur during data loading
-            DisplayAlert("Error", $"Failed to load dashboard data: {ex.Message}", "OK");
+            await DisplayAlert("Error", $"Failed to load dashboard data: {ex.Message}", "OK");
         }
     }
 
-    //*****************************************************************************
-    //                       DATABASE METHODS
-    //*****************************************************************************
-    private decimal GetTotalCommission()
-    {
-        // Replace with your database logic
-        // Example: return database.CalculateTotalCommission();
-        return 10500.75M; // Placeholder value
-    }
-
-    private decimal GetPaymentDue()
-    {
-        // Replace with your database logic
-        // Example: return database.CalculatePaymentDue();
-        return 2500.50M; // Placeholder value
-    }
-
-    private decimal GetPaymentMade()
-    {
-        // Replace with your database logic
-        // Example: return database.CalculatePaymentMade();
-        return 8000.00M; // Placeholder value
-    }
-
-    private int GetBalesSold()
-    {
-        // Replace with your database logic
-        // Example: return database.GetTotalBalesSold();
-        return 350; // Placeholder value
-    }
-
-    private int GetTotalGinners()
-    {
-        // Replace with your database logic
-        // Example: return database.GetTotalGinnersCount();
-        return 30; // Placeholder value
-    }
+    // Navigation
+    private async void OnGinnersPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new GinnersPage());
+    private async void OnMillsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new MillsPage());
+    private async void OnContractsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new ContractsPage());
+    private async void OnDeliveriesPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new DeliveriesPage());
+    private async void OnPaymentsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new PaymentsPage());
+    private async void OnLogOutButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new LoginPage());
 }
