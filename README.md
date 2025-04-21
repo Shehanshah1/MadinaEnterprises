@@ -108,6 +108,3 @@ This project is proprietary and developed for **Madina Enterprises**. Redistribu
 **Built with ❤️ using .NET MAUI**
 ```
 
----
-
-Let me know if you'd like a version tailored for GitHub or to add screenshots, badge icons, or a live demo link.
