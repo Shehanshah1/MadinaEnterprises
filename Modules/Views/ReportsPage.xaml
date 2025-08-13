@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MadinaEnterprises.Modules.Views.ReportsPage"
+             BackgroundColor="#242424"
+             MinimumHeightRequest="600"
+             MinimumWidthRequest="1200"
+             Title="Reports">
+
+    <Grid ColumnDefinitions="253,*">
+        <!-- Sidebar -->
+        <BoxView Grid.Column="0" Color="#98cb00" />
+        <BoxView Grid.Column="1" Color="White" />
+
+        <!-- Sidebar Buttons -->
+        <StackLayout Grid.Column="0" Padding="10" Spacing="30">
+            <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked"/>
+            <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnersPageButtonClicked"/>
+            <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked"/>
+            <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
+            <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
+            <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
+            <Button Text="Ginner Ledger" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnerLedgerPageButtonClicked"/>
+            <Button Text="Reports" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0"/>
+            <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
+        </StackLayout>
+
+        <!-- Main Content -->
+        <ScrollView Grid.Column="1">
+            <VerticalStackLayout Padding="20" Spacing="20">
+                <!-- Title -->
+                <Label Text="Reports &amp; Analytics"
+                       FontSize="Header"
+                       FontAttributes="Bold"
+                       TextColor="Black"
+                       HorizontalOptions="Start"/>
+
+                <BoxView HeightRequest="2" BackgroundColor="Black" />
+
+                <!-- Report Type Selection -->
+                <Frame BackgroundColor="#f5f5f5" Padding="20" CornerRadius="10" HasShadow="True">
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="Select Report Type" FontSize="18" FontAttributes="Bold" TextColor="Black"/>
+
+                        <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" RowSpacing="10" ColumnSpacing="10">
+                            <!-- Financial Reports -->
+                            <Frame Grid.Row="0" Grid.Column="0" BackgroundColor="White" Padding="15" HasShadow="True">
+                                <VerticalStackLayout>
+                                    <RadioButton x:Name="financialSummaryRadio" 
+                                                Content="💰 Financial Summary" 
+                                                GroupName="ReportType"
+                                                IsChecked="True"
+                                                CheckedChanged="OnReportTypeChanged"/>
+                                </VerticalStackLayout>
+                            </Frame>
+
+                            <!-- Contract Reports -->
+                            <Frame Grid.Row="0" Grid.Column="1" BackgroundColor="White" Padding="15" HasShadow="True">
+                                <VerticalStackLayout>
+                                    <RadioButton x:Name="contractAnalysisRadio" 
+                                                Content="📄 Contract Analysis" 
+                                                GroupName="ReportType"
+                                                CheckedChanged="OnReportTypeChanged"/>
+                                </VerticalStackLayout>
+                            </Frame>
+
+                            <!-- Ginner Reports -->
+                            <Frame Grid.Row="0" Grid.Column="2" BackgroundColor="White" Padding="15" HasShadow="True">
+                                <VerticalStackLayout>
+                                    <RadioButton x:Name="ginnerPerformanceRadio" 
+                                                Content="🏭 Ginner Performance" 
+                                                GroupName="ReportType"
+                                                CheckedChanged="OnReportTypeChanged"/>
+                                </VerticalStackLayout>
+                            </Frame>
+
+                            <!-- Mill Reports -->
+                            <Frame Grid.Row="1" Grid.Column="0" BackgroundColor="White" Padding="15" HasShadow="True">
+                                <VerticalStackLayout>
+                                    <RadioButton x:Name="millAnalysisRadio" 
+                                                Content="🏢 Mill Analysis" 
+                                                GroupName="ReportType"
+                                                CheckedChanged="OnReportTypeChanged"/>
+                                </VerticalStackLayout>
+                            </Frame>
+
+                            <!-- Delivery Reports -->
+                            <Frame Grid.Row="1" Grid.Column="1" BackgroundColor="White" Padding="15" HasShadow="True">
+                                <VerticalStackLayout>
+                                    <RadioButton x:Name="deliveryReportRadio" 
+                                                Content="🚚 Delivery Report" 
+                                                GroupName="ReportType"
+                                                CheckedChanged="OnReportTypeChanged"/>
+                                </VerticalStackLayout>
+                            </Frame>
+
+                            <!-- Payment Reports -->
+                            <Frame Grid.Row="1" Grid.Column="2" BackgroundColor="White" Padding="15" HasShadow="True">
+                                <VerticalStackLayout>
+                                    <RadioButton x:Name="paymentStatusRadio" 
+                                                Content="💳 Payment Status" 
+                                                GroupName="ReportType"
+                                                CheckedChanged="OnReportTypeChanged"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Date Range Selection -->
+                <Frame BackgroundColor="#f5f5f5" Padding="20" CornerRadius="10" HasShadow="True">
+                    <Grid ColumnDefinitions="*,*,*,Auto" ColumnSpacing="15">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Start Date" TextColor="Black" FontSize="14"/>
+                            <DatePicker x:Name="startDatePicker" TextColor="Black" BackgroundColor="White"/>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="End Date" TextColor="Black" FontSize="14"/>
+                            <DatePicker x:Name="endDatePicker" TextColor="Black" BackgroundColor="White"/>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="2">
+                            <Label Text="Quick Select" TextColor="Black" FontSize="14"/>
+                            <Picker x:Name="quickDatePicker" BackgroundColor="White" TextColor="Black">
+                                <Picker.Items>
+                                    <x:String>Custom</x:String>
+                                    <x:String>Today</x:String>
+                                    <x:String>This Week</x:String>
+                                    <x:String>This Month</x:String>
+                                    <x:String>Last Month</x:String>
+                                    <x:String>This Quarter</x:String>
+                                    <x:String>This Year</x:String>
+                                    <x:String>All Time</x:String>
+                                </Picker.Items>
+                            </Picker>
+                        </VerticalStackLayout>
+
+                        <Button Grid.Column="3" 
+                                Text="Generate Report" 
+                                BackgroundColor="#98cb00" 
+                                TextColor="White" 
+                                CornerRadius="5"
+                                VerticalOptions="End"
+                                Clicked="OnGenerateReportClicked"/>
+                    </Grid>
+                </Frame>
+
+                <!-- Report Display Area -->
+                <Frame x:Name="reportFrame" 
+                       BackgroundColor="#f5f5f5" 
+                       Padding="20" 
+                       CornerRadius="10" 
+                       HasShadow="True"
+                       IsVisible="False">
+                    <VerticalStackLayout Spacing="15">
+                        <!-- Report Header -->
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout>
+                                <Label x:Name="reportTitleLabel" 
+                                       Text="Report Title" 
+                                       FontSize="20" 
+                                       FontAttributes="Bold" 
+                                       TextColor="Black"/>
+                                <Label x:Name="reportDateRangeLabel" 
+                                       Text="Date Range" 
+                                       FontSize="12" 
+                                       TextColor="#666"/>
+                            </VerticalStackLayout>
+
+                            <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                                <Button Text="📧 Email" 
+                                        BackgroundColor="#1976d2" 
+                                        TextColor="White" 
+                                        CornerRadius="5"
+                                        Clicked="OnEmailReportClicked"/>
+                                <Button Text="📥 Export" 
+                                        BackgroundColor="#43a047" 
+                                        TextColor="White" 
+                                        CornerRadius="5"
+                                        Clicked="OnExportReportClicked"/>
+                                <Button Text="🖨️ Print" 
+                                        BackgroundColor="#666" 
+                                        TextColor="White" 
+                                        CornerRadius="5"
+                                        Clicked="OnPrintReportClicked"/>
+                            </HorizontalStackLayout>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" BackgroundColor="#ddd"/>
+
+                        <!-- Report Content -->
+                        <ScrollView HeightRequest="400">
+                            <VerticalStackLayout x:Name="reportContentLayout" Spacing="10">
+                                <!-- Dynamic content will be added here -->
+                            </VerticalStackLayout>
+                        </ScrollView>
+
+                        <!-- Report Summary -->
+                        <BoxView HeightRequest="1" BackgroundColor="#ddd"/>
+                        <Frame BackgroundColor="#e8f5e9" Padding="15" CornerRadius="5">
+                            <Label x:Name="reportSummaryLabel" 
+                                   Text="Summary will appear here" 
+                                   TextColor="Black" 
+                                   FontSize="13"/>
+                        </Frame>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Quick Stats Cards -->
+                <Label Text="Quick Statistics" FontSize="18" FontAttributes="Bold" TextColor="Black"/>
+
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="10">
+                    <Frame Grid.Column="0" BackgroundColor="#e3f2fd" Padding="15" CornerRadius="10">
+                        <VerticalStackLayout>
+                            <Label Text="Total Revenue" FontSize="11" TextColor="#666"/>
+                            <Label x:Name="totalRevenueStatLabel" Text="$0" FontSize="18" FontAttributes="Bold" TextColor="#1976d2"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Frame Grid.Column="1" BackgroundColor="#fff3e0" Padding="15" CornerRadius="10">
+                        <VerticalStackLayout>
+                            <Label Text="Pending Payments" FontSize="11" TextColor="#666"/>
+                            <Label x:Name="pendingPaymentsStatLabel" Text="$0" FontSize="18" FontAttributes="Bold" TextColor="#ff9800"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Frame Grid.Column="2" BackgroundColor="#e8f5e9" Padding="15" CornerRadius="10">
+                        <VerticalStackLayout>
+                            <Label Text="Active Contracts" FontSize="11" TextColor="#666"/>
+                            <Label x:Name="activeContractsStatLabel" Text="0" FontSize="18" FontAttributes="Bold" TextColor="#43a047"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Frame Grid.Column="3" BackgroundColor="#fce4ec" Padding="15" CornerRadius="10">
+                        <VerticalStackLayout>
+                            <Label Text="Total Deliveries" FontSize="11" TextColor="#666"/>
+                            <Label x:Name="totalDeliveriesStatLabel" Text="0" FontSize="18" FontAttributes="Bold" TextColor="#e91e63"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </Grid>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
