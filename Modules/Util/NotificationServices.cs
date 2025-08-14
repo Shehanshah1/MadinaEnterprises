@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using MadinaEnterprises.Modules.Models;
 
-namespace MadinaEnterprises.Services
+namespace MadinaEnterprises.Modules.Util
 {
     public class NotificationService
     {

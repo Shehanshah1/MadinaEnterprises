@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MadinaEnterprises.Modules.Models;
 
-namespace MadinaEnterprises.Services
+namespace MadinaEnterprises.Modules.Util
 {
     public class PdfGenerationService
     {

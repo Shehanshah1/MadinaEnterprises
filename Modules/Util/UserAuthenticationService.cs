@@ -5,7 +5,7 @@ using System.Data.SQLite;
 using System.Threading.Tasks;
 using System.Linq;
 
-namespace MadinaEnterprises.Services
+namespace MadinaEnterprises.Modules.Util
 {
     public class UserAuthenticationService
     {

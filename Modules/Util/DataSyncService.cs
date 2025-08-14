@@ -9,7 +9,7 @@ using System.Linq;
 using MadinaEnterprises.Modules.Models;
 using ClosedXML.Excel;
 
-namespace MadinaEnterprises.Services
+namespace MadinaEnterprises.Modules.Util
 {
     public class DataSyncService
     {

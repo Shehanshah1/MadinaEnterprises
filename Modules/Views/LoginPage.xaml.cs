@@ -1,8 +1,9 @@
 using System.Text.RegularExpressions;
+using MadinaEnterprises.Modules.Util;
 using Microsoft.Maui.Controls;
 using System;
 using System.Threading.Tasks;
-using MadinaEnterprises.Services;
+using MadinaEnterprises.Modules.Util;
 
 namespace MadinaEnterprises.Modules.Views
 {
