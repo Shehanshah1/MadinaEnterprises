@@ -1,11 +1,15 @@
 ﻿using MadinaEnterprises.Modules.Views;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace MadinaEnterprises
 {
     public partial class App : Application
     {
         // Instance of DatabaseService (guaranteed initialized)
-        public static DatabaseService DatabaseService { get; private set; } = new();
+        public static DatabaseService DatabaseService { get; private set; }
+
+        // Shell instance for navigation
+        public static AppShell AppShell { get; private set; }
 
         public App()
         {
@@ -14,8 +18,9 @@ namespace MadinaEnterprises
             // Initialize the database service
             DatabaseService = new DatabaseService();
 
-            // Set the startup page
-            MainPage = new NavigationPage(new LoginPage());
+            // Create and set the shell
+            AppShell = new AppShell();
+            MainPage = AppShell;
         }
 
         protected override void OnStart()
@@ -33,22 +38,34 @@ namespace MadinaEnterprises
             // Handle when your app resumes
         }
 
-        // Navigation helper
+        // Navigation helpers using Shell
         public static async Task NavigateToPage(Page page)
         {
-            if (Current?.MainPage is NavigationPage navigationPage)
-            {
-                await navigationPage.PushAsync(page);
-            }
+            string pageName = page.GetType().Name;
+            await Shell.Current.GoToAsync($"//{pageName}");
+        }
+
+        public static async Task NavigateToPageByName(string pageName)
+        {
+            await Shell.Current.GoToAsync($"//{pageName}");
         }
 
         // Back navigation helper
         public static async Task GoBack()
         {
-            if (Current?.MainPage is NavigationPage navigationPage)
-            {
-                await navigationPage.PopAsync();
-            }
+            await Shell.Current.GoToAsync("..");
+        }
+
+        // Show main app after login
+        public static void ShowMainApp()
+        {
+            AppShell?.ShowMainApp();
+        }
+
+        // Show login page
+        public static void ShowLogin()
+        {
+            AppShell?.ShowLogin();
         }
     }
 }

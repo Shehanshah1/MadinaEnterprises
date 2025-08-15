@@ -75,6 +75,9 @@
 	  <Compile Update="Modules\Views\GinnerLedgerPage.xaml.cs">
 	    <DependentUpon>GinnerLedgerPage.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Modules\Views\AppShell.xaml.cs">
+	    <DependentUpon>AppShell.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -93,6 +96,9 @@
 	  <MauiXaml Update="Modules\Views\ForgotPasswordPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Modules\Views\GinnerLedgerPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Modules\Views\GinnersPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
@@ -102,7 +108,10 @@
 	  <MauiXaml Update="Modules\Views\MillsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Modules\Views\GinnerLedgerPage.xaml">
+	  <MauiXaml Update="Modules\Views\AppShell.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Modules\Views\MorePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Modules\Views\PaymentsPage.xaml">

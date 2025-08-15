@@ -11,6 +11,7 @@ namespace MadinaEnterprises.Modules.Views
     {
         private readonly DatabaseService _db = App.DatabaseService!;
         private List<Mills> _mills = new();
+        private Mills? _selectedMill = null;
 
         public MillsPage()
         {
@@ -20,14 +21,22 @@ namespace MadinaEnterprises.Modules.Views
 
         private async Task LoadMills()
         {
-            _mills = await _db.GetAllMills();
-            millListView.ItemsSource = _mills;
+            try
+            {
+                _mills = await _db.GetAllMills();
+                millListView.ItemsSource = _mills;
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Failed to load mills: {ex.Message}", "OK");
+            }
         }
 
         private void OnMillSelected(object sender, SelectedItemChangedEventArgs e)
         {
             if (e.SelectedItem is not Mills selected) return;
 
+            _selectedMill = selected;
             millNameEntry.Text = selected.MillName;
             millIDEntry.Text = selected.MillID;
             millAddressEntry.Text = selected.Address;
@@ -36,60 +45,109 @@ namespace MadinaEnterprises.Modules.Views
 
         private async void OnAddMillClicked(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(millNameEntry.Text) || string.IsNullOrWhiteSpace(millIDEntry.Text))
+            {
+                await DisplayAlert("Validation Error", "Mill name and Mill ID are required.", "OK");
+                return;
+            }
+
+            // Generate Mill ID if not provided
+            if (string.IsNullOrWhiteSpace(millIDEntry.Text))
+            {
+                millIDEntry.Text = $"MILL-{DateTime.Now:yyyyMMdd}-{new Random().Next(1000, 9999)}";
+            }
+
+            var mill = new Mills
+            {
+                MillName = millNameEntry.Text.Trim(),
+                MillID = millIDEntry.Text.Trim(),
+                Address = millAddressEntry.Text?.Trim() ?? "",
+                OwnerName = millOwnerNameEntry.Text?.Trim() ?? ""
+            };
+
+            // Check if mill already exists
+            var existing = _mills.FirstOrDefault(m => m.MillID == mill.MillID);
+            if (existing != null)
+            {
+                await DisplayAlert("Duplicate Mill", "A mill with this ID already exists. Use Update instead.", "OK");
+                return;
+            }
+
+            try
+            {
+                await _db.AddMill(mill);
+                await DisplayAlert("Success", "Mill added successfully!", "OK");
+                ClearForm();
+                await LoadMills();
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Failed to add mill: {ex.Message}", "OK");
+            }
+        }
+
+        private async void OnUpdateMillClicked(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(millIDEntry.Text))
+            {
+                await DisplayAlert("Validation Error", "Please select a mill to update.", "OK");
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(millNameEntry.Text))
             {
-                await DisplayAlert("Error", "Mill name cannot be empty.", "OK");
+                await DisplayAlert("Validation Error", "Mill name is required.", "OK");
                 return;
             }
 
             var mill = new Mills
             {
-                MillName = millNameEntry.Text,
-                MillID = millIDEntry.Text,
-                Address = millAddressEntry.Text,
-                OwnerName = millOwnerNameEntry.Text
-            };  
-
-            var existing = _mills.FirstOrDefault(m => m.MillID == mill.MillID);
-            if (existing == null)
-                await _db.AddMill(mill);
-            else
-                await DisplayAlert("Exists", "Mill already exists. Try updating instead.", "OK");
-
-            await DisplayAlert("Success", "Mill saved successfully!", "OK");
-            ClearForm();
-            await LoadMills();
-        }
-
-        private async void OnUpdateMillClicked(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(millNameEntry.Text)) return;
-
-            var mill = new Mills
-            {
-                MillName = millNameEntry.Text,
-                MillID = millIDEntry.Text,
-                Address = millAddressEntry.Text,
-                OwnerName = millOwnerNameEntry.Text
+                MillName = millNameEntry.Text.Trim(),
+                MillID = millIDEntry.Text.Trim(),
+                Address = millAddressEntry.Text?.Trim() ?? "",
+                OwnerName = millOwnerNameEntry.Text?.Trim() ?? ""
             };
 
-            await _db.UpdateMill(mill);
-            await DisplayAlert("Updated", "Mill updated successfully.", "OK");
-            ClearForm();
-            await LoadMills();
+            try
+            {
+                await _db.UpdateMill(mill);
+                await DisplayAlert("Success", "Mill updated successfully.", "OK");
+                ClearForm();
+                await LoadMills();
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Failed to update mill: {ex.Message}", "OK");
+            }
         }
 
         private async void OnDeleteMillClicked(object sender, EventArgs e)
         {
-            if (millListView.SelectedItem is not Mills selected) return;
+            if (_selectedMill == null && string.IsNullOrWhiteSpace(millIDEntry.Text))
+            {
+                await DisplayAlert("Error", "Please select a mill to delete.", "OK");
+                return;
+            }
 
-            bool confirm = await DisplayAlert("Confirm", $"Delete mill '{selected.MillName}'?", "Yes", "No");
+            var millToDelete = _selectedMill ?? new Mills { MillID = millIDEntry.Text };
+
+            bool confirm = await DisplayAlert("Confirm Delete",
+                $"Are you sure you want to delete mill '{millToDelete.MillName ?? millToDelete.MillID}'?\n\nNote: This will fail if the mill is referenced in any contracts.",
+                "Yes", "No");
+
             if (!confirm) return;
 
-            await _db.DeleteMill(selected.MillName);
-            await DisplayAlert("Deleted", "Mill deleted successfully.", "OK");
-            ClearForm();
-            await LoadMills();
+            try
+            {
+                await _db.DeleteMill(millToDelete.MillID);
+                await DisplayAlert("Success", "Mill deleted successfully.", "OK");
+                ClearForm();
+                await LoadMills();
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Failed to delete mill: {ex.Message}\n\nThe mill may be referenced in existing contracts.", "OK");
+            }
         }
 
         private void ClearForm()
@@ -99,15 +157,47 @@ namespace MadinaEnterprises.Modules.Views
             millAddressEntry.Text = "";
             millOwnerNameEntry.Text = "";
             millListView.SelectedItem = null;
+            _selectedMill = null;
         }
 
-        // Navigation
-        private async void OnDashboardPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new DashboardPage());
-        private async void OnGinnersPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new GinnersPage());
-        private async void OnContractsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new ContractsPage());
-        private async void OnDeliveriesPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new DeliveriesPage());
-        private async void OnPaymentsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new PaymentsPage());
-        private async void OnGinnerLedgerPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new GinnerLedgerPage());
-        private async void OnLogOutButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new LoginPage());
+        // Navigation methods
+        private async void OnDashboardPageButtonClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("//DashboardPage");
+        }
+
+        private async void OnGinnersPageButtonClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("//GinnersPage");
+        }
+
+        private async void OnContractsPageButtonClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("//ContractsPage");
+        }
+
+        private async void OnDeliveriesPageButtonClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("//DeliveriesPage");
+        }
+
+        private async void OnPaymentsPageButtonClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("//PaymentsPage");
+        }
+
+        private async void OnGinnerLedgerPageButtonClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("//GinnerLedgerPage");
+        }
+
+        private async void OnLogOutButtonClicked(object sender, EventArgs e)
+        {
+            var result = await DisplayAlert("Logout", "Are you sure you want to logout?", "Yes", "No");
+            if (result)
+            {
+                await Shell.Current.GoToAsync("//LoginPage");
+            }
+        }
     }
 }

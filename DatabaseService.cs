@@ -112,6 +112,7 @@ namespace MadinaEnterprises
                         );";
 
                     command.ExecuteNonQuery();
+                    connection.Close();
                 }
                 catch (Exception ex)
                 {
@@ -152,6 +153,7 @@ namespace MadinaEnterprises
                     PaymentNotes = reader["PaymentNotes"]?.ToString() ?? ""
                 });
             }
+            conn.Close();
             return list;
         }
 
@@ -165,7 +167,7 @@ namespace MadinaEnterprises
             using var reader = await cmd.ExecuteReaderAsync();
             if (await reader.ReadAsync())
             {
-                return new Contracts
+                var contract = new Contracts
                 {
                     ContractID = reader["ContractID"]?.ToString() ?? "",
                     GinnerID = reader["GinnerID"]?.ToString() ?? "",
@@ -178,7 +180,10 @@ namespace MadinaEnterprises
                     DeliveryNotes = reader["DeliveryNotes"]?.ToString() ?? "",
                     PaymentNotes = reader["PaymentNotes"]?.ToString() ?? ""
                 };
+                conn.Close();
+                return contract;
             }
+            conn.Close();
             return null;
         }
 
@@ -207,6 +212,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@PaymentNotes", c.PaymentNotes ?? "");
 
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         public async Task UpdateContract(Contracts c)
@@ -235,6 +241,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@PaymentNotes", c.PaymentNotes ?? "");
 
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         public async Task DeleteContract(string contractId)
@@ -268,6 +275,10 @@ namespace MadinaEnterprises
                 transaction.Rollback();
                 throw;
             }
+            finally
+            {
+                conn.Close();
+            }
         }
 
         // ========== DELIVERIES ==========
@@ -294,6 +305,7 @@ namespace MadinaEnterprises
                     DeliveryDate = DateTime.TryParse(reader["DeliveryDate"]?.ToString(), out var delDate) ? delDate : DateTime.Now
                 });
             }
+            conn.Close();
             return list;
         }
 
@@ -322,6 +334,7 @@ namespace MadinaEnterprises
                     DeliveryDate = DateTime.TryParse(reader["DeliveryDate"]?.ToString(), out var delDate) ? delDate : DateTime.Now
                 });
             }
+            conn.Close();
             return list;
         }
 
@@ -344,6 +357,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@DeliveryDate", d.DeliveryDate.ToString("yyyy-MM-dd"));
 
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         public async Task UpdateDelivery(Deliveries d)
@@ -367,6 +381,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@DeliveryDate", d.DeliveryDate.ToString("yyyy-MM-dd"));
 
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         public async Task DeleteDelivery(string deliveryId)
@@ -375,6 +390,7 @@ namespace MadinaEnterprises
             var cmd = new SQLiteCommand("DELETE FROM Deliveries WHERE DeliveryID = @id", conn);
             cmd.Parameters.AddWithValue("@id", deliveryId);
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         // ========== PAYMENTS ==========
@@ -397,6 +413,7 @@ namespace MadinaEnterprises
                     Date = DateTime.TryParse(reader["Date"]?.ToString(), out var date) ? date : DateTime.Now
                 });
             }
+            conn.Close();
             return list;
         }
 
@@ -421,6 +438,7 @@ namespace MadinaEnterprises
                     Date = DateTime.TryParse(reader["Date"]?.ToString(), out var date) ? date : DateTime.Now
                 });
             }
+            conn.Close();
             return list;
         }
 
@@ -439,6 +457,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Date", p.Date.ToString("yyyy-MM-dd"));
 
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         public async Task UpdatePayment(Payment p)
@@ -456,6 +475,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Date", p.Date.ToString("yyyy-MM-dd"));
 
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         public async Task DeletePayment(string paymentId)
@@ -464,6 +484,7 @@ namespace MadinaEnterprises
             var cmd = new SQLiteCommand("DELETE FROM Payments WHERE PaymentID = @id", conn);
             cmd.Parameters.AddWithValue("@id", paymentId);
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         // ========== GINNERS ==========
@@ -490,6 +511,7 @@ namespace MadinaEnterprises
                     Station = reader["Station"]?.ToString() ?? ""
                 });
             }
+            conn.Close();
             return list;
         }
 
@@ -503,7 +525,7 @@ namespace MadinaEnterprises
             using var reader = await cmd.ExecuteReaderAsync();
             if (await reader.ReadAsync())
             {
-                return new Ginners
+                var ginner = new Ginners
                 {
                     GinnerID = reader["GinnerID"]?.ToString() ?? "",
                     GinnerName = reader["GinnerName"]?.ToString() ?? "",
@@ -516,7 +538,10 @@ namespace MadinaEnterprises
                     ContactPerson = reader["ContactPerson"]?.ToString() ?? "",
                     Station = reader["Station"]?.ToString() ?? ""
                 };
+                conn.Close();
+                return ginner;
             }
+            conn.Close();
             return null;
         }
 
@@ -539,6 +564,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Station", g.Station ?? "");
 
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         public async Task UpdateGinner(Ginners g)
@@ -560,6 +586,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Station", g.Station ?? "");
 
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         public async Task DeleteGinner(string ginnerId)
@@ -568,6 +595,7 @@ namespace MadinaEnterprises
             var cmd = new SQLiteCommand("DELETE FROM Ginners WHERE GinnerID = @GinnerID", conn);
             cmd.Parameters.AddWithValue("@GinnerID", ginnerId);
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         // ========== MILLS ==========
@@ -588,6 +616,7 @@ namespace MadinaEnterprises
                     OwnerName = reader["OwnerName"]?.ToString() ?? ""
                 });
             }
+            conn.Close();
             return list;
         }
 
@@ -601,14 +630,17 @@ namespace MadinaEnterprises
             using var reader = await cmd.ExecuteReaderAsync();
             if (await reader.ReadAsync())
             {
-                return new Mills
+                var mill = new Mills
                 {
                     MillID = reader["MillID"]?.ToString() ?? "",
                     MillName = reader["MillName"]?.ToString() ?? "",
                     Address = reader["Address"]?.ToString() ?? "",
                     OwnerName = reader["OwnerName"]?.ToString() ?? ""
                 };
+                conn.Close();
+                return mill;
             }
+            conn.Close();
             return null;
         }
 
@@ -621,6 +653,23 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Address", m.Address ?? "");
             cmd.Parameters.AddWithValue("@OwnerName", m.OwnerName ?? "");
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
+        }
+
+        public async Task UpdateMill(Mills m)
+        {
+            using var conn = await GetConnectionAsync();
+            var cmd = new SQLiteCommand(@"
+                UPDATE Mills SET MillName=@MillName, Address=@Address, OwnerName=@OwnerName
+                WHERE MillID=@MillID", conn);
+
+            cmd.Parameters.AddWithValue("@MillID", m.MillID ?? "");
+            cmd.Parameters.AddWithValue("@MillName", m.MillName ?? "");
+            cmd.Parameters.AddWithValue("@Address", m.Address ?? "");
+            cmd.Parameters.AddWithValue("@OwnerName", m.OwnerName ?? "");
+
+            await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         public async Task DeleteMill(string millId)
@@ -629,6 +678,7 @@ namespace MadinaEnterprises
             var cmd = new SQLiteCommand("DELETE FROM Mills WHERE MillID = @MillID", conn);
             cmd.Parameters.AddWithValue("@MillID", millId);
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         // ========== GINNER LEDGER ==========
@@ -650,7 +700,7 @@ namespace MadinaEnterprises
                     MillsDueTo = reader["MillsDueTo"]?.ToString() ?? ""
                 });
             }
-
+            conn.Close();
             return ginnerLedgerList;
         }
 
@@ -674,6 +724,7 @@ namespace MadinaEnterprises
                     MillsDueTo = reader["MillsDueTo"]?.ToString() ?? ""
                 });
             }
+            conn.Close();
             return list;
         }
 
@@ -691,6 +742,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@MillsDueTo", g.MillsDueTo ?? "");
 
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         public async Task UpdateGinnerLedger(GinnerLedger g)
@@ -707,6 +759,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@MillsDueTo", g.MillsDueTo ?? "");
 
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         public async Task DeleteGinnerLedger(string contractId, string dealId)
@@ -716,6 +769,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@ContractID", contractId);
             cmd.Parameters.AddWithValue("@DealID", dealId);
             await cmd.ExecuteNonQueryAsync();
+            conn.Close();
         }
 
         // ========== ANALYTICS & REPORTS ==========
@@ -820,4 +874,3 @@ namespace MadinaEnterprises
         public double RemainingAmount { get; set; }
         public double CommissionAmount { get; set; }
     }
-}
