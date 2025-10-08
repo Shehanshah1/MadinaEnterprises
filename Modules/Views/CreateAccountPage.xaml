@@ -2,18 +2,18 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MadinaEnterprises.Modules.Views.CreateAccountPage"
-             BackgroundColor="#666666"
+             BackgroundColor="#F4F4F4"
              Title="Create Account">
 
     <ScrollView>
-        <VerticalStackLayout>
+        <VerticalStackLayout Spacing="0" Padding="0">
 
             <!-- Header -->
-            <Grid BackgroundColor="#98cb00" HeightRequest="100">
+            <Grid BackgroundColor="#A4C400" HeightRequest="96">
                 <Label Text="MADINA ENTERPRISES"
-                       FontSize="60"
+                       FontSize="52"
                        FontAttributes="Bold"
-                       TextColor="White"
+                       TextColor="#333333"
                        HorizontalOptions="Center"
                        VerticalOptions="Center"/>
             </Grid>
@@ -21,57 +21,120 @@
             <!-- Error -->
             <Label x:Name="errorMessageLabel"
                    IsVisible="False"
-                   TextColor="Red"
+                   TextColor="#DC2626"
+                   FontAttributes="Bold"
                    HorizontalOptions="Center"
-                   Margin="0,10"/>
+                   Margin="0,12,0,0"/>
 
             <!-- Form Card -->
-            <Grid BackgroundColor="White" Padding="30">
-                <VerticalStackLayout Spacing="20" HorizontalOptions="Center" WidthRequest="500">
+            <Grid BackgroundColor="White"
+                  Padding="24"
+                  Margin="24,20"
+                  HorizontalOptions="Center"
+                  WidthRequest="700">
 
-                    <Image Source="madina_logo.png" Aspect="AspectFit" HeightRequest="150" />
+                <VerticalStackLayout Spacing="18" HorizontalOptions="Center" WidthRequest="520">
 
-                    <Label Text="Create a New Account" FontSize="Large" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center"/>
+                    <Image Source="madina_logo.png" Aspect="AspectFit" HeightRequest="140" />
 
-                    <Entry x:Name="nameEntry"
-                           Placeholder="Full Name"
-                           BackgroundColor="AliceBlue"
-                           TextColor="Black" />
+                    <Label Text="Create a New Account"
+                           FontSize="24"
+                           FontAttributes="Bold"
+                           TextColor="#333333"
+                           HorizontalOptions="Center"/>
 
-                    <Entry x:Name="emailEntry"
-                           Placeholder="Email"
-                           Keyboard="Email"
-                           BackgroundColor="AliceBlue"
-                           TextColor="Black" />
+                    <!-- Name -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Full Name" TextColor="#A4C400" FontAttributes="Bold"/>
+                        <Entry x:Name="nameEntry"
+                               Placeholder="Full Name"
+                               BackgroundColor="#F6F8FA"
+                               TextColor="#333333"
+                               HeightRequest="46"/>
+                    </VerticalStackLayout>
 
-                    <Entry x:Name="passwordEntry"
-                           Placeholder="Password"
-                           IsPassword="True"
-                           BackgroundColor="AliceBlue"
-                           TextColor="Black" />
+                    <!-- Email -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Email" TextColor="#A4C400" FontAttributes="Bold"/>
+                        <Entry x:Name="emailEntry"
+                               Placeholder="Email"
+                               Keyboard="Email"
+                               BackgroundColor="#F6F8FA"
+                               TextColor="#333333"
+                               HeightRequest="46"/>
+                    </VerticalStackLayout>
 
-                    <Entry x:Name="confirmPasswordEntry"
-                           Placeholder="Confirm Password"
-                           IsPassword="True"
-                           BackgroundColor="AliceBlue"
-                           TextColor="Black" />
+                    <!-- Password -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Password" TextColor="#A4C400" FontAttributes="Bold"/>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Entry x:Name="passwordEntry"
+                                   Placeholder="Password"
+                                   IsPassword="True"
+                                   BackgroundColor="#F6F8FA"
+                                   TextColor="#333333"
+                                   HeightRequest="46"
+                                   Grid.Column="0"/>
+                            <Button Text="Show"
+                                    BackgroundColor="#A4C400"
+                                    TextColor="White"
+                                    HeightRequest="46"
+                                    Clicked="OnTogglePasswordVisibility"
+                                    Grid.Column="1"/>
+                        </Grid>
+                        <Label Text="Use 8+ characters with letters, numbers, and symbols."
+                               FontSize="12" TextColor="#666666"/>
+                    </VerticalStackLayout>
 
-                    <!-- Create Account Button -->
-                    <Button Text="Create Account"
-                            BackgroundColor="#98cb00"
-                            TextColor="White"
-                            FontAttributes="Bold"
-                            CornerRadius="0"
-                            Clicked="OnCreateAccountClicked">
-                        <Button.Shadow>
-                            <Shadow Radius="4" Brush="Black" Offset="5,5"/>
-                        </Button.Shadow>
-                    </Button>
+                    <!-- Confirm Password -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Confirm Password" TextColor="#A4C400" FontAttributes="Bold"/>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Entry x:Name="confirmPasswordEntry"
+                                   Placeholder="Confirm Password"
+                                   IsPassword="True"
+                                   BackgroundColor="#F6F8FA"
+                                   TextColor="#333333"
+                                   HeightRequest="46"
+                                   Grid.Column="0"/>
+                            <Button Text="Show"
+                                    BackgroundColor="#A4C400"
+                                    TextColor="White"
+                                    HeightRequest="46"
+                                    Clicked="OnToggleConfirmVisibility"
+                                    Grid.Column="1"/>
+                        </Grid>
+                    </VerticalStackLayout>
+
+                    <!-- Terms -->
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                        <CheckBox x:Name="termsCheckBox" Grid.Column="0"/>
+                        <Label Grid.Column="1"
+                               Text="I agree to the Terms of Service and Privacy Policy."
+                               TextColor="#333333"/>
+                    </Grid>
+
+                    <!-- Actions -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <Button x:Name="createButton"
+                                Text="Create Account"
+                                BackgroundColor="#A4C400"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                HeightRequest="48"
+                                Clicked="OnCreateAccountClicked"/>
+                        <ActivityIndicator x:Name="busyIndicator"
+                                           Grid.Column="1"
+                                           IsVisible="False"
+                                           IsRunning="False"
+                                           VerticalOptions="Center"
+                                           HorizontalOptions="Center"/>
+                    </Grid>
 
                     <!-- Already have an account -->
                     <Button Text="Back to Login"
-                            BackgroundColor="White"
-                            TextColor="Blue"
+                            BackgroundColor="Transparent"
+                            TextColor="#0B72D2"
                             Clicked="OnLoginRedirectClicked"/>
                 </VerticalStackLayout>
             </Grid>
