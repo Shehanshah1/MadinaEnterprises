@@ -33,27 +33,49 @@
                        HorizontalOptions="Start"/>
                 <BoxView HeightRequest="2" BackgroundColor="Black"/>
 
-                <!-- Form Section -->
+
+                <!-- Form Card -->
                 <Frame Padding="20" BackgroundColor="#f5f5f5" CornerRadius="10" HasShadow="True">
-                    <VerticalStackLayout Spacing="10">
-                        <Picker x:Name="paymentPicker" Title="Select Payment to Edit/Delete" SelectedIndexChanged="OnPaymentSelected" BackgroundColor="White" TextColor="Black" IsVisible="False"/>
-                        <Entry x:Name="paymentIDEntry" Placeholder="Payment ID" BackgroundColor="White" TextColor="Black"/>
-                        <Picker x:Name="contractPicker" Title="Select Contract" BackgroundColor="White" TextColor="Black" TitleColor="Black"/>
-                        <Entry x:Name="totalAmountEntry" Placeholder="Total Deal Amount" IsReadOnly="True" BackgroundColor="White" TextColor="Black"/>
-                        <Entry x:Name="paidAmountEntry" Placeholder="Amount Paid" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" TextChanged="OnPaidAmountChanged"/>
-                        <Entry x:Name="remainingAmountEntry" Placeholder="Remaining Amount" IsReadOnly="True" BackgroundColor="White" TextColor="Black"/>
-                        <Entry x:Name="balesEntry" Placeholder="Total Bales" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                        <HorizontalStackLayout Spacing="10">
-                            <Label Text="Payment Date" TextColor="Black" VerticalOptions="Center"/>
-                            <DatePicker x:Name="paymentDatePicker" TextColor="Black" BackgroundColor="White"/>
-                        </HorizontalStackLayout>
+                    <!-- Frame must have ONE child -->
+                    <VerticalStackLayout Spacing="16">
+
+                        <!-- Form Grid -->
+                        <Grid ColumnDefinitions="*,*" RowSpacing="12"
+              RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+
+                            <!-- Labels -->
+                            <Label Text="Payment ID"    Grid.Row="1" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Contract Picker"       Grid.Row="2" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Total Amount"     Grid.Row="3" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Total Paid"              Grid.Row="4" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Remaining Amount"           Grid.Row="5" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Total Bales"               Grid.Row="6" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Payment Date"               Grid.Row="7" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+ 
+                            <!-- Inputs (names unchanged) -->
+                            <Picker  x:Name="paymentPicker" Title="Select Payment to Edit/Delete" SelectedIndexChanged="OnPaymentSelected" BackgroundColor="White" TextColor="Black" IsVisible="False"/>
+                            <Entry  x:Name="paymentIDEntry" Placeholder="Payment ID" BackgroundColor="White" TextColor="Black"    Grid.Row="1" Grid.Column="1" />
+                            <Picker  x:Name="contractPicker" Grid.Row="2" Grid.Column="1" Title="Select Contract" TitleColor="Black" BackgroundColor="LightGray"  TextColor="Black"/>
+                            <Entry  x:Name="totalAmountEntry" Placeholder="Total Deal Amount" IsReadOnly="True" BackgroundColor="White" TextColor="Black" Grid.Row="3" Grid.Column="1"/>
+                            <Entry x:Name="paidAmountEntry" Placeholder="Amount Paid" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" TextChanged="OnPaidAmountChanged" Grid.Row="4" Grid.Column="1"/>
+                            <Entry x:Name="remainingAmountEntry" Placeholder="Remaining Amount" IsReadOnly="True" BackgroundColor="White" TextColor="Black" Grid.Row="5" Grid.Column="1"/>
+                            <Entry x:Name="balesEntry" Placeholder="Total Bales" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="6" Grid.Column="1"/>
+                            <DatePicker x:Name="paymentDatePicker" TextColor="Black" BackgroundColor="White" Grid.Row="7" Grid.Column="1"/>
+            
+                        </Grid>
+
+                        <!-- Action Buttons (now inside the same container) -->
+
                         <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
                             <Button Text="Save Payment" Clicked="OnSavePaymentClicked" BackgroundColor="#98cb00" TextColor="White"/>
                             <Button Text="Update Payment" Clicked="OnUpdatePaymentClicked" BackgroundColor="#ff9800" TextColor="White"/>
                             <Button Text="Delete Payment" Clicked="OnDeletePaymentClicked" BackgroundColor="Red" TextColor="White"/>
                         </HorizontalStackLayout>
+
+
                     </VerticalStackLayout>
                 </Frame>
+
 
                 <!-- List View Section -->
                 <Label Text="Existing Payments" FontSize="20" FontAttributes="Bold" TextColor="Black"/>

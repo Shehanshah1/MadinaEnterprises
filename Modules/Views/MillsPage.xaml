@@ -33,45 +33,88 @@
 
                 <BoxView HeightRequest="1" Color="Black" />
 
-                <!-- Form Grid -->
-                <Grid ColumnDefinitions="*,*" RowSpacing="10" RowDefinitions="Auto,Auto,Auto,Auto">
-                    <Label Text="Mill Name" TextColor="Black" HorizontalOptions="Center" FontSize="Medium"/>
-                    <Entry x:Name="millNameEntry" BackgroundColor="LightGray" TextColor="Black" Grid.Column="1"/>
 
-                    <Label Text="Mill ID" TextColor="Black" Grid.Row="1" HorizontalOptions="Center" FontSize="Medium"/>
-                    <Entry x:Name="millIDEntry" BackgroundColor="LightGray" TextColor="Black" Grid.Row="1" Grid.Column="1"/>
 
-                    <Label Text="Address" TextColor="Black" Grid.Row="2" HorizontalOptions="Center" FontSize="Medium"/>
-                    <Entry x:Name="millAddressEntry" BackgroundColor="LightGray" TextColor="Black" Grid.Row="2" Grid.Column="1"/>
 
-                    <Label Text="Owner Name" TextColor="Black" Grid.Row="3" HorizontalOptions="Center" FontSize="Medium"/>
-                    <Entry x:Name="millOwnerNameEntry" BackgroundColor="LightGray" TextColor="Black" Grid.Row="3" Grid.Column="1"/>
-                </Grid>
+                <!-- Form Card -->
+                <Frame Padding="20" BackgroundColor="#f5f5f5" CornerRadius="10" HasShadow="True">
+                    <!-- Frame must have ONE child -->
+                    <VerticalStackLayout Spacing="16">
 
-                <!-- Action Buttons -->
-                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                    <Button Text="Add Mill" BackgroundColor="#98cb00" TextColor="White" Clicked="OnAddMillClicked"/>
-                    <Button Text="Update" BackgroundColor="#ff9800" TextColor="White" Clicked="OnUpdateMillClicked"/>
-                    <Button Text="Delete" BackgroundColor="Red" TextColor="White" Clicked="OnDeleteMillClicked"/>
-                </HorizontalStackLayout>
+                        <!-- Form Grid -->
+                        <Grid ColumnDefinitions="*,*" RowSpacing="12"
+              RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
 
-                <!-- List View -->
-                <ListView x:Name="millListView"
-                          BackgroundColor="#e5e5e5"
-                          ItemsSource="{Binding}"
+                            <!-- Labels -->
+                            <Label Text="Mill ID"           Grid.Row="0" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Mill Name"         Grid.Row="1" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Address"           Grid.Row="2" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Owner"              Grid.Row="3" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+
+                            <!-- Inputs (names unchanged) -->
+                            <Entry x:Name="millIDEntry"              Grid.Row="0" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="e.g., GNR-001"/>
+                            <Entry x:Name="millNameEntry"            Grid.Row="1" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="e.g., Al-Noor Ginning"/>
+                            <Entry x:Name="millAddressEntry"         Grid.Row="2" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="Phone/Email"/>
+                            <Entry x:Name="millOwnerNameEntry"       Grid.Row="3" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="IBAN #"/>
+                        </Grid>
+
+                        <!-- Action Buttons (now inside the same container) -->
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                            <Button Text="Add Mill" BackgroundColor="#98cb00" TextColor="White" Clicked="OnAddMillClicked"/>
+                            <Button Text="Update"      BackgroundColor="#ff9800" TextColor="White" Clicked="OnUpdateMillClicked"/>
+                            <Button Text="Delete"      BackgroundColor="Red"     TextColor="White" Clicked="OnDeleteMillClicked"/>
+                        </HorizontalStackLayout>
+
+                    </VerticalStackLayout>
+                </Frame>
+
+
+                <!-- List Header -->
+                <Label Text="Existing Mills"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="Black"/>
+
+                <!-- Search Bar -->
+                <SearchBar x:Name="MillSearchBar"
+                           Placeholder="Search by Mill Name or ID..."
+                           TextChanged="OnSearchTextChanged"
+                           BackgroundColor="White"
+                           TextColor="Black"/>
+
+                <!-- Styled List (name + handler unchanged) -->
+                <ListView x:Name="MillsListView"
+                          BackgroundColor="WhiteSmoke"
                           SelectionMode="Single"
                           ItemSelected="OnMillSelected"
-                          HeightRequest="300"
-                          SeparatorColor="Black">
+                          HasUnevenRows="True"
+                          HeightRequest="280">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <TextCell Text="{Binding MillName}" 
-                                      Detail="{Binding OwnerName}" 
-                                      TextColor="Black" 
-                                      DetailColor="#98cb00"/>
+                            <ViewCell>
+                                <Frame Padding="10" Margin="6,4" BorderColor="#1976d2" CornerRadius="5" BackgroundColor="White">
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                        <Label Grid.Row="0" Grid.Column="0"
+                                               Text="{Binding MillName}"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="Black"/>
+                                        <Label Grid.Row="0" Grid.Column="1"
+                                               Text="{Binding MillID}"
+                                               FontSize="14"
+                                               TextColor="#444444"
+                                               HorizontalTextAlignment="End"/>
+                                        <Label Grid.Row="1" Grid.ColumnSpan="2"
+                                               Text="{Binding OwnerName}"
+                                               FontSize="13"
+                                               TextColor="#666666"/>
+                                    </Grid>
+                                </Frame>
+                            </ViewCell>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

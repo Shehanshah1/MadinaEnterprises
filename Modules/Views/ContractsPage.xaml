@@ -33,20 +33,45 @@
 
                 <BoxView HeightRequest="2" BackgroundColor="Black" />
 
-                <!-- Contract Form -->
+                <!-- Form Card -->
                 <Frame Padding="20" BackgroundColor="#f5f5f5" CornerRadius="10" HasShadow="True">
-                    <VerticalStackLayout Spacing="15">
+                    <!-- Frame must have ONE child -->
+                    <VerticalStackLayout Spacing="16">
 
-                        <Picker x:Name="contractPicker" Title="Select Contract to Edit/Delete" BackgroundColor="LightGray" TextColor="Black" IsVisible="False"/>
-                        <Entry x:Name="contractIDEntry" Placeholder="Contract ID" BackgroundColor="White" TextColor="Black"/>
-                        <Picker x:Name="ginnerPicker" Title="Select Ginner" BackgroundColor="LightGray" TextColor="Black"/>
-                        <Picker x:Name="millPicker" Title="Select Mill" BackgroundColor="LightGray" TextColor="Black"/>
-                        <Entry x:Name="totalBalesEntry" Placeholder="Total Bales" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                        <Entry x:Name="pricePerBatchEntry" Placeholder="Price per Batch" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                        <Entry x:Name="commissionEntry" Placeholder="Commission (%)" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                        <DatePicker x:Name="contractDatePicker" TextColor="Black"/>
-                        <Editor x:Name="deliveryNotesEditor" Placeholder="Delivery Notes" AutoSize="TextChanges" BackgroundColor="White" TextColor="Black"/>
-                        <Editor x:Name="paymentNotesEditor" Placeholder="Payment Notes" AutoSize="TextChanges" BackgroundColor="White" TextColor="Black"/>
+                        <!-- Form Grid -->
+                        <Grid ColumnDefinitions="*,*" RowSpacing="12"
+                        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+
+                            <!-- Labels -->
+                            <Label Text="Contract ID Entry"    Grid.Row="1" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Ginner Picker"       Grid.Row="2" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Mill Picker"     Grid.Row="3" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Amount Entry"              Grid.Row="4" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Total Bales Entry"           Grid.Row="5" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Price Per Batch"               Grid.Row="6" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Commission Percentage"      Grid.Row="7" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Contract Date"    Grid.Row="8" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Delivery Notes"           Grid.Row="9" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Payment Notes"           Grid.Row="10" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+
+                            <!-- Inputs (names unchanged) -->
+                            <Picker x:Name="contractPicker" Title="Select Contract to Edit/Delete" BackgroundColor="LightGray" TextColor="Black" IsVisible="False" Grid.Row="0" Grid.Column="1"/>
+
+                            <Entry  x:Name="contractIDEntry" Placeholder="Contract ID" BackgroundColor="White" TextColor="Black"       Grid.Row="1" Grid.Column="1" />
+                            <Picker  x:Name="ginnerPicker" Title="Select Ginner" BackgroundColor="LightGray"                             Grid.Row="2" Grid.Column="1"  TitleColor="Black" TextColor="Black"/>
+                            <Picker  x:Name="millPicker" Title="Select Mill" BackgroundColor="LightGray"                                 Grid.Row="3" Grid.Column="1"  TitleColor="Black" TextColor="Black"/>
+                            <Entry  x:Name="amountEntry" Placeholder="Amount" Keyboard="Numeric" BackgroundColor="White"                 Grid.Row="4" Grid.Column="1" TextColor="Black"/>
+                            <Entry x:Name="totalBalesEntry" Placeholder="Total Bales" Keyboard="Numeric" BackgroundColor="White"         Grid.Row="5" Grid.Column="1" TextColor="Black"/>
+                            <Entry x:Name="pricePerBatchEntry" Placeholder="Price per Batch" Keyboard="Numeric"  BackgroundColor="White" Grid.Row="6" Grid.Column="1" TextColor="Black" />
+                            <Entry  x:Name="commissionEntry" Placeholder="Commission (%)" Keyboard="Numeric" BackgroundColor="White"     Grid.Row="7" Grid.Column="1" TextColor="Black"/>
+                            <DatePicker x:Name="contractDatePicker"  BackgroundColor="White"                                             Grid.Row="8" Grid.Column="1"  TextColor="Black" />
+                            <Editor x:Name="deliveryNotesEditor" Placeholder="Delivery Notes" AutoSize="TextChanges" Keyboard="Telephone"  Grid.Row="9" Grid.Column="1" TextColor="Black"  BackgroundColor="White"/>
+                            <Editor x:Name="paymentNotesEditor" Placeholder="Payment Notes" AutoSize="TextChanges"                         Grid.Row="10" Grid.Column="1" BackgroundColor="White" />
+                           
+
+                        </Grid>
+
+                        <!-- Action Buttons (now inside the same container) -->
 
                         <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
                             <Button Text="Save Contract" Clicked="OnSaveContractClicked" BackgroundColor="#98cb00" TextColor="White" CornerRadius="5"/>
@@ -58,6 +83,7 @@
                             <Button Text="Export to DOCX" Clicked="OnExportDocClicked" BackgroundColor="#1976d2" TextColor="White" CornerRadius="5"/>
                             <Button Text="Export to Excel" Clicked="OnExportExcelClicked" BackgroundColor="#43a047" TextColor="White" CornerRadius="5"/>
                         </HorizontalStackLayout>
+
 
                     </VerticalStackLayout>
                 </Frame>

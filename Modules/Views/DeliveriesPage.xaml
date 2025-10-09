@@ -14,7 +14,7 @@
         <!-- Sidebar Buttons -->
         <StackLayout Grid.Column="0" Padding="10" Spacing="30">
             <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked"/>
-            <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0"/>
+            <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnersPageButtonClicked"/>
             <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked"/>
             <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
             <Button Text="Deliveries" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
@@ -33,42 +33,60 @@
                      HorizontalOptions="Start"/>
 
                 <BoxView HeightRequest="2" BackgroundColor="Black" />
-                <!-- Main Form -->
-                <Frame Padding="20" BackgroundColor="#f5f5f5" CornerRadius="10" HasShadow="True">
 
-                    <Grid Grid.Column="1" Padding="10" RowSpacing="20"
-                  ColumnDefinitions="*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
-                        <!-- Form Inputs -->
-                        <Picker Grid.Row="2" x:Name="deliveryPicker" Title="Select Delivery to Edit/Delete" SelectedIndexChanged="OnDeliverySelected" IsVisible="False"/>
-                        <Entry Grid.Row="0" x:Name="deliveryIDEntry" Placeholder="Delivery ID" BackgroundColor="White" TextColor="Black"/>
-                        <Picker Grid.Row="1" x:Name="contractPicker" Title="Select Contract" TitleColor="Black" BackgroundColor="LightGray"  TextColor="Black"/>
-                        <Entry Grid.Row="2" x:Name="amountEntry" Placeholder="Amount" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                        <Entry Grid.Row="3" x:Name="totalBalesEntry" Placeholder="Total Bales" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                        <Entry Grid.Row="4" x:Name="factoryWeightEntry" Placeholder="Factory Weight" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                        <Entry Grid.Row="5" x:Name="millWeightEntry" Placeholder="Mill Weight" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                        <Entry Grid.Row="6" x:Name="truckNoEntry" Placeholder="Truck Number" BackgroundColor="White" TextColor="Black"/>
-                        <Entry Grid.Row="7" x:Name="driverContactEntry" Placeholder="Driver Contact" Keyboard="Telephone" BackgroundColor="White" TextColor="Black"/>
-                        <HorizontalStackLayout Grid.Row="8" Spacing="10">
-                            <Label Text="Departure Date:   " TextColor="Black" FontSize="Default" VerticalTextAlignment="Center"/>
-                            <DatePicker x:Name="departureDatePicker" TextColor="Black" Background="LightGray"/>
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Grid.Row="9" Spacing="10">
-                            <Label Text="Delivery Date:   " TextColor="Black" FontSize="Default" VerticalTextAlignment="Center"/>
-                            <DatePicker x:Name="deliveryDatePicker" TextColor="Black" Background="LightGray"/>
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Grid.Row="10" Spacing="10" HorizontalOptions="Center">
+
+
+                <!-- Form Card -->
+                <Frame Padding="20" BackgroundColor="#f5f5f5" CornerRadius="10" HasShadow="True">
+                    <!-- Frame must have ONE child -->
+                    <VerticalStackLayout Spacing="16">
+
+                        <!-- Form Grid -->
+                        <Grid ColumnDefinitions="*,*" RowSpacing="12"
+              RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+
+                            <!-- Labels -->
+                            <Label Text="Delivery ID"    Grid.Row="1" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Contract Picker"       Grid.Row="2" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Amount"     Grid.Row="3" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Total Bales"              Grid.Row="4" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Factory Weight Entry"           Grid.Row="5" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Mill Weight Entry"               Grid.Row="6" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Truck Number"               Grid.Row="7" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Driver Contact"      Grid.Row="8" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Departure Date"    Grid.Row="9" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Delivery Date"           Grid.Row="10" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+
+                            <!-- Inputs (names unchanged) -->
+                            <Picker  x:Name="deliveryPicker" Title="Select Delivery to Edit/Delete" SelectedIndexChanged="OnDeliverySelected" IsVisible="False" Grid.Row="0" Grid.Column="1" BackgroundColor="White" TextColor="Black" />
+                            <Entry x:Name="deliveryIDEntry" Placeholder="Delivery ID" BackgroundColor="White" TextColor="Black"    Grid.Row="1" Grid.Column="1" />
+                            <Picker  x:Name="contractPicker" Grid.Row="2" Grid.Column="1" Title="Select Contract" TitleColor="Black" BackgroundColor="LightGray"  TextColor="Black"/>
+                            <Entry  x:Name="amountEntry" Placeholder="Amount" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="3" Grid.Column="1"/>
+                            <Entry x:Name="totalBalesEntry" Placeholder="Total Bales" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="4" Grid.Column="1"/>
+                            <Entry x:Name="factoryWeightEntry" Placeholder="Factory Weight" Keyboard="Numeric"  BackgroundColor="White" TextColor="Black" Grid.Row="5" Grid.Column="1"/>
+                            <Entry x:Name="millWeightEntry" Placeholder="Mill Weight" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="6" Grid.Column="1"/>
+                            <Entry x:Name="truckNoEntry" Placeholder="Truck Number"        BackgroundColor="White" TextColor="Black" Grid.Row="7" Grid.Column="1"/>
+                            <Entry x:Name="driverContactEntry" Placeholder="Driver Contact" Keyboard="Telephone"  BackgroundColor="White" TextColor="Black" Grid.Row="8" Grid.Column="1"/>
+                            <DatePicker x:Name="departureDatePicker" TextColor="Black" Background="LightGray"  Grid.Row="9" Grid.Column="1"/>
+                            <DatePicker x:Name="deliveryDatePicker" TextColor="Black" Background="LightGray" Grid.Row="10" Grid.Column="1"/>
+                           
+                        </Grid>
+
+                        <!-- Action Buttons (now inside the same container) -->
+                        <HorizontalStackLayout  Spacing="10" HorizontalOptions="Center">
                             <Button Text="Save Delivery" Clicked="OnSaveDeliveryClicked" BackgroundColor="#98cb00" TextColor="White"/>
                             <Button Text="Update Delivery" Clicked="OnUpdateDeliveryClicked" BackgroundColor="#ff9800" TextColor="White"/>
                             <Button Text="Delete Delivery" Clicked="OnDeleteDeliveryClicked" BackgroundColor="Red" TextColor="White"/>
                         </HorizontalStackLayout>
 
 
-
-                    </Grid>
+                    </VerticalStackLayout>
                 </Frame>
+
+             
                 <!-- Existing Deliveries List -->
                 <Label Text="Existing Deliveries" FontSize="20" FontAttributes="Bold" TextColor="Black"/>
-                <SearchBar x:Name="deliverySearchBar"
+                <SearchBar x:Name="deliverySearchBar" TextColor="Black"
            Placeholder="Search by Delivery ID..."
            TextChanged="OnSearchTextChanged"
            BackgroundColor="White"/>

@@ -8,6 +8,9 @@ public partial class GinnersPage : ContentPage
     private readonly DatabaseService _databaseService;
     private readonly ObservableCollection<Ginners> _ginnersList;
 
+    // cache for searching
+    private List<Ginners> _allGinners = new();
+
     public GinnersPage()
     {
         InitializeComponent();
@@ -28,9 +31,22 @@ public partial class GinnersPage : ContentPage
     private async void OnLogOutButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new LoginPage());
 
     //****************************************************************************
+    //                             DATA LOADING
+    //****************************************************************************
+    private async Task LoadGinners()
+    {
+        _ginnersList.Clear();
+        var ginners = await _databaseService.GetAllGinners();
+
+        _allGinners = ginners.ToList(); // cache for search
+
+        foreach (var ginner in ginners)
+            _ginnersList.Add(ginner);
+    }
+
+    //****************************************************************************
     //                       GINNER MANAGEMENT
     //****************************************************************************
-
     private async void OnAddGinnerClicked(object sender, EventArgs e)
     {
         if (string.IsNullOrWhiteSpace(GinnerIDEntry.Text) || string.IsNullOrWhiteSpace(GinnerNameEntry.Text))
@@ -67,14 +83,6 @@ public partial class GinnersPage : ContentPage
         await LoadGinners();
     }
 
-    private async Task LoadGinners()
-    {
-        _ginnersList.Clear();
-        var ginners = await _databaseService.GetAllGinners();
-        foreach (var ginner in ginners)
-            _ginnersList.Add(ginner);
-    }
-
     private async void OnUpdateGinnerClicked(object sender, EventArgs e)
     {
         if (string.IsNullOrWhiteSpace(GinnerIDEntry.Text))
@@ -83,7 +91,7 @@ public partial class GinnersPage : ContentPage
             return;
         }
 
-        // Make sure GinnerID exists before updating
+        // Ensure GinnerID exists before updating
         var allGinners = await _databaseService.GetAllGinners();
         var existingGinner = allGinners.FirstOrDefault(g => g.GinnerID == GinnerIDEntry.Text);
         if (existingGinner == null)
@@ -156,5 +164,27 @@ public partial class GinnersPage : ContentPage
         GinnerContactPersonEntry.Text = "";
         GinnerStationEntry.Text = "";
         GinnersListView.SelectedItem = null;
+        GinnerSearchBar.Text = string.Empty;
+    }
+
+    //****************************************************************************
+    //                               SEARCH
+    //****************************************************************************
+    private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+    {
+        var q = (e.NewTextValue ?? string.Empty).Trim().ToLowerInvariant();
+
+        _ginnersList.Clear();
+        IEnumerable<Ginners> src = _allGinners;
+
+        if (!string.IsNullOrEmpty(q))
+        {
+            src = _allGinners.Where(g =>
+                (g.GinnerName ?? string.Empty).ToLowerInvariant().Contains(q) ||
+                (g.GinnerID ?? string.Empty).ToLowerInvariant().Contains(q));
+        }
+
+        foreach (var g in src)
+            _ginnersList.Add(g);
     }
 }

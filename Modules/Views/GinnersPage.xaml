@@ -15,17 +15,18 @@
         <!-- Sidebar Buttons -->
         <StackLayout Grid.Column="0" Padding="10" Spacing="30">
             <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked"/>
-            <Button Text="Ginners" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0"/>
-            <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked"/>
+            <Button Text="Ginners"   FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0"/>
+            <Button Text="Mills"     FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked"/>
             <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
             <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
-            <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
-            <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
+            <Button Text="Payments"  FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
+            <Button Text="Logout"    FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
         </StackLayout>
 
-        <!-- Main Content Area with Scroll Fix -->
+        <!-- Main Content Area -->
         <ScrollView Grid.Column="1">
             <VerticalStackLayout Padding="20" Spacing="20">
+
                 <!-- Title -->
                 <Label Text="Ginner Management"
                        FontSize="Header"
@@ -35,61 +36,97 @@
 
                 <BoxView HeightRequest="2" BackgroundColor="Black" />
 
-                <!-- Form Grid -->
-                <Grid ColumnDefinitions="*,*" RowSpacing="10" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
-                    <Label Text="Ginner ID" Grid.Row="0" Grid.Column="0" TextColor="Black" FontSize="Medium" HorizontalOptions="Center"/>
-                    <Entry x:Name="GinnerIDEntry" Grid.Row="0" Grid.Column="1" BackgroundColor="LightGray" TextColor="Black"/>
+               
+                <!-- Form Card -->
+                <Frame Padding="20" BackgroundColor="#f5f5f5" CornerRadius="10" HasShadow="True">
+                    <!-- Frame must have ONE child -->
+                    <VerticalStackLayout Spacing="16">
 
-                    <Label Text="Ginner Name" Grid.Row="1" Grid.Column="0" TextColor="Black" FontSize="Medium" HorizontalOptions="Center"/>
-                    <Entry x:Name="GinnerNameEntry" Grid.Row="1" Grid.Column="1" BackgroundColor="LightGray" TextColor="Black"/>
+                        <!-- Form Grid -->
+                        <Grid ColumnDefinitions="*,*" RowSpacing="12"
+              RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
 
-                    <Label Text="Contact" Grid.Row="2" Grid.Column="0" TextColor="Black" FontSize="Medium" HorizontalOptions="Center"/>
-                    <Entry x:Name="GinnerContactEntry" Grid.Row="2" Grid.Column="1" BackgroundColor="LightGray" TextColor="Black"/>
+                            <!-- Labels -->
+                            <Label Text="Ginner ID"         Grid.Row="0" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Ginner Name"       Grid.Row="1" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Contact"           Grid.Row="2" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="IBAN"              Grid.Row="3" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Address"           Grid.Row="4" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="NTN"               Grid.Row="5" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="STN"               Grid.Row="6" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Bank Address"      Grid.Row="7" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Contact Person"    Grid.Row="8" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Station"           Grid.Row="9" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
 
-                    <Label Text="IBAN" Grid.Row="3" Grid.Column="0" TextColor="Black" FontSize="Medium" HorizontalOptions="Center"/>
-                    <Entry x:Name="GinnerIBANEntry" Grid.Row="3" Grid.Column="1" BackgroundColor="LightGray" TextColor="Black"/>
+                            <!-- Inputs (names unchanged) -->
+                            <Entry x:Name="GinnerIDEntry"            Grid.Row="0" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="e.g., GNR-001"/>
+                            <Entry x:Name="GinnerNameEntry"          Grid.Row="1" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="e.g., Al-Noor Ginning"/>
+                            <Entry x:Name="GinnerContactEntry"       Grid.Row="2" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="Phone/Email"/>
+                            <Entry x:Name="GinnerIBANEntry"          Grid.Row="3" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="IBAN #"/>
+                            <Entry x:Name="GinnerAddressEntry"       Grid.Row="4" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="Street, City"/>
+                            <Entry x:Name="GinnerNTNEntry"           Grid.Row="5" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="NTN #"/>
+                            <Entry x:Name="GinnerSTNEntry"           Grid.Row="6" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="STN #"/>
+                            <Entry x:Name="GinnerBankAddressEntry"   Grid.Row="7" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="Bank Branch Address"/>
+                            <Entry x:Name="GinnerContactPersonEntry" Grid.Row="8" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="Contact Person Name"/>
+                            <Entry x:Name="GinnerStationEntry"       Grid.Row="9" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="Station/City"/>
+                        </Grid>
 
-                    <Label Text="Address" Grid.Row="4" Grid.Column="0" TextColor="Black" FontSize="Medium" HorizontalOptions="Center"/>
-                    <Entry x:Name="GinnerAddressEntry" Grid.Row="4" Grid.Column="1" BackgroundColor="LightGray" TextColor="Black"/>
+                        <!-- Action Buttons (now inside the same container) -->
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                            <Button Text="Add Ginner" BackgroundColor="#98cb00" TextColor="White" Clicked="OnAddGinnerClicked"/>
+                            <Button Text="Update"      BackgroundColor="#ff9800" TextColor="White" Clicked="OnUpdateGinnerClicked"/>
+                            <Button Text="Delete"      BackgroundColor="Red"     TextColor="White" Clicked="OnDeleteGinnerClicked"/>
+                        </HorizontalStackLayout>
 
-                    <Label Text="NTN" Grid.Row="5" Grid.Column="0" TextColor="Black" FontSize="Medium" HorizontalOptions="Center"/>
-                    <Entry x:Name="GinnerNTNEntry" Grid.Row="5" Grid.Column="1" BackgroundColor="LightGray" TextColor="Black"/>
+                    </VerticalStackLayout>
+                </Frame>
 
-                    <Label Text="STN" Grid.Row="6" Grid.Column="0" TextColor="Black" FontSize="Medium" HorizontalOptions="Center"/>
-                    <Entry x:Name="GinnerSTNEntry" Grid.Row="6" Grid.Column="1" BackgroundColor="LightGray" TextColor="Black"/>
+                <!-- List Header -->
+                <Label Text="Existing Ginners"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="Black"/>
 
-                    <Label Text="Bank Address" Grid.Row="7" Grid.Column="0" TextColor="Black" FontSize="Medium" HorizontalOptions="Center"/>
-                    <Entry x:Name="GinnerBankAddressEntry" Grid.Row="7" Grid.Column="1" BackgroundColor="LightGray" TextColor="Black"/>
+                <!-- Search Bar -->
+                <SearchBar x:Name="GinnerSearchBar"
+                           Placeholder="Search by Ginner Name or ID..."
+                           TextChanged="OnSearchTextChanged"
+                           BackgroundColor="White"
+                           TextColor="Black"/>
 
-                    <Label Text="Contact Person" Grid.Row="8" Grid.Column="0" TextColor="Black" FontSize="Medium" HorizontalOptions="Center"/>
-                    <Entry x:Name="GinnerContactPersonEntry" Grid.Row="8" Grid.Column="1" BackgroundColor="LightGray" TextColor="Black"/>
-
-                    <Label Text="Station" Grid.Row="9" Grid.Column="0" TextColor="Black" FontSize="Medium" HorizontalOptions="Center"/>
-                    <Entry x:Name="GinnerStationEntry" Grid.Row="9" Grid.Column="1" BackgroundColor="LightGray" TextColor="Black"/>
-                </Grid>
-
-                <!-- Buttons -->
-                <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="10">
-                    <Button Text="Add Ginner" BackgroundColor="#98cb00" TextColor="White" Clicked="OnAddGinnerClicked"/>
-                    <Button Text="Update" BackgroundColor="#ff9800" TextColor="White" Clicked="OnUpdateGinnerClicked"/>
-                    <Button Text="Delete" BackgroundColor="Red" TextColor="White" Clicked="OnDeleteGinnerClicked"/>
-                </StackLayout>
-
-                <!-- Ginners List -->
+                <!-- Styled List (name + handler unchanged) -->
                 <ListView x:Name="GinnersListView"
-                          Background="Gray"
-                          ItemsSource="{Binding}"
+                          BackgroundColor="WhiteSmoke"
                           SelectionMode="Single"
                           ItemSelected="OnGinnerSelected"
-                          HeightRequest="200">
+                          HasUnevenRows="True"
+                          HeightRequest="280">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <TextCell TextColor="Black"
-                                      Text="{Binding GinnerName}"
-                                      />
+                            <ViewCell>
+                                <Frame Padding="10" Margin="6,4" BorderColor="#1976d2" CornerRadius="5" BackgroundColor="White">
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                        <Label Grid.Row="0" Grid.Column="0"
+                                               Text="{Binding GinnerName}"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="Black"/>
+                                        <Label Grid.Row="0" Grid.Column="1"
+                                               Text="{Binding GinnerID}"
+                                               FontSize="14"
+                                               TextColor="#444444"
+                                               HorizontalTextAlignment="End"/>
+                                        <Label Grid.Row="1" Grid.ColumnSpan="2"
+                                               Text="{Binding Contact}"
+                                               FontSize="13"
+                                               TextColor="#666666"/>
+                                    </Grid>
+                                </Frame>
+                            </ViewCell>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+
             </VerticalStackLayout>
         </ScrollView>
     </Grid>
