@@ -57,6 +57,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiImage Remove="Resources\Images\madina_logoc.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<MauiAsset Include="Resources\Images\madina_logoc.png" LogicalName="madina_logoc.png" />
+	</ItemGroup>
+
+
+	<ItemGroup>
 		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
 		<PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
