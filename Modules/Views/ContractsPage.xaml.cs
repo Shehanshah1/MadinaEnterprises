@@ -54,6 +54,7 @@ public partial class ContractsPage : ContentPage
         contractDatePicker.Date = c.DateCreated;
         deliveryNotesEditor.Text = c.DeliveryNotes;
         paymentNotesEditor.Text = c.PaymentNotes;
+        descriptionEntry.Text = c.Description;
     }
 
     private void ClearForm()
@@ -69,6 +70,7 @@ public partial class ContractsPage : ContentPage
         paymentNotesEditor.Text = "";
         contractPicker.SelectedItem = null;
         contractListView.SelectedItem = null;
+        descriptionEntry.Text = "";
     }
 
     private void OnContractSelected(object sender, EventArgs e)
@@ -107,7 +109,8 @@ public partial class ContractsPage : ContentPage
             CommissionPercentage = double.TryParse(commissionEntry.Text, out var comm) ? comm : 0,
             DateCreated = contractDatePicker.Date,
             DeliveryNotes = deliveryNotesEditor.Text ?? "",
-            PaymentNotes = paymentNotesEditor.Text ?? ""
+            PaymentNotes = paymentNotesEditor.Text ?? "",
+            Description = descriptionEntry.Text ?? ""
         };
 
         if (contracts.Any(c => c.ContractID == contract.ContractID))
@@ -140,7 +143,8 @@ public partial class ContractsPage : ContentPage
             CommissionPercentage = double.TryParse(commissionEntry.Text, out var comm) ? comm : 0,
             DateCreated = contractDatePicker.Date,
             DeliveryNotes = deliveryNotesEditor.Text ?? "",
-            PaymentNotes = paymentNotesEditor.Text ?? ""
+            PaymentNotes = paymentNotesEditor.Text ?? "",
+            Description = descriptionEntry.Text ?? ""
         };
 
         await _db.UpdateContract(contract);

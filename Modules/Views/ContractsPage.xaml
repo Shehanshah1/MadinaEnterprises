@@ -40,7 +40,7 @@
 
                         <!-- Form Grid -->
                         <Grid ColumnDefinitions="*,*" RowSpacing="12"
-                        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
 
                             <!-- Labels -->
                             <Label Text="Contract ID Entry"    Grid.Row="1" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
@@ -53,6 +53,7 @@
                             <Label Text="Contract Date"    Grid.Row="8" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
                             <Label Text="Delivery Notes"           Grid.Row="9" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
                             <Label Text="Payment Notes"           Grid.Row="10" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Description"           Grid.Row="11" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
 
                             <!-- Inputs (names unchanged) -->
                             <Picker x:Name="contractPicker" Title="Select Contract to Edit/Delete" BackgroundColor="LightGray" TextColor="Black" IsVisible="False" Grid.Row="0" Grid.Column="1"/>
@@ -66,8 +67,9 @@
                             <Entry  x:Name="commissionEntry" Placeholder="Commission (%)" Keyboard="Numeric" BackgroundColor="White"     Grid.Row="7" Grid.Column="1" TextColor="Black"/>
                             <DatePicker x:Name="contractDatePicker"  BackgroundColor="White"                                             Grid.Row="8" Grid.Column="1"  TextColor="Black" />
                             <Editor x:Name="deliveryNotesEditor" Placeholder="Delivery Notes" AutoSize="TextChanges" Keyboard="Telephone"  Grid.Row="9" Grid.Column="1" TextColor="Black"  BackgroundColor="White"/>
-                            <Editor x:Name="paymentNotesEditor" Placeholder="Payment Notes" AutoSize="TextChanges"                         Grid.Row="10" Grid.Column="1" BackgroundColor="White" />
-                           
+                            <Editor x:Name="paymentNotesEditor" Placeholder="Payment Notes" AutoSize="TextChanges"                         Grid.Row="10" Grid.Column="1" TextColor="Black" BackgroundColor="White" />
+                            <Entry  x:Name="descriptionEntry" Placeholder="Composition, Percentage, Notes" BackgroundColor="White"       Grid.Row="11" Grid.Column="1" TextColor="Black"/>
+
 
                         </Grid>
 

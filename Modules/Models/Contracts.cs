@@ -19,5 +19,6 @@ namespace MadinaEnterprises.Modules.Models
         public string DeliveryNotes { get; set; }
         public string PaymentNotes { get; set; }
         public string GinnerName { get; set; }
+        public string? Description { get; set; }  
     }
 }

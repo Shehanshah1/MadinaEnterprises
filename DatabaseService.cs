@@ -31,71 +31,92 @@ namespace MadinaEnterprises
             using var command = new SQLiteCommand(connection);
 
             command.CommandText = @"
+        CREATE TABLE IF NOT EXISTS Contracts (
+            ContractID TEXT PRIMARY KEY,
+            GinnerID TEXT,
+            MillID TEXT,
+            TotalBales INTEGER,
+            PricePerBatch REAL,
+            TotalAmount REAL,
+            CommissionPercentage REAL,
+            DateCreated TEXT,
+            DeliveryNotes TEXT,
+            PaymentNotes TEXT,
+            Description TEXT   -- NEW (nullable)
+        );
+        CREATE TABLE IF NOT EXISTS Deliveries (
+            DeliveryID TEXT PRIMARY KEY,
+            ContractID TEXT,
+            Amount REAL,
+            TotalBales INTEGER,
+            FactoryWeight REAL,
+            MillWeight REAL,
+            TruckNumber TEXT,
+            DriverContact TEXT,
+            DepartureDate TEXT,
+            DeliveryDate TEXT
+        );
+        CREATE TABLE IF NOT EXISTS Payments (
+            PaymentID TEXT PRIMARY KEY,
+            ContractID TEXT,
+            TotalAmount REAL,
+            AmountPaid REAL,
+            TotalBales INTEGER,
+            Date TEXT
+        );
 
-                CREATE TABLE IF NOT EXISTS Contracts (
-                    ContractID TEXT PRIMARY KEY,
-                    GinnerID TEXT,
-                    MillID TEXT,
-                    TotalBales INTEGER,
-                    PricePerBatch REAL,
-                    TotalAmount REAL,
-                    CommissionPercentage REAL,
-                    DateCreated TEXT,
-                    DeliveryNotes TEXT,
-                    PaymentNotes TEXT
-                );
-                CREATE TABLE IF NOT EXISTS Deliveries (
-                    DeliveryID TEXT PRIMARY KEY,
-                    ContractID TEXT,
-                    Amount REAL,
-                    TotalBales INTEGER,
-                    FactoryWeight REAL,
-                    MillWeight REAL,
-                    TruckNumber TEXT,
-                    DriverContact TEXT,
-                    DepartureDate TEXT,
-                    DeliveryDate TEXT
-                );
-                CREATE TABLE IF NOT EXISTS Payments (
-                    PaymentID TEXT PRIMARY KEY,
-                    ContractID TEXT,
-                    TotalAmount REAL,
-                    AmountPaid REAL,
-                    TotalBales INTEGER,
-                    Date TEXT
-                );
+        CREATE TABLE IF NOT EXISTS Ginners (
+            GinnerID TEXT PRIMARY KEY,
+            GinnerName TEXT,
+            Contact TEXT,
+            IBAN TEXT,
+            Address TEXT,
+            NTN TEXT,
+            STN TEXT,
+            BankAddress TEXT,
+            ContactPerson TEXT,
+            Station TEXT
+        );
+        
+        CREATE TABLE IF NOT EXISTS GinnerLedger (
+            ContractID TEXT,
+            DealID TEXT,
+            AmountPaid REAL,
+            DatePaid TEXT,
+            MillsDueTo TEXT,
+            PRIMARY KEY (ContractID, DealID)
+        );
 
-                CREATE TABLE IF NOT EXISTS Ginners (
-                    GinnerID TEXT PRIMARY KEY,
-                    GinnerName TEXT,
-                    Contact TEXT,
-                    IBAN TEXT,
-                    Address TEXT,
-                    NTN TEXT,
-                    STN TEXT,
-                    BankAddress TEXT,
-                    ContactPerson TEXT,
-                    Station TEXT
-                );
-                
-                CREATE TABLE IF NOT EXISTS GinnerLedger (
-                    ContractID TEXT,
-                    DealID TEXT,
-                    AmountPaid REAL,
-                    DatePaid TEXT,
-                    MillsDueTo TEXT,
-                    PRIMARY KEY (ContractID, DealID)
-                );
-
-                CREATE TABLE IF NOT EXISTS Mills (
-                    MillName TEXT,
-                    MillID TEXT PRIMARY KEY,
-                    Address TEXT,
-                    OwnerName TEXT
-                );
-               
-            ";
+        CREATE TABLE IF NOT EXISTS Mills (
+            MillName TEXT,
+            MillID TEXT PRIMARY KEY,
+            Address TEXT,
+            OwnerName TEXT
+        );
+    ";
             command.ExecuteNonQuery();
+
+            // ---- Migration for existing databases: add Description if missing
+            using (var pragma = new SQLiteCommand("PRAGMA table_info(Contracts);", connection))
+            using (var reader = pragma.ExecuteReader())
+            {
+                bool hasDescription = false;
+                while (reader.Read())
+                {
+                    var colName = reader["name"]?.ToString();
+                    if (string.Equals(colName, "Description", StringComparison.OrdinalIgnoreCase))
+                    {
+                        hasDescription = true;
+                        break;
+                    }
+                }
+
+                if (!hasDescription)
+                {
+                    using var alter = new SQLiteCommand("ALTER TABLE Contracts ADD COLUMN Description TEXT;", connection);
+                    alter.ExecuteNonQuery();
+                }
+            }
         }
 
         // ========== CONTRACTS ==========
@@ -120,8 +141,10 @@ namespace MadinaEnterprises
                     CommissionPercentage = Convert.ToDouble(reader["CommissionPercentage"]),
                     DateCreated = DateTime.Parse(reader["DateCreated"].ToString()),
                     DeliveryNotes = reader["DeliveryNotes"].ToString(),
-                    PaymentNotes = reader["PaymentNotes"].ToString()
+                    PaymentNotes = reader["PaymentNotes"].ToString(),
+                    Description = reader["Description"] is DBNull ? null : reader["Description"]?.ToString()   // NEW
                 });
+
             }
             return list;
         }
@@ -131,8 +154,14 @@ namespace MadinaEnterprises
             using var conn = new SQLiteConnection(_connectionString);
             await conn.OpenAsync();
             var cmd = new SQLiteCommand(@"
-                INSERT INTO Contracts (ContractID, GinnerID, MillID, TotalBales, PricePerBatch, TotalAmount, CommissionPercentage, DateCreated, DeliveryNotes, PaymentNotes)
-                VALUES (@ContractID, @GinnerID, @MillID, @TotalBales, @PricePerBatch, @TotalAmount, @CommissionPercentage, @DateCreated, @DeliveryNotes, @PaymentNotes)", conn);
+    INSERT INTO Contracts (
+        ContractID, GinnerID, MillID, TotalBales, PricePerBatch, TotalAmount,
+        CommissionPercentage, DateCreated, DeliveryNotes, PaymentNotes, Description
+    )
+    VALUES (
+        @ContractID, @GinnerID, @MillID, @TotalBales, @PricePerBatch, @TotalAmount,
+        @CommissionPercentage, @DateCreated, @DeliveryNotes, @PaymentNotes, @Description
+    )", conn);
 
             cmd.Parameters.AddWithValue("@ContractID", c.ContractID);
             cmd.Parameters.AddWithValue("@GinnerID", c.GinnerID);
@@ -142,8 +171,9 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@TotalAmount", c.TotalAmount);
             cmd.Parameters.AddWithValue("@CommissionPercentage", c.CommissionPercentage);
             cmd.Parameters.AddWithValue("@DateCreated", c.DateCreated.ToString("yyyy-MM-dd"));
-            cmd.Parameters.AddWithValue("@DeliveryNotes", c.DeliveryNotes);
-            cmd.Parameters.AddWithValue("@PaymentNotes", c.PaymentNotes);
+            cmd.Parameters.AddWithValue("@DeliveryNotes", (object?)c.DeliveryNotes ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@PaymentNotes", (object?)c.PaymentNotes ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@Description", (object?)c.Description ?? DBNull.Value);   // NEW
 
             await cmd.ExecuteNonQueryAsync();
         }
@@ -153,9 +183,18 @@ namespace MadinaEnterprises
             using var conn = new SQLiteConnection(_connectionString);
             await conn.OpenAsync();
             var cmd = new SQLiteCommand(@"
-                UPDATE Contracts SET GinnerID=@GinnerID, MillID=@MillID, TotalBales=@TotalBales, PricePerBatch=@PricePerBatch, TotalAmount=@TotalAmount,
-                CommissionPercentage=@CommissionPercentage, DateCreated=@DateCreated, DeliveryNotes=@DeliveryNotes, PaymentNotes=@PaymentNotes
-                WHERE ContractID=@ContractID", conn);
+    UPDATE Contracts SET
+        GinnerID=@GinnerID,
+        MillID=@MillID,
+        TotalBales=@TotalBales,
+        PricePerBatch=@PricePerBatch,
+        TotalAmount=@TotalAmount,
+        CommissionPercentage=@CommissionPercentage,
+        DateCreated=@DateCreated,
+        DeliveryNotes=@DeliveryNotes,
+        PaymentNotes=@PaymentNotes,
+        Description=@Description
+    WHERE ContractID=@ContractID", conn);
 
             cmd.Parameters.AddWithValue("@ContractID", c.ContractID);
             cmd.Parameters.AddWithValue("@GinnerID", c.GinnerID);
@@ -165,8 +204,9 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@TotalAmount", c.TotalAmount);
             cmd.Parameters.AddWithValue("@CommissionPercentage", c.CommissionPercentage);
             cmd.Parameters.AddWithValue("@DateCreated", c.DateCreated.ToString("yyyy-MM-dd"));
-            cmd.Parameters.AddWithValue("@DeliveryNotes", c.DeliveryNotes);
-            cmd.Parameters.AddWithValue("@PaymentNotes", c.PaymentNotes);
+            cmd.Parameters.AddWithValue("@DeliveryNotes", (object?)c.DeliveryNotes ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@PaymentNotes", (object?)c.PaymentNotes ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@Description", (object?)c.Description ?? DBNull.Value);   // NEW
 
             await cmd.ExecuteNonQueryAsync();
         }
