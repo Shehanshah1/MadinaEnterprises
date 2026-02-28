@@ -55,8 +55,8 @@
                             <!-- Inputs (names unchanged) -->
                             <Picker  x:Name="paymentPicker" Title="Select Payment to Edit/Delete" SelectedIndexChanged="OnPaymentSelected" BackgroundColor="White" TextColor="Black" IsVisible="False"/>
                             <Entry  x:Name="paymentIDEntry" Placeholder="Payment ID" BackgroundColor="White" TextColor="Black"    Grid.Row="1" Grid.Column="1" />
-                            <Picker  x:Name="contractPicker" Grid.Row="2" Grid.Column="1" Title="Select Contract" TitleColor="Black" BackgroundColor="LightGray"  TextColor="Black"/>
-                            <Entry  x:Name="totalAmountEntry" Placeholder="Total Deal Amount" IsReadOnly="True" BackgroundColor="White" TextColor="Black" Grid.Row="3" Grid.Column="1"/>
+                            <Picker  x:Name="contractPicker" Grid.Row="2" Grid.Column="1" Title="Select Contract" TitleColor="Black" BackgroundColor="LightGray"  TextColor="Black" SelectedIndexChanged="OnContractChanged"/>
+                            <Entry  x:Name="totalAmountEntry" Placeholder="Total Amount (suggested, editable)" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="3" Grid.Column="1" TextChanged="OnTotalAmountChanged"/>
                             <Entry x:Name="paidAmountEntry" Placeholder="Amount Paid" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" TextChanged="OnPaidAmountChanged" Grid.Row="4" Grid.Column="1"/>
                             <Entry x:Name="remainingAmountEntry" Placeholder="Remaining Amount" IsReadOnly="True" BackgroundColor="White" TextColor="Black" Grid.Row="5" Grid.Column="1"/>
                             <Entry x:Name="balesEntry" Placeholder="Total Bales" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="6" Grid.Column="1"/>

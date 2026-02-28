@@ -1,5 +1,6 @@
 using MadinaEnterprises.Modules.Models;
 using Microsoft.Maui.Controls;
+using MadinaEnterprises.Modules.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,6 +15,8 @@ public partial class DeliveriesPage : ContentPage
     private List<Deliveries> deliveries = new();
     private List<Contracts> contracts = new();
     private ObservableCollection<Deliveries> filteredDeliveries = new();
+    private bool _isSettingSuggestedAmount;
+    private bool _isAmountManuallyEdited;
 
 
     public DeliveriesPage()
@@ -56,7 +59,10 @@ public partial class DeliveriesPage : ContentPage
     {
         deliveryIDEntry.Text = d.DeliveryID;
         contractPicker.SelectedIndex = contracts.FindIndex(c => c.ContractID == d.ContractID);
+        _isSettingSuggestedAmount = true;
         amountEntry.Text = d.Amount.ToString("F2");
+        _isSettingSuggestedAmount = false;
+        _isAmountManuallyEdited = true;
         totalBalesEntry.Text = d.TotalBales.ToString();
         factoryWeightEntry.Text = d.FactoryWeight.ToString("F2");
         millWeightEntry.Text = d.MillWeight.ToString("F2");
@@ -79,6 +85,7 @@ public partial class DeliveriesPage : ContentPage
         departureDatePicker.Date = DateTime.Today;
         deliveryDatePicker.Date = DateTime.Today;
         deliveryPicker.SelectedIndex = -1;
+        _isAmountManuallyEdited = false;
     }
 
     private void OnDeliverySelected(object sender, EventArgs e)
@@ -90,6 +97,54 @@ public partial class DeliveriesPage : ContentPage
             PopulateForm(selected);
     }
 
+    private void OnContractChanged(object sender, EventArgs e)
+    {
+        _isAmountManuallyEdited = false;
+        RecalculateActualAmount();
+    }
+    private void OnMillWeightChanged(object sender, TextChangedEventArgs e) => RecalculateActualAmount();
+
+    private void OnAmountChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_isSettingSuggestedAmount)
+        {
+            return;
+        }
+
+        _isAmountManuallyEdited = true;
+    }
+
+    private void RecalculateActualAmount()
+    {
+        if (_isAmountManuallyEdited)
+        {
+            return;
+        }
+
+        if (contractPicker.SelectedIndex < 0 || contractPicker.SelectedIndex >= contracts.Count)
+        {
+            _isSettingSuggestedAmount = true;
+            amountEntry.Text = "0.00";
+            _isSettingSuggestedAmount = false;
+            return;
+        }
+
+        if (!RateCalculation.TryParseDouble(millWeightEntry.Text, out var millWeightKg))
+        {
+            _isSettingSuggestedAmount = true;
+            amountEntry.Text = "0.00";
+            _isSettingSuggestedAmount = false;
+            return;
+        }
+
+        var ratePerMaund = contracts[contractPicker.SelectedIndex].PricePerBatch;
+        var actualAmount = RateCalculation.AmountFromKg(millWeightKg, ratePerMaund);
+
+        _isSettingSuggestedAmount = true;
+        amountEntry.Text = actualAmount.ToString("F2");
+        _isSettingSuggestedAmount = false;
+    }
+
     private async void OnSaveDeliveryClicked(object sender, EventArgs e)
     {
         if (contractPicker.SelectedIndex == -1)
@@ -98,14 +153,16 @@ public partial class DeliveriesPage : ContentPage
             return;
         }
 
+        RecalculateActualAmount();
+
         var delivery = new Deliveries
         {
             DeliveryID = deliveryIDEntry.Text ?? "",
             ContractID = contracts[contractPicker.SelectedIndex].ContractID,
-            Amount = double.TryParse(amountEntry.Text, out var amt) ? amt : 0,
+            Amount = RateCalculation.TryParseDouble(amountEntry.Text, out var amt) ? amt : 0,
             TotalBales = int.TryParse(totalBalesEntry.Text, out var bales) ? bales : 0,
-            FactoryWeight = double.TryParse(factoryWeightEntry.Text, out var fw) ? fw : 0,
-            MillWeight = double.TryParse(millWeightEntry.Text, out var mw) ? mw : 0,
+            FactoryWeight = RateCalculation.TryParseDouble(factoryWeightEntry.Text, out var fw) ? fw : 0,
+            MillWeight = RateCalculation.TryParseDouble(millWeightEntry.Text, out var mw) ? mw : 0,
             TruckNumber = truckNoEntry.Text ?? "",
             DriverContact = driverContactEntry.Text ?? "",
             DepartureDate = departureDatePicker.Date,
@@ -132,14 +189,16 @@ public partial class DeliveriesPage : ContentPage
             return;
         }
 
+        RecalculateActualAmount();
+
         var delivery = new Deliveries
         {
             DeliveryID = deliveryIDEntry.Text ?? "",
             ContractID = contracts[contractPicker.SelectedIndex].ContractID,
-            Amount = double.TryParse(amountEntry.Text, out var amt) ? amt : 0,
+            Amount = RateCalculation.TryParseDouble(amountEntry.Text, out var amt) ? amt : 0,
             TotalBales = int.TryParse(totalBalesEntry.Text, out var bales) ? bales : 0,
-            FactoryWeight = double.TryParse(factoryWeightEntry.Text, out var fw) ? fw : 0,
-            MillWeight = double.TryParse(millWeightEntry.Text, out var mw) ? mw : 0,
+            FactoryWeight = RateCalculation.TryParseDouble(factoryWeightEntry.Text, out var fw) ? fw : 0,
+            MillWeight = RateCalculation.TryParseDouble(millWeightEntry.Text, out var mw) ? mw : 0,
             TruckNumber = truckNoEntry.Text ?? "",
             DriverContact = driverContactEntry.Text ?? "",
             DepartureDate = departureDatePicker.Date,

@@ -1,5 +1,6 @@
 using MadinaEnterprises.Modules.Models;
 using Microsoft.Maui.Controls;
+using MadinaEnterprises.Modules.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,7 +14,10 @@ public partial class PaymentsPage : ContentPage
     private readonly DatabaseService _db = App.DatabaseService!;
     private List<Contracts> contracts = new();
     private List<Payment> payments = new();
+    private List<Deliveries> deliveries = new();
     private ObservableCollection<Payment> filteredPayments = new();
+    private bool _isSettingSuggestedTotal;
+    private bool _isTotalAmountManuallyEdited;
 
     public PaymentsPage()
     {
@@ -25,6 +29,7 @@ public partial class PaymentsPage : ContentPage
     {
         contracts = await _db.GetAllContracts();
         payments = await _db.GetAllPayments();
+        deliveries = await _db.GetAllDeliveries();
 
         contractPicker.ItemsSource = contracts.Select(c => c.ContractID).ToList();
         paymentPicker.ItemsSource = payments.Select(p => p.PaymentID).ToList();
@@ -37,9 +42,12 @@ public partial class PaymentsPage : ContentPage
     {
         paymentIDEntry.Text = p.PaymentID;
         contractPicker.SelectedItem = p.ContractID;
+        _isSettingSuggestedTotal = true;
         totalAmountEntry.Text = p.TotalAmount.ToString("F2");
+        _isSettingSuggestedTotal = false;
+        _isTotalAmountManuallyEdited = true;
         paidAmountEntry.Text = p.AmountPaid.ToString("F2");
-        remainingAmountEntry.Text = (p.TotalAmount - p.AmountPaid).ToString("F2");
+        RecalculateRemainingAmount();
         balesEntry.Text = p.TotalBales.ToString();
         paymentDatePicker.Date = p.Date;
     }
@@ -55,6 +63,24 @@ public partial class PaymentsPage : ContentPage
         paymentDatePicker.Date = DateTime.Today;
         paymentPicker.SelectedItem = null;
         paymentListView.SelectedItem = null;
+        _isTotalAmountManuallyEdited = false;
+    }
+
+    private void OnContractChanged(object sender, EventArgs e)
+    {
+        _isTotalAmountManuallyEdited = false;
+        RecalculateTotalAmountForSelectedContract();
+        RecalculateRemainingAmount();
+    }
+
+    private void OnTotalAmountChanged(object sender, TextChangedEventArgs e)
+    {
+        if (!_isSettingSuggestedTotal)
+        {
+            _isTotalAmountManuallyEdited = true;
+        }
+
+        RecalculateRemainingAmount();
     }
 
     private void OnPaymentSelected(object sender, EventArgs e)
@@ -86,12 +112,15 @@ public partial class PaymentsPage : ContentPage
 
         var contract = contracts.First(c => c.ContractID == contractPicker.SelectedItem.ToString());
 
+        RecalculateTotalAmountForSelectedContract();
+        var totalAmount = RateCalculation.TryParseDouble(totalAmountEntry.Text, out var calcTotal) ? calcTotal : 0;
+
         var payment = new Payment
         {
             PaymentID = paymentIDEntry.Text,
             ContractID = contract.ContractID,
-            TotalAmount = contract.TotalAmount,
-            AmountPaid = double.TryParse(paidAmountEntry.Text, out var amt) ? amt : 0,
+            TotalAmount = totalAmount,
+            AmountPaid = RateCalculation.TryParseDouble(paidAmountEntry.Text, out var amt) ? amt : 0,
             TotalBales = int.TryParse(balesEntry.Text, out var bales) ? bales : 0,
             Date = paymentDatePicker.Date
         };
@@ -114,12 +143,15 @@ public partial class PaymentsPage : ContentPage
 
         var contract = contracts.First(c => c.ContractID == contractPicker.SelectedItem.ToString());
 
+        RecalculateTotalAmountForSelectedContract();
+        var totalAmount = RateCalculation.TryParseDouble(totalAmountEntry.Text, out var calcTotal) ? calcTotal : 0;
+
         var payment = new Payment
         {
             PaymentID = paymentIDEntry.Text,
             ContractID = contract.ContractID,
-            TotalAmount = contract.TotalAmount,
-            AmountPaid = double.TryParse(paidAmountEntry.Text, out var amt) ? amt : 0,
+            TotalAmount = totalAmount,
+            AmountPaid = RateCalculation.TryParseDouble(paidAmountEntry.Text, out var amt) ? amt : 0,
             TotalBales = int.TryParse(balesEntry.Text, out var bales) ? bales : 0,
             Date = paymentDatePicker.Date
         };
@@ -142,11 +174,52 @@ public partial class PaymentsPage : ContentPage
 
     private void OnPaidAmountChanged(object sender, TextChangedEventArgs e)
     {
-        if (double.TryParse(totalAmountEntry.Text, out var total) &&
-            double.TryParse(paidAmountEntry.Text, out var paid))
+        RecalculateRemainingAmount();
+    }
+
+    private void RecalculateTotalAmountForSelectedContract()
+    {
+        if (_isTotalAmountManuallyEdited)
         {
-            remainingAmountEntry.Text = (total - paid).ToString("F2");
+            return;
         }
+
+        if (contractPicker.SelectedItem is not string contractId)
+        {
+            _isSettingSuggestedTotal = true;
+            totalAmountEntry.Text = "0.00";
+            _isSettingSuggestedTotal = false;
+            return;
+        }
+
+        var contract = contracts.FirstOrDefault(c => c.ContractID == contractId);
+        if (contract == null)
+        {
+            _isSettingSuggestedTotal = true;
+            totalAmountEntry.Text = "0.00";
+            _isSettingSuggestedTotal = false;
+            return;
+        }
+
+        var contractDeliveries = deliveries.Where(d => d.ContractID == contractId).ToList();
+        var suggestedTotal = contractDeliveries.Sum(d => d.Amount);
+
+        if (suggestedTotal <= 0)
+        {
+            var millWeightKg = contractDeliveries.Sum(d => d.MillWeight);
+            suggestedTotal = RateCalculation.AmountFromKg(millWeightKg, contract.PricePerBatch);
+        }
+
+        _isSettingSuggestedTotal = true;
+        totalAmountEntry.Text = suggestedTotal.ToString("F2");
+        _isSettingSuggestedTotal = false;
+    }
+
+    private void RecalculateRemainingAmount()
+    {
+        var total = RateCalculation.TryParseDouble(totalAmountEntry.Text, out var totalAmount) ? totalAmount : 0;
+        var paid = RateCalculation.TryParseDouble(paidAmountEntry.Text, out var paidAmount) ? paidAmount : 0;
+        remainingAmountEntry.Text = (total - paid).ToString("F2");
     }
 
     private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
