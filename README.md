@@ -27,6 +27,7 @@ MadinaEnterprises/
 - **Ginner Ledger** – Maintain deal-level payment records with date and mill due tracking.
 - **Navigation Panel** – A persistent sidebar for quick page access.
 - **Offline Data Storage** – Uses SQLite with local file persistence.
+- **Rich Export Engine** – One-click DOCX for selected contract and multi-workbook Excel exports (master + per-ginner files) with polished formatting, filters, and summaries.
 
 ---
 
@@ -82,9 +83,23 @@ madina.db3
 
 ---
 
+
+## 📤 Export Functionality
+
+- **Word export**: `Contracts -> Export to DOCX` generates a clean contract document for the selected contract.
+- **Excel export**: `Contracts -> Export to Excel` generates:
+  - one **master workbook** (Contracts, Deliveries, Payments)
+  - one **per-ginner workbook** (Summary, Contracts, Deliveries, Payments) for each ginner with contracts
+- Export files are grouped into a timestamped folder inside app data, and the app offers to open the exported file immediately after generation.
+
 ## 🔐 Authentication
 
-Currently uses a placeholder `LoginPage`. You can integrate secure authentication (e.g., Firebase, Microsoft Identity) as needed.
+This project now uses a **simple hardcoded login** flow (no signup and no forgot-password screen).
+
+- Username: `Anees`
+- Password: `4081`
+
+You can change these constants in `Modules/Views/LoginPage.xaml.cs` (`HardcodedUsername` and `HardcodedPassword`).
 
 ---
 
@@ -106,5 +121,3 @@ This project is proprietary and developed for **Madina Enterprises**. Redistribu
 ---
 
 **Built with ❤️ using .NET MAUI**
-```
-

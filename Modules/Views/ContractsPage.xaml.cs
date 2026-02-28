@@ -1,6 +1,7 @@
 using MadinaEnterprises.Modules.Models;
 using System.Collections.ObjectModel;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.ApplicationModel;
 using MadinaEnterprises.Modules.Util;
 
 namespace MadinaEnterprises.Modules.Views;
@@ -174,23 +175,64 @@ public partial class ContractsPage : ContentPage
 
     private async void OnExportDocClicked(object sender, EventArgs e)
     {
-        if (contractPicker.SelectedItem is not string selectedId) return;
+        if (contractPicker.SelectedItem is not string selectedId)
+        {
+            await DisplayAlert("Export", "Select a contract first.", "OK");
+            return;
+        }
+
         var contract = contracts.FirstOrDefault(c => c.ContractID == selectedId);
-        if (contract == null) return;
+        if (contract == null)
+        {
+            await DisplayAlert("Export", "Contract not found.", "OK");
+            return;
+        }
 
         var ginner = ginners.FirstOrDefault(g => g.GinnerID == contract.GinnerID);
         var mill = mills.FirstOrDefault(m => m.MillID == contract.MillID);
+        if (ginner == null || mill == null)
+        {
+            await DisplayAlert("Export", "Ginner or mill details missing for this contract.", "OK");
+            return;
+        }
 
-        var path = ExportHelper.ExportContractToWord(contract, ginner!, mill!);
-        await DisplayAlert("Export", $"DOCX export complete: {path}", "OK");
-        ClearForm();
+        try
+        {
+            var path = await Task.Run(() => ExportHelper.ExportContractToWord(contract, ginner, mill));
+            var open = await DisplayAlert("Export Complete", $"DOCX export complete.\n{path}", "Open File", "Close");
+            if (open)
+            {
+                await Launcher.OpenAsync(new OpenFileRequest { File = new ReadOnlyFile(path) });
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Export Failed", $"Could not export DOCX: {ex.Message}", "OK");
+        }
     }
 
     private async void OnExportExcelClicked(object sender, EventArgs e)
     {
-        var path = ExportHelper.ExportAllContractsToExcel(contracts, ginners, mills);
-        await DisplayAlert("Export", $"Excel exported: {path}", "OK");
-        ClearForm();
+        if (!contracts.Any())
+        {
+            await DisplayAlert("Export", "No contracts available to export.", "OK");
+            return;
+        }
+
+        try
+        {
+            var result = await Task.Run(() => ExportHelper.ExportAllContractsToExcel(contracts, ginners, mills));
+            var message = $"Master workbook and {result.PerGinnerWorkbookPaths.Count} ginner workbook(s) created.\nFolder: {result.ExportDirectory}";
+            var open = await DisplayAlert("Export Complete", message, "Open Master", "Close");
+            if (open)
+            {
+                await Launcher.OpenAsync(new OpenFileRequest { File = new ReadOnlyFile(result.MasterWorkbookPath) });
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Export Failed", $"Could not export Excel files: {ex.Message}", "OK");
+        }
     }
 
     // Navigation
