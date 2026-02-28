@@ -157,7 +157,9 @@ public sealed class PasswordResetService : IPasswordResetService
     {
         if (string.IsNullOrWhiteSpace(ApiEndpoint))
         {
-            await Task.Delay(600); // simulate
+            // Keep response generic to avoid user enumeration while still performing a real lookup.
+            _ = await App.DatabaseService.UserExists(email);
+            await Task.Delay(300);
             return PasswordResetResult.Ok();
         }
 
