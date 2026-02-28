@@ -24,57 +24,84 @@
         <!-- Main Content -->
         <ScrollView Grid.Column="1">
             <VerticalStackLayout Padding="30" Spacing="20">
-                <Label Text="Dashboard"
-                       FontSize="Header"
-                       FontAttributes="Bold"
-                       TextColor="Black"
-                       HorizontalOptions="Start"/>
-                <BoxView HeightRequest="2" BackgroundColor="Black"/>
+
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="Dashboard"
+                               FontSize="34"
+                               FontAttributes="Bold"
+                               TextColor="#111827"
+                               HorizontalOptions="Start"/>
+                        <Label Text="Overview of business performance and current metrics"
+                               FontSize="14"
+                               TextColor="#6B7280"/>
+                    </VerticalStackLayout>
+                    <Frame Grid.Column="1"
+                           BackgroundColor="#F3F4F6"
+                           BorderColor="#E5E7EB"
+                           CornerRadius="10"
+                           Padding="12,8"
+                           HasShadow="False"
+                           VerticalOptions="Center">
+                        <Label Text="Live Stats"
+                               FontAttributes="Bold"
+                               TextColor="#374151"/>
+                    </Frame>
+                </Grid>
+
+                <BoxView HeightRequest="2" BackgroundColor="#111827" Opacity="0.9"/>
 
                 <!-- Widgets Grid -->
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="20" RowSpacing="20">
 
-                    <!-- Total Commission -->
-                    <VerticalStackLayout Grid.Row="0" Grid.Column="0">
-                        <Label Text="Total Commission" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
-                        <Label x:Name="TotalCommissionLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
-                    </VerticalStackLayout>
+                    <Frame Grid.Row="0" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Total Commission" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
+                            <Label x:Name="TotalCommissionLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                        </VerticalStackLayout>
+                    </Frame>
 
-                    <!-- Payment Made -->
-                    <VerticalStackLayout Grid.Row="0" Grid.Column="1">
-                        <Label Text="Payment Made" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
-                        <Label x:Name="PaymentMadeLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
-                    </VerticalStackLayout>
+                    <Frame Grid.Row="0" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Payment Made" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
+                            <Label x:Name="PaymentMadeLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                        </VerticalStackLayout>
+                    </Frame>
 
-                    <!-- Payment Due -->
-                    <VerticalStackLayout Grid.Row="1" Grid.Column="0">
-                        <Label Text="Payment Due" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
-                        <Label x:Name="PaymentDueLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
-                    </VerticalStackLayout>
+                    <Frame Grid.Row="1" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Payment Due" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
+                            <Label x:Name="PaymentDueLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                        </VerticalStackLayout>
+                    </Frame>
 
-                    <!-- Bales Sold -->
-                    <VerticalStackLayout Grid.Row="1" Grid.Column="1">
-                        <Label Text="Bales Sold" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
-                        <Label x:Name="BalesSoldLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
-                    </VerticalStackLayout>
+                    <Frame Grid.Row="1" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Bales Sold" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
+                            <Label x:Name="BalesSoldLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                        </VerticalStackLayout>
+                    </Frame>
 
-                    <!-- Total Ginners -->
-                    <VerticalStackLayout Grid.Row="2" Grid.Column="0">
-                        <Label Text="Total Ginners" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
-                        <Label x:Name="TotalGinnersLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
-                    </VerticalStackLayout>
+                    <Frame Grid.Row="2" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Total Ginners" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
+                            <Label x:Name="TotalGinnersLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                        </VerticalStackLayout>
+                    </Frame>
 
-                    <!-- Total Mills -->
-                    <VerticalStackLayout Grid.Row="2" Grid.Column="1">
-                        <Label Text="Total Mills" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
-                        <Label x:Name="TotalMillsLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
-                    </VerticalStackLayout>
+                    <Frame Grid.Row="2" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Total Mills" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
+                            <Label x:Name="TotalMillsLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                        </VerticalStackLayout>
+                    </Frame>
 
-                    <!-- Average Commission Rate -->
-                    <VerticalStackLayout Grid.Row="3" Grid.Column="0">
-                        <Label Text="Avg. Commission Rate" FontSize="Medium" FontAttributes="Bold" TextColor="Black"/>
-                        <Label x:Name="AvgCommissionRateLabel" Text="Loading..." FontSize="Small" TextColor="Gray"/>
-                    </VerticalStackLayout>
+                    <Frame Grid.Row="3" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Avg. Commission Rate" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
+                            <Label x:Name="AvgCommissionRateLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                        </VerticalStackLayout>
+                    </Frame>
                 </Grid>
             </VerticalStackLayout>
         </ScrollView>

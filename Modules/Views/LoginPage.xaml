@@ -14,6 +14,7 @@
                 <Label Text="MADINA ENTERPRISES"
                        FontAttributes="Bold"
                        FontSize="52"
+                       LetterSpacing="1"
                        TextColor="#333333"
                        HorizontalOptions="Center"
                        VerticalOptions="Center"/>
@@ -26,85 +27,105 @@
                    FontSize="14"
                    IsVisible="False"
                    HorizontalOptions="Center"
-                   Margin="0,12"/>
+                   Margin="0,14,0,4"/>
 
-            <!-- Login Card (no CornerRadius) -->
-            <Frame Margin="36,28"
-                   Padding="24"
+            <!-- Login Card -->
+            <Frame Margin="36,26"
+                   Padding="0"
                    BackgroundColor="White"
                    HasShadow="True"
+                   CornerRadius="18"
                    HorizontalOptions="Center"
                    WidthRequest="880">
 
                 <!-- Two columns: logo | divider | fields -->
-                <Grid ColumnDefinitions="Auto,24,*" VerticalOptions="Center">
+                <Grid ColumnDefinitions="Auto,24,*"
+                      VerticalOptions="Center"
+                      Padding="26">
 
                     <!-- Logo -->
-                    <Image Source="madina_logo.png"
-                           Grid.Column="0"
-                           HeightRequest="200"
-                           WidthRequest="200"
-                           HorizontalOptions="Start"
-                           VerticalOptions="Center"
-                           Aspect="AspectFit"
-                           Margin="0,0,16,0"/>
+                    <VerticalStackLayout Grid.Column="0"
+                                         Spacing="12"
+                                         HorizontalOptions="Center"
+                                         VerticalOptions="Center"
+                                         Padding="4,0,16,0">
+                        <Frame BackgroundColor="#F7F9FC"
+                               BorderColor="#E7E7E7"
+                               CornerRadius="14"
+                               Padding="14"
+                               HasShadow="False">
+                            <Image Source="madina_logo.png"
+                                   HeightRequest="180"
+                                   WidthRequest="180"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   Aspect="AspectFit"/>
+                        </Frame>
+                        <Label Text="Trusted Cotton Trading"
+                               FontSize="14"
+                               TextColor="#6B7280"
+                               HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
 
                     <!-- Divider -->
                     <BoxView Grid.Column="1"
                              WidthRequest="1"
                              BackgroundColor="#DDDDDD"
-                             HeightRequest="220"
+                             HeightRequest="280"
                              VerticalOptions="Center"
-                             Opacity="0.7"/>
+                             Opacity="0.8"/>
 
                     <!-- Fields -->
                     <VerticalStackLayout Grid.Column="2"
-                                         Spacing="16"
+                                         Spacing="14"
                                          VerticalOptions="Center"
-                                         Padding="8,0,0,0"
-                                         MinimumWidthRequest="320">
+                                         Padding="14,0,0,0"
+                                         MinimumWidthRequest="340">
 
-                        <Label Text="Welcome!"
+                        <Label Text="Welcome back"
                                FontAttributes="Bold"
-                               FontSize="24"
+                               FontSize="30"
                                TextColor="#333333"/>
 
-                        <Label Text="Use your hardcoded admin credentials"
+                        <Label Text="Sign in with your admin credentials"
                                FontSize="16"
                                TextColor="#666666"/>
 
                         <!-- Email -->
-                        <VerticalStackLayout Spacing="6">
+                        <VerticalStackLayout Spacing="6" Margin="0,8,0,0">
                             <Label Text="Username"
-                                   TextColor="#A4C400"
+                                   TextColor="#5B6E00"
                                    FontAttributes="Bold"/>
                             <Entry x:Name="emailEntry"
                                    Placeholder="Enter your username"
                                    BackgroundColor="#F6F8FA"
                                    TextColor="#333333"
-                                   HeightRequest="46"
-                                   Keyboard="Default"/>
+                                   PlaceholderColor="#9CA3AF"
+                                   HeightRequest="50"/>
                         </VerticalStackLayout>
 
                         <!-- Password + Show/Hide -->
                         <VerticalStackLayout Spacing="6">
                             <Label Text="Password"
-                                   TextColor="#A4C400"
+                                   TextColor="#5B6E00"
                                    FontAttributes="Bold"/>
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                 <Entry x:Name="passwordEntry"
                                        Placeholder="Enter your password"
                                        IsPassword="True"
                                        BackgroundColor="#F6F8FA"
                                        TextColor="#333333"
-                                       HeightRequest="46"
+                                       PlaceholderColor="#9CA3AF"
+                                       HeightRequest="50"
                                        Grid.Column="0"/>
                                 <Button x:Name="showHidePasswordButton"
                                         Text="Show"
                                         BackgroundColor="#A4C400"
                                         TextColor="White"
                                         FontAttributes="Bold"
-                                        Padding="10,6"
+                                        CornerRadius="10"
+                                        Padding="14,8"
+                                        HeightRequest="50"
                                         Clicked="showHidePasswordButton_Clicked"
                                         Grid.Column="1"/>
                             </Grid>
@@ -116,7 +137,10 @@
                                 BackgroundColor="#A4C400"
                                 TextColor="White"
                                 FontAttributes="Bold"
-                                HeightRequest="50"
+                                FontSize="17"
+                                CornerRadius="12"
+                                HeightRequest="52"
+                                Margin="0,8,0,0"
                                 Clicked="OnLoginButtonClicked"/>
                     </VerticalStackLayout>
                 </Grid>
