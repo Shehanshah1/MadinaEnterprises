@@ -1,34 +1,32 @@
 ﻿using MadinaEnterprises.Modules.Models;
 using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MadinaEnterprises
 {
     public class DatabaseService
     {
-        private readonly string _dbPath = Path.Combine(FileSystem.AppDataDirectory, "madina.db3");
-        private readonly string _databasePath;
+                private readonly string _databasePath;
         private readonly string _connectionString;
 
         public DatabaseService()
         {
             _databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "madina.db3");
-            _connectionString = $"Data Source={_databasePath};Version=3;";
+            _connectionString = $"Data Source={_databasePath}";
             InitializeDatabase();
         }
 
         private void InitializeDatabase()
         {
-            if (!File.Exists(_databasePath))
-                SQLiteConnection.CreateFile(_databasePath);
-
-            using var connection = new SQLiteConnection(_connectionString);
+            using var connection = new SqliteConnection(_connectionString);
             connection.Open();
-            using var command = new SQLiteCommand(connection);
+            using var command = connection.CreateCommand();
 
             command.CommandText = @"
         CREATE TABLE IF NOT EXISTS Contracts (
@@ -93,11 +91,19 @@ namespace MadinaEnterprises
             Address TEXT,
             OwnerName TEXT
         );
+
+        CREATE TABLE IF NOT EXISTS Users (
+            UserID TEXT PRIMARY KEY,
+            Name TEXT NOT NULL,
+            Email TEXT NOT NULL UNIQUE,
+            PasswordHash TEXT NOT NULL,
+            CreatedAt TEXT NOT NULL
+        );
     ";
             command.ExecuteNonQuery();
 
             // ---- Migration for existing databases: add Description if missing
-            using (var pragma = new SQLiteCommand("PRAGMA table_info(Contracts);", connection))
+            using (var pragma = new SqliteCommand("PRAGMA table_info(Contracts);", connection))
             using (var reader = pragma.ExecuteReader())
             {
                 bool hasDescription = false;
@@ -113,7 +119,7 @@ namespace MadinaEnterprises
 
                 if (!hasDescription)
                 {
-                    using var alter = new SQLiteCommand("ALTER TABLE Contracts ADD COLUMN Description TEXT;", connection);
+                    using var alter = new SqliteCommand("ALTER TABLE Contracts ADD COLUMN Description TEXT;", connection);
                     alter.ExecuteNonQuery();
                 }
             }
@@ -123,10 +129,10 @@ namespace MadinaEnterprises
         public async Task<List<Contracts>> GetAllContracts()
         {
             var list = new List<Contracts>();
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
 
-            var cmd = new SQLiteCommand("SELECT * FROM Contracts", conn);
+            var cmd = new SqliteCommand("SELECT * FROM Contracts", conn);
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -151,9 +157,9 @@ namespace MadinaEnterprises
 
         public async Task AddContract(Contracts c)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand(@"
+            var cmd = new SqliteCommand(@"
     INSERT INTO Contracts (
         ContractID, GinnerID, MillID, TotalBales, PricePerBatch, TotalAmount,
         CommissionPercentage, DateCreated, DeliveryNotes, PaymentNotes, Description
@@ -180,9 +186,9 @@ namespace MadinaEnterprises
 
         public async Task UpdateContract(Contracts c)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand(@"
+            var cmd = new SqliteCommand(@"
     UPDATE Contracts SET
         GinnerID=@GinnerID,
         MillID=@MillID,
@@ -213,9 +219,9 @@ namespace MadinaEnterprises
 
         public async Task DeleteContract(string contractId)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand("DELETE FROM Contracts WHERE ContractID = @id", conn);
+            var cmd = new SqliteCommand("DELETE FROM Contracts WHERE ContractID = @id", conn);
             cmd.Parameters.AddWithValue("@id", contractId);
             await cmd.ExecuteNonQueryAsync();
         }
@@ -224,10 +230,10 @@ namespace MadinaEnterprises
         public async Task<List<Deliveries>> GetAllDeliveries()
         {
             var list = new List<Deliveries>();
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
 
-            var cmd = new SQLiteCommand("SELECT * FROM Deliveries", conn);
+            var cmd = new SqliteCommand("SELECT * FROM Deliveries", conn);
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -250,9 +256,9 @@ namespace MadinaEnterprises
 
         public async Task AddDelivery(Deliveries d)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand(@"
+            var cmd = new SqliteCommand(@"
                 INSERT INTO Deliveries (DeliveryID, ContractID, Amount, TotalBales, FactoryWeight, MillWeight, TruckNumber, DriverContact, DepartureDate, DeliveryDate)
                 VALUES (@DeliveryID, @ContractID, @Amount, @TotalBales, @FactoryWeight, @MillWeight, @TruckNumber, @DriverContact, @DepartureDate, @DeliveryDate)", conn);
 
@@ -272,9 +278,9 @@ namespace MadinaEnterprises
 
         public async Task UpdateDelivery(Deliveries d)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand(@"
+            var cmd = new SqliteCommand(@"
                 UPDATE Deliveries SET ContractID=@ContractID, Amount=@Amount, TotalBales=@TotalBales,
                 FactoryWeight=@FactoryWeight, MillWeight=@MillWeight, TruckNumber=@TruckNumber, DriverContact=@DriverContact,
                 DepartureDate=@DepartureDate, DeliveryDate=@DeliveryDate
@@ -296,9 +302,9 @@ namespace MadinaEnterprises
 
         public async Task DeleteDelivery(string deliveryId)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand("DELETE FROM Deliveries WHERE DeliveryID = @id", conn);
+            var cmd = new SqliteCommand("DELETE FROM Deliveries WHERE DeliveryID = @id", conn);
             cmd.Parameters.AddWithValue("@id", deliveryId);
             await cmd.ExecuteNonQueryAsync();
         }
@@ -307,10 +313,10 @@ namespace MadinaEnterprises
         public async Task<List<Payment>> GetAllPayments()
         {
             var list = new List<Payment>();
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
 
-            var cmd = new SQLiteCommand("SELECT * FROM Payments", conn);
+            var cmd = new SqliteCommand("SELECT * FROM Payments", conn);
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -329,9 +335,9 @@ namespace MadinaEnterprises
 
         public async Task AddPayment(Payment p)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand(@"
+            var cmd = new SqliteCommand(@"
                 INSERT INTO Payments (PaymentID, ContractID, TotalAmount, AmountPaid, TotalBales, Date)
                 VALUES (@PaymentID, @ContractID, @TotalAmount, @AmountPaid, @TotalBales, @Date)", conn);
 
@@ -347,9 +353,9 @@ namespace MadinaEnterprises
 
         public async Task UpdatePayment(Payment p)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand(@"
+            var cmd = new SqliteCommand(@"
                 UPDATE Payments SET ContractID=@ContractID, TotalAmount=@TotalAmount, AmountPaid=@AmountPaid, TotalBales=@TotalBales, Date=@Date
                 WHERE PaymentID=@PaymentID", conn);
 
@@ -365,9 +371,9 @@ namespace MadinaEnterprises
 
         public async Task DeletePayment(string paymentId)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand("DELETE FROM Payments WHERE PaymentID = @id", conn);
+            var cmd = new SqliteCommand("DELETE FROM Payments WHERE PaymentID = @id", conn);
             cmd.Parameters.AddWithValue("@id", paymentId);
             await cmd.ExecuteNonQueryAsync();
         }
@@ -376,10 +382,10 @@ namespace MadinaEnterprises
         public async Task<List<Ginners>> GetAllGinners()
         {
             var list = new List<Ginners>();
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
 
-            var cmd = new SQLiteCommand("SELECT * FROM Ginners", conn);
+            var cmd = new SqliteCommand("SELECT * FROM Ginners", conn);
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -402,9 +408,9 @@ namespace MadinaEnterprises
 
         public async Task AddGinner(Ginners g)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand(@"
+            var cmd = new SqliteCommand(@"
                 INSERT INTO Ginners (GinnerID, GinnerName, Contact, IBAN, Address, NTN, STN, BankAddress, ContactPerson, Station)
                 VALUES (@GinnerID, @GinnerName, @Contact, @IBAN, @Address, @NTN, @STN, @BankAddress, @ContactPerson, @Station)", conn);
 
@@ -424,9 +430,9 @@ namespace MadinaEnterprises
 
         public async Task UpdateGinner(Ginners g)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand(@"
+            var cmd = new SqliteCommand(@"
                 UPDATE Ginners SET GinnerName=@GinnerName, Contact=@Contact, IBAN=@IBAN, Address=@Address, NTN=@NTN, STN=@STN, BankAddress=@BankAddress, ContactPerson=@ContactPerson, Station=@Station
                 WHERE GinnerID=@GinnerID", conn);
 
@@ -446,9 +452,9 @@ namespace MadinaEnterprises
 
         public async Task DeleteGinner(string GinnerID)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand("DELETE FROM Ginners WHERE GinnerID = @GinnerID", conn);
+            var cmd = new SqliteCommand("DELETE FROM Ginners WHERE GinnerID = @GinnerID", conn);
             cmd.Parameters.AddWithValue("@GinnerID", GinnerID);
             await cmd.ExecuteNonQueryAsync();
         }
@@ -457,10 +463,10 @@ namespace MadinaEnterprises
         public async Task<List<Mills>> GetAllMills()
         {
             var list = new List<Mills>();
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
 
-            var cmd = new SQLiteCommand("SELECT * FROM Mills", conn);
+            var cmd = new SqliteCommand("SELECT * FROM Mills", conn);
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -477,9 +483,9 @@ namespace MadinaEnterprises
 
         public async Task AddMill(Mills m)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand("INSERT INTO Mills (MillName, MillID, Address, OwnerName) VALUES (@MillName, @MillID, @Address, @OwnerName)", conn);
+            var cmd = new SqliteCommand("INSERT INTO Mills (MillName, MillID, Address, OwnerName) VALUES (@MillName, @MillID, @Address, @OwnerName)", conn);
             cmd.Parameters.AddWithValue("@MillName", m.MillName);
             cmd.Parameters.AddWithValue("@MillID", m.MillID);
             cmd.Parameters.AddWithValue("@Address", m.Address);
@@ -489,9 +495,9 @@ namespace MadinaEnterprises
 
         public async Task UpdateMill(Mills m)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand("UPDATE Mills SET MillName = @MillName, Address=@Address, OwnerName=@OwnerName WHERE MillID=@MillID", conn);
+            var cmd = new SqliteCommand("UPDATE Mills SET MillName = @MillName, Address=@Address, OwnerName=@OwnerName WHERE MillID=@MillID", conn);
             cmd.Parameters.AddWithValue("@MillID", m.MillID);
             cmd.Parameters.AddWithValue("@MillName", m.MillName);
             cmd.Parameters.AddWithValue("@Address", m.Address);
@@ -499,21 +505,21 @@ namespace MadinaEnterprises
             await cmd.ExecuteNonQueryAsync();
         }
 
-        public async Task DeleteMill(string millName)
+        public async Task DeleteMill(string millId)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand("DELETE FROM Mills WHERE MillName = @MillName", conn);
-            cmd.Parameters.AddWithValue("@MillName", millName);
+            var cmd = new SqliteCommand("DELETE FROM Mills WHERE MillID = @MillID", conn);
+            cmd.Parameters.AddWithValue("@MillID", millId);
             await cmd.ExecuteNonQueryAsync();
         }
         public async Task<List<GinnerLedger>> GetAllGinnerLedger()
         {
             var ginnerLedgerList = new List<GinnerLedger>();
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
 
-            var command = new SQLiteCommand("SELECT * FROM GinnerLedger", conn);
+            var command = new SqliteCommand("SELECT * FROM GinnerLedger", conn);
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -532,9 +538,9 @@ namespace MadinaEnterprises
 
         public async Task AddGinnerLedger(GinnerLedger g)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand(@"
+            var cmd = new SqliteCommand(@"
         INSERT INTO GinnerLedger (ContractID, DealID, AmountPaid, DatePaid, MillsDueTo)
         VALUES (@ContractID, @DealID, @AmountPaid, @DatePaid, @MillsDueTo)", conn);
 
@@ -549,9 +555,9 @@ namespace MadinaEnterprises
 
         public async Task UpdateGinnerLedger(GinnerLedger g)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand(@"
+            var cmd = new SqliteCommand(@"
         UPDATE GinnerLedger SET AmountPaid=@AmountPaid, DatePaid=@DatePaid, MillsDueTo=@MillsDueTo
         WHERE ContractID=@ContractID AND DealID=@DealID", conn);
 
@@ -566,13 +572,82 @@ namespace MadinaEnterprises
 
         public async Task DeleteGinnerLedger(string contractId, string dealId)
         {
-            using var conn = new SQLiteConnection(_connectionString);
+            using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SQLiteCommand("DELETE FROM GinnerLedger WHERE ContractID = @ContractID AND DealID = @DealID", conn);
+            var cmd = new SqliteCommand("DELETE FROM GinnerLedger WHERE ContractID = @ContractID AND DealID = @DealID", conn);
             cmd.Parameters.AddWithValue("@ContractID", contractId);
             cmd.Parameters.AddWithValue("@DealID", dealId);
             await cmd.ExecuteNonQueryAsync();
         }
+
+        // ========== USERS / AUTH ==========
+        public async Task<bool> RegisterUser(string name, string email, string password)
+        {
+            var normalizedEmail = email.Trim().ToLowerInvariant();
+            if (await UserExists(normalizedEmail))
+            {
+                return false;
+            }
+
+            var salt = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
+            var hash = HashPassword(password, salt);
+
+            using var conn = new SqliteConnection(_connectionString);
+            await conn.OpenAsync();
+            var cmd = new SqliteCommand(@"INSERT INTO Users (UserID, Name, Email, PasswordHash, CreatedAt)
+                                         VALUES (@UserID, @Name, @Email, @PasswordHash, @CreatedAt)", conn);
+            cmd.Parameters.AddWithValue("@UserID", Guid.NewGuid().ToString("N"));
+            cmd.Parameters.AddWithValue("@Name", name.Trim());
+            cmd.Parameters.AddWithValue("@Email", normalizedEmail);
+            cmd.Parameters.AddWithValue("@PasswordHash", $"{salt}:{hash}");
+            cmd.Parameters.AddWithValue("@CreatedAt", DateTime.UtcNow.ToString("O"));
+
+            await cmd.ExecuteNonQueryAsync();
+            return true;
+        }
+
+        public async Task<bool> ValidateUserCredentials(string email, string password)
+        {
+            var normalizedEmail = email.Trim().ToLowerInvariant();
+            using var conn = new SqliteConnection(_connectionString);
+            await conn.OpenAsync();
+            var cmd = new SqliteCommand("SELECT PasswordHash FROM Users WHERE Email = @Email LIMIT 1", conn);
+            cmd.Parameters.AddWithValue("@Email", normalizedEmail);
+
+            var result = await cmd.ExecuteScalarAsync();
+            if (result is null || result == DBNull.Value)
+            {
+                return false;
+            }
+
+            var stored = result.ToString() ?? string.Empty;
+            var parts = stored.Split(':', 2);
+            if (parts.Length != 2)
+            {
+                return false;
+            }
+
+            var computed = HashPassword(password, parts[0]);
+            return string.Equals(computed, parts[1], StringComparison.Ordinal);
+        }
+
+        public async Task<bool> UserExists(string email)
+        {
+            var normalizedEmail = email.Trim().ToLowerInvariant();
+            using var conn = new SqliteConnection(_connectionString);
+            await conn.OpenAsync();
+            var cmd = new SqliteCommand("SELECT COUNT(1) FROM Users WHERE Email = @Email", conn);
+            cmd.Parameters.AddWithValue("@Email", normalizedEmail);
+            var count = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+            return count > 0;
+        }
+
+        private static string HashPassword(string password, string salt)
+        {
+            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"{salt}:{password}"));
+            return Convert.ToHexString(bytes);
+        }
+
 
     }
 }

@@ -228,16 +228,12 @@ public sealed class RegistrationService : IRegistrationService
 
     public async Task<RegistrationResult> RegisterAsync(RegistrationRequest request)
     {
-        // Simulated flow if no endpoint is configured
         if (string.IsNullOrWhiteSpace(ApiEndpoint))
         {
-            await Task.Delay(700);
-
-            // Simulate "email already in use"
-            if (request.Email.EndsWith("@exists.com", StringComparison.OrdinalIgnoreCase))
-                return RegistrationResult.Fail("This email is already in use.");
-
-            return RegistrationResult.Ok();
+            var created = await App.DatabaseService.RegisterUser(request.Name, request.Email, request.Password);
+            return created
+                ? RegistrationResult.Ok()
+                : RegistrationResult.Fail("This email is already in use.");
         }
 
         try
