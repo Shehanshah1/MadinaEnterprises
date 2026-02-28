@@ -86,6 +86,19 @@ madina.db3
 
 Currently uses a placeholder `LoginPage`. You can integrate secure authentication (e.g., Firebase, Microsoft Identity) as needed.
 
+### Email verification setup (required)
+
+Account creation sends a verification code through SMTP. Configure these environment variables before running:
+
+- `MADINA_SMTP_USER` – sender mailbox username (**required**)
+- `MADINA_SMTP_PASS` – mailbox/app password (**required**)
+- `MADINA_SMTP_FROM` – sender address shown to users (optional; defaults to user)
+- `MADINA_SMTP_HOST` – SMTP host (optional for Gmail; defaults to `smtp.gmail.com` when sender is Gmail)
+- `MADINA_SMTP_PORT` – SMTP port (optional; default `587`)
+- `MADINA_SMTP_SSL` – set to `false` only if your SMTP server does not use TLS (optional)
+
+For Gmail, set `MADINA_SMTP_USER=muhammadasjad.rehmanhashmi@gmail.com`, create an **App Password** (2-Step Verification must be enabled), and place it in `MADINA_SMTP_PASS`.
+
 ---
 
 ## 📣 Contribution
@@ -106,5 +119,3 @@ This project is proprietary and developed for **Madina Enterprises**. Redistribu
 ---
 
 **Built with ❤️ using .NET MAUI**
-```
-

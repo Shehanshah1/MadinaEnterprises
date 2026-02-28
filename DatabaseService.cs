@@ -697,6 +697,19 @@ namespace MadinaEnterprises
             return LoginValidationResult.Success(isAdmin);
         }
 
+
+        public async Task DeleteUserIfUnverified(string email)
+        {
+            var normalizedEmail = email.Trim().ToLowerInvariant();
+            using var conn = new SqliteConnection(_connectionString);
+            await conn.OpenAsync();
+            var cmd = new SqliteCommand(@"DELETE FROM Users
+                                          WHERE Email = @Email
+                                            AND IsEmailVerified = 0", conn);
+            cmd.Parameters.AddWithValue("@Email", normalizedEmail);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
         public async Task<bool> UserExists(string email)
         {
             var normalizedEmail = email.Trim().ToLowerInvariant();

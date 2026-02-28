@@ -203,7 +203,16 @@ public interface IRegistrationService
 
 public interface IEmailService
 {
-    Task SendVerificationCodeAsync(string email, string code);
+    Task<EmailDispatchResult> SendVerificationCodeAsync(string email, string code);
+}
+
+public sealed class EmailDispatchResult
+{
+    public bool Success { get; set; }
+    public string? ErrorMessage { get; set; }
+
+    public static EmailDispatchResult Ok() => new() { Success = true };
+    public static EmailDispatchResult Fail(string message) => new() { Success = false, ErrorMessage = message };
 }
 
 public sealed class RegistrationService : IRegistrationService
@@ -231,7 +240,12 @@ public sealed class RegistrationService : IRegistrationService
             var code = Random.Shared.Next(100000, 1000000).ToString();
             var expiresAt = DateTime.UtcNow.AddMinutes(15);
             await App.DatabaseService.SaveVerificationCode(request.Email, code, expiresAt);
-            await _emailService.SendVerificationCodeAsync(request.Email, code);
+            var emailDispatch = await _emailService.SendVerificationCodeAsync(request.Email, code);
+            if (!emailDispatch.Success)
+            {
+                await App.DatabaseService.DeleteUserIfUnverified(request.Email);
+                return RegistrationResult.Fail(emailDispatch.ErrorMessage ?? "Unable to send verification email.");
+            }
 
             var isAdmin = await App.DatabaseService.IsUserAdmin(request.Email);
             return RegistrationResult.Ok(isFirstAdmin: isAdmin, needsAdminApproval: !isAdmin);
@@ -263,35 +277,50 @@ public sealed class RegistrationService : IRegistrationService
 
 public sealed class SmtpEmailService : IEmailService
 {
-    public async Task SendVerificationCodeAsync(string email, string code)
+    public async Task<EmailDispatchResult> SendVerificationCodeAsync(string email, string code)
     {
         var host = Environment.GetEnvironmentVariable("MADINA_SMTP_HOST");
         var user = Environment.GetEnvironmentVariable("MADINA_SMTP_USER");
         var pass = Environment.GetEnvironmentVariable("MADINA_SMTP_PASS");
         var from = Environment.GetEnvironmentVariable("MADINA_SMTP_FROM") ?? user;
+        var useStartTls = !string.Equals(Environment.GetEnvironmentVariable("MADINA_SMTP_SSL"), "false", StringComparison.OrdinalIgnoreCase);
+
+        var senderAddress = from ?? user ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(host) && senderAddress.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase))
+        {
+            host = "smtp.gmail.com";
+        }
 
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(user) ||
             string.IsNullOrWhiteSpace(pass) || string.IsNullOrWhiteSpace(from))
         {
-            // Fallback to local debug output when SMTP is not configured.
-            System.Diagnostics.Debug.WriteLine($"[EmailFallback] verification code for {email}: {code}");
-            return;
+            return EmailDispatchResult.Fail(
+                "Verification email is not configured. Set MADINA_SMTP_USER and MADINA_SMTP_PASS (Gmail app password), plus optional SMTP variables.");
         }
 
-        using var client = new SmtpClient(host)
+        try
         {
-            Port = int.TryParse(Environment.GetEnvironmentVariable("MADINA_SMTP_PORT"), out var p) ? p : 587,
-            EnableSsl = true,
-            Credentials = new NetworkCredential(user, pass)
-        };
+            using var client = new SmtpClient(host)
+            {
+                Port = int.TryParse(Environment.GetEnvironmentVariable("MADINA_SMTP_PORT"), out var p) ? p : 587,
+                EnableSsl = useStartTls,
+                Credentials = new NetworkCredential(user, pass)
+            };
 
-        using var message = new MailMessage(from, email)
+            using var message = new MailMessage(from, email)
+            {
+                Subject = "Madina Enterprises verification code",
+                Body = $"Your verification code is {code}. It expires in 15 minutes.",
+                IsBodyHtml = false
+            };
+
+            await client.SendMailAsync(message);
+            return EmailDispatchResult.Ok();
+        }
+        catch (Exception ex)
         {
-            Subject = "Madina Enterprises verification code",
-            Body = $"Your verification code is {code}. It expires in 15 minutes.",
-            IsBodyHtml = false
-        };
-
-        await client.SendMailAsync(message);
+            System.Diagnostics.Debug.WriteLine($"[EmailError] Unable to send verification email: {ex.Message}");
+            return EmailDispatchResult.Fail("Unable to send verification email. Please check SMTP credentials and app password.");
+        }
     }
 }
