@@ -10,6 +10,16 @@ using System.Threading.Tasks;
 
 namespace MadinaEnterprises
 {
+    public sealed class LoginValidationResult
+    {
+        public bool IsValid { get; init; }
+        public bool IsAdmin { get; init; }
+        public string? ErrorMessage { get; init; }
+
+        public static LoginValidationResult Fail(string message) => new() { IsValid = false, ErrorMessage = message };
+        public static LoginValidationResult Success(bool isAdmin) => new() { IsValid = true, IsAdmin = isAdmin };
+    }
+
     public class DatabaseService
     {
                 private readonly string _databasePath;
@@ -622,41 +632,69 @@ namespace MadinaEnterprises
 
             using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SqliteCommand(@"INSERT INTO Users (UserID, Name, Email, PasswordHash, CreatedAt)
-                                         VALUES (@UserID, @Name, @Email, @PasswordHash, @CreatedAt)", conn);
+            var countCmd = new SqliteCommand("SELECT COUNT(1) FROM Users", conn);
+            var isFirstUser = Convert.ToInt32(await countCmd.ExecuteScalarAsync()) == 0;
+
+            var cmd = new SqliteCommand(@"INSERT INTO Users
+                (UserID, Name, Email, PasswordHash, CreatedAt, IsAdmin, IsEmailVerified, IsApproved, ApprovedBy)
+                VALUES
+                (@UserID, @Name, @Email, @PasswordHash, @CreatedAt, @IsAdmin, @IsEmailVerified, @IsApproved, @ApprovedBy)", conn);
             cmd.Parameters.AddWithValue("@UserID", Guid.NewGuid().ToString("N"));
             cmd.Parameters.AddWithValue("@Name", name.Trim());
             cmd.Parameters.AddWithValue("@Email", normalizedEmail);
             cmd.Parameters.AddWithValue("@PasswordHash", $"{salt}:{hash}");
             cmd.Parameters.AddWithValue("@CreatedAt", DateTime.UtcNow.ToString("O"));
+            cmd.Parameters.AddWithValue("@IsAdmin", isFirstUser ? 1 : 0);
+            cmd.Parameters.AddWithValue("@IsEmailVerified", 0);
+            cmd.Parameters.AddWithValue("@IsApproved", isFirstUser ? 1 : 0);
+            cmd.Parameters.AddWithValue("@ApprovedBy", isFirstUser ? "SYSTEM" : DBNull.Value);
 
             await cmd.ExecuteNonQueryAsync();
             return true;
         }
 
-        public async Task<bool> ValidateUserCredentials(string email, string password)
+        public async Task<LoginValidationResult> ValidateUserCredentials(string email, string password)
         {
             var normalizedEmail = email.Trim().ToLowerInvariant();
             using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new SqliteCommand("SELECT PasswordHash FROM Users WHERE Email = @Email LIMIT 1", conn);
+            var cmd = new SqliteCommand(@"SELECT PasswordHash, IsAdmin, IsEmailVerified, IsApproved
+                                          FROM Users WHERE Email = @Email LIMIT 1", conn);
             cmd.Parameters.AddWithValue("@Email", normalizedEmail);
 
-            var result = await cmd.ExecuteScalarAsync();
-            if (result is null || result == DBNull.Value)
+            using var reader = await cmd.ExecuteReaderAsync();
+            if (!await reader.ReadAsync())
             {
-                return false;
+                return LoginValidationResult.Fail("Incorrect email or password.");
             }
 
-            var stored = result.ToString() ?? string.Empty;
+            var stored = reader["PasswordHash"]?.ToString() ?? string.Empty;
             var parts = stored.Split(':', 2);
             if (parts.Length != 2)
             {
-                return false;
+                return LoginValidationResult.Fail("Incorrect email or password.");
             }
 
             var computed = HashPassword(password, parts[0]);
-            return string.Equals(computed, parts[1], StringComparison.Ordinal);
+            if (!string.Equals(computed, parts[1], StringComparison.Ordinal))
+            {
+                return LoginValidationResult.Fail("Incorrect email or password.");
+            }
+
+            var isEmailVerified = Convert.ToInt32(reader["IsEmailVerified"]) == 1;
+            if (!isEmailVerified)
+            {
+                return LoginValidationResult.Fail("Please verify your email before logging in.");
+            }
+
+            var isApproved = Convert.ToInt32(reader["IsApproved"]) == 1;
+            if (!isApproved)
+            {
+                return LoginValidationResult.Fail("Your account is pending admin approval.");
+            }
+
+            var isAdmin = Convert.ToInt32(reader["IsAdmin"]) == 1;
+            return LoginValidationResult.Success(isAdmin);
         }
 
         public async Task<bool> UserExists(string email)
@@ -674,6 +712,110 @@ namespace MadinaEnterprises
         {
             var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"{salt}:{password}"));
             return Convert.ToHexString(bytes);
+        }
+
+        public async Task SaveVerificationCode(string email, string code, DateTime expiresAtUtc)
+        {
+            var normalizedEmail = email.Trim().ToLowerInvariant();
+            using var conn = new SqliteConnection(_connectionString);
+            await conn.OpenAsync();
+            var cmd = new SqliteCommand(@"UPDATE Users
+                                          SET VerificationCode = @Code,
+                                              VerificationExpiresAt = @ExpiresAt
+                                          WHERE Email = @Email", conn);
+            cmd.Parameters.AddWithValue("@Code", code);
+            cmd.Parameters.AddWithValue("@ExpiresAt", expiresAtUtc.ToString("O"));
+            cmd.Parameters.AddWithValue("@Email", normalizedEmail);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        public async Task<bool> VerifyEmailCode(string email, string code)
+        {
+            var normalizedEmail = email.Trim().ToLowerInvariant();
+            using var conn = new SqliteConnection(_connectionString);
+            await conn.OpenAsync();
+
+            var select = new SqliteCommand(@"SELECT VerificationCode, VerificationExpiresAt
+                                             FROM Users WHERE Email = @Email LIMIT 1", conn);
+            select.Parameters.AddWithValue("@Email", normalizedEmail);
+
+            using var reader = await select.ExecuteReaderAsync();
+            if (!await reader.ReadAsync())
+            {
+                return false;
+            }
+
+            var expectedCode = reader["VerificationCode"]?.ToString();
+            var expiresRaw = reader["VerificationExpiresAt"]?.ToString();
+            if (string.IsNullOrWhiteSpace(expectedCode) || string.IsNullOrWhiteSpace(expiresRaw))
+            {
+                return false;
+            }
+
+            if (!DateTime.TryParse(expiresRaw, out var expiresAt) || DateTime.UtcNow > expiresAt)
+            {
+                return false;
+            }
+
+            if (!string.Equals(expectedCode, code.Trim(), StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            var update = new SqliteCommand(@"UPDATE Users
+                                             SET IsEmailVerified = 1,
+                                                 VerificationCode = NULL,
+                                                 VerificationExpiresAt = NULL
+                                             WHERE Email = @Email", conn);
+            update.Parameters.AddWithValue("@Email", normalizedEmail);
+            await update.ExecuteNonQueryAsync();
+            return true;
+        }
+
+        public async Task<List<string>> GetPendingApprovalEmails()
+        {
+            var list = new List<string>();
+            using var conn = new SqliteConnection(_connectionString);
+            await conn.OpenAsync();
+            var cmd = new SqliteCommand(@"SELECT Email FROM Users
+                                          WHERE IsEmailVerified = 1
+                                            AND IsApproved = 0
+                                          ORDER BY CreatedAt ASC", conn);
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                list.Add(reader["Email"]?.ToString() ?? string.Empty);
+            }
+
+            return list.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+        }
+
+        public async Task ApproveUser(string adminEmail, string pendingEmail)
+        {
+            using var conn = new SqliteConnection(_connectionString);
+            await conn.OpenAsync();
+            var cmd = new SqliteCommand(@"UPDATE Users
+                                          SET IsApproved = 1,
+                                              ApprovedBy = @ApprovedBy
+                                          WHERE Email = @Email", conn);
+            cmd.Parameters.AddWithValue("@ApprovedBy", adminEmail.Trim().ToLowerInvariant());
+            cmd.Parameters.AddWithValue("@Email", pendingEmail.Trim().ToLowerInvariant());
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        public async Task<bool> IsUserAdmin(string email)
+        {
+            using var conn = new SqliteConnection(_connectionString);
+            await conn.OpenAsync();
+            var cmd = new SqliteCommand("SELECT IsAdmin FROM Users WHERE Email = @Email LIMIT 1", conn);
+            cmd.Parameters.AddWithValue("@Email", email.Trim().ToLowerInvariant());
+            var result = await cmd.ExecuteScalarAsync();
+            if (result is null || result == DBNull.Value)
+            {
+                return false;
+            }
+
+            return Convert.ToInt32(result) == 1;
         }
 
 

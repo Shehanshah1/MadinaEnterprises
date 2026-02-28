@@ -189,6 +189,9 @@ public sealed class RegistrationResult
     public bool NeedsAdminApproval { get; set; }
     public string? ErrorMessage { get; set; }
 
+    public static RegistrationResult Ok(bool isFirstAdmin = false, bool needsAdminApproval = true)
+        => new() { Success = true, IsFirstAdmin = isFirstAdmin, NeedsAdminApproval = needsAdminApproval };
+
     public static RegistrationResult Fail(string msg) => new() { Success = false, ErrorMessage = msg };
 }
 
@@ -220,9 +223,18 @@ public sealed class RegistrationService : IRegistrationService
         if (string.IsNullOrWhiteSpace(ApiEndpoint))
         {
             var created = await App.DatabaseService.RegisterUser(request.Name, request.Email, request.Password);
-            return created
-                ? RegistrationResult.Ok()
-                : RegistrationResult.Fail("This email is already in use.");
+            if (!created)
+            {
+                return RegistrationResult.Fail("This email is already in use.");
+            }
+
+            var code = Random.Shared.Next(100000, 1000000).ToString();
+            var expiresAt = DateTime.UtcNow.AddMinutes(15);
+            await App.DatabaseService.SaveVerificationCode(request.Email, code, expiresAt);
+            await _emailService.SendVerificationCodeAsync(request.Email, code);
+
+            var isAdmin = await App.DatabaseService.IsUserAdmin(request.Email);
+            return RegistrationResult.Ok(isFirstAdmin: isAdmin, needsAdminApproval: !isAdmin);
         }
 
         try
