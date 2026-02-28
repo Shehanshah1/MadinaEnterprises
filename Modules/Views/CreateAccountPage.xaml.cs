@@ -220,24 +220,9 @@ public sealed class RegistrationService : IRegistrationService
         if (string.IsNullOrWhiteSpace(ApiEndpoint))
         {
             var created = await App.DatabaseService.RegisterUser(request.Name, request.Email, request.Password);
-            if (!created.Success)
-            {
-                return RegistrationResult.Fail(created.ErrorMessage ?? "Could not create account.");
-            }
-
-            var code = await App.DatabaseService.GetVerificationCodeForEmail(request.Email);
-            if (string.IsNullOrWhiteSpace(code))
-            {
-                return RegistrationResult.Fail("Could not generate verification code.");
-            }
-
-            await _emailService.SendVerificationCodeAsync(request.Email, code);
-            return new RegistrationResult
-            {
-                Success = true,
-                IsFirstAdmin = created.IsFirstAdmin,
-                NeedsAdminApproval = created.NeedsAdminApproval
-            };
+            return created
+                ? RegistrationResult.Ok()
+                : RegistrationResult.Fail("This email is already in use.");
         }
 
         try

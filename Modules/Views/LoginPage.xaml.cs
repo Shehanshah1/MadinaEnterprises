@@ -52,9 +52,9 @@ namespace MadinaEnterprises.Modules.Views
 
             await Task.Delay(100); // Simulate API delay
 
-            var loginResult = await App.DatabaseService.ValidateUserCredentials(email, password);
+            var isValid = await App.DatabaseService.ValidateUserCredentials(email, password);
 
-            if (loginResult.Success)
+            if (isValid)
             {
                 if (loginResult.IsAdmin)
                 {
@@ -107,3 +107,4 @@ namespace MadinaEnterprises.Modules.Views
         }
     }
 }
+z
