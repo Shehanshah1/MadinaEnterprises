@@ -123,6 +123,34 @@ namespace MadinaEnterprises
                     alter.ExecuteNonQuery();
                 }
             }
+
+            EnsureUserColumns(connection);
+        }
+
+        private static void EnsureUserColumns(SqliteConnection connection)
+        {
+            var cols = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            using var pragma = new SqliteCommand("PRAGMA table_info(Users);", connection);
+            using var reader = pragma.ExecuteReader();
+            while (reader.Read())
+            {
+                cols.Add(reader["name"]?.ToString() ?? string.Empty);
+            }
+
+            static void AddColumnIfMissing(SqliteConnection conn, HashSet<string> existing, string column, string sql)
+            {
+                if (existing.Contains(column)) return;
+                using var cmd = new SqliteCommand(sql, conn);
+                cmd.ExecuteNonQuery();
+                existing.Add(column);
+            }
+
+            AddColumnIfMissing(connection, cols, "IsAdmin", "ALTER TABLE Users ADD COLUMN IsAdmin INTEGER NOT NULL DEFAULT 0;");
+            AddColumnIfMissing(connection, cols, "IsEmailVerified", "ALTER TABLE Users ADD COLUMN IsEmailVerified INTEGER NOT NULL DEFAULT 0;");
+            AddColumnIfMissing(connection, cols, "IsApproved", "ALTER TABLE Users ADD COLUMN IsApproved INTEGER NOT NULL DEFAULT 0;");
+            AddColumnIfMissing(connection, cols, "ApprovedBy", "ALTER TABLE Users ADD COLUMN ApprovedBy TEXT;");
+            AddColumnIfMissing(connection, cols, "VerificationCode", "ALTER TABLE Users ADD COLUMN VerificationCode TEXT;");
+            AddColumnIfMissing(connection, cols, "VerificationExpiresAt", "ALTER TABLE Users ADD COLUMN VerificationExpiresAt TEXT;");
         }
 
         // ========== CONTRACTS ==========

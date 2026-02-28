@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Maui.Controls;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace MadinaEnterprises.Modules.Views
 {
@@ -55,15 +56,44 @@ namespace MadinaEnterprises.Modules.Views
 
             if (isValid)
             {
+                if (loginResult.IsAdmin)
+                {
+                    await ProcessPendingApprovals(email);
+                }
+
                 await App.NavigateToPage(new DashboardPage());
             }
             else
             {
-                errorMessageLabel.Text = "Incorrect email or password.";
+                errorMessageLabel.Text = loginResult.ErrorMessage ?? "Incorrect email or password.";
                 errorMessageLabel.IsVisible = true;
             }
 
             loginButton.IsEnabled = true;
+        }
+
+        private async Task ProcessPendingApprovals(string adminEmail)
+        {
+            var pending = await App.DatabaseService.GetPendingApprovalEmails();
+            if (!pending.Any())
+            {
+                return;
+            }
+
+            var shouldReview = await DisplayAlert("Admin Approval", $"There are {pending.Count} pending verified account(s). Approve now?", "Yes", "Later");
+            if (!shouldReview)
+            {
+                return;
+            }
+
+            foreach (var pendingEmail in pending)
+            {
+                var approve = await DisplayAlert("Approve User", $"Approve '{pendingEmail}'?", "Approve", "Skip");
+                if (approve)
+                {
+                    await App.DatabaseService.ApproveUser(adminEmail, pendingEmail);
+                }
+            }
         }
 
         private async void OnCreateAccountButtonClicked(object sender, EventArgs e)
