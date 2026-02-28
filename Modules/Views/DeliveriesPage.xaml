@@ -60,11 +60,11 @@
                             <!-- Inputs (names unchanged) -->
                             <Picker  x:Name="deliveryPicker" Title="Select Delivery to Edit/Delete" SelectedIndexChanged="OnDeliverySelected" IsVisible="False" Grid.Row="0" Grid.Column="1" BackgroundColor="White" TextColor="Black" />
                             <Entry x:Name="deliveryIDEntry" Placeholder="Delivery ID" BackgroundColor="White" TextColor="Black"    Grid.Row="1" Grid.Column="1" />
-                            <Picker  x:Name="contractPicker" Grid.Row="2" Grid.Column="1" Title="Select Contract" TitleColor="Black" BackgroundColor="LightGray"  TextColor="Black"/>
-                            <Entry  x:Name="amountEntry" Placeholder="Amount" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="3" Grid.Column="1"/>
+                            <Picker  x:Name="contractPicker" Grid.Row="2" Grid.Column="1" Title="Select Contract" TitleColor="Black" BackgroundColor="LightGray"  TextColor="Black" SelectedIndexChanged="OnContractChanged"/>
+                            <Entry  x:Name="amountEntry" Placeholder="Amount (suggested from mill weight, editable)" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="3" Grid.Column="1" TextChanged="OnAmountChanged"/>
                             <Entry x:Name="totalBalesEntry" Placeholder="Total Bales" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="4" Grid.Column="1"/>
                             <Entry x:Name="factoryWeightEntry" Placeholder="Factory Weight" Keyboard="Numeric"  BackgroundColor="White" TextColor="Black" Grid.Row="5" Grid.Column="1"/>
-                            <Entry x:Name="millWeightEntry" Placeholder="Mill Weight" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="6" Grid.Column="1"/>
+                            <Entry x:Name="millWeightEntry" Placeholder="Mill Weight (kg)" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="6" Grid.Column="1" TextChanged="OnMillWeightChanged"/>
                             <Entry x:Name="truckNoEntry" Placeholder="Truck Number"        BackgroundColor="White" TextColor="Black" Grid.Row="7" Grid.Column="1"/>
                             <Entry x:Name="driverContactEntry" Placeholder="Driver Contact" Keyboard="Telephone"  BackgroundColor="White" TextColor="Black" Grid.Row="8" Grid.Column="1"/>
                             <DatePicker x:Name="departureDatePicker" TextColor="Black" Background="LightGray"  Grid.Row="9" Grid.Column="1"/>

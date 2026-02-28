@@ -1,5 +1,6 @@
 using MadinaEnterprises.Modules.Models;
 using System.Linq;
+using MadinaEnterprises.Modules.Util;
 using Microsoft.Maui.Controls;
 
 namespace MadinaEnterprises.Modules.Views;
@@ -22,8 +23,18 @@ public partial class DashboardPage : ContentPage
             var payments = await _db.GetAllPayments();
             var ginners = await _db.GetAllGinners();
             var mills = await _db.GetAllMills();
+            var deliveries = await _db.GetAllDeliveries();
 
-            double totalCommission = contracts.Sum(c => c.TotalAmount * (c.CommissionPercentage / 100));
+            double totalDealAmount = 0;
+            double totalCommission = 0;
+            foreach (var contract in contracts)
+            {
+                var millWeightKg = deliveries.Where(d => d.ContractID == contract.ContractID).Sum(d => d.MillWeight);
+                var actualAmount = RateCalculation.AmountFromKg(millWeightKg, contract.PricePerBatch);
+                totalDealAmount += actualAmount;
+                totalCommission += actualAmount * (contract.CommissionPercentage / 100);
+            }
+
             double totalPaid = payments.Sum(p => p.AmountPaid);
             double totalDue = payments.Sum(p => p.TotalAmount - p.AmountPaid);
             int balesSold = contracts.Sum(c => c.TotalBales);

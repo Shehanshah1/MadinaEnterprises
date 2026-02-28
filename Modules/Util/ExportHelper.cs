@@ -20,7 +20,7 @@ namespace MadinaEnterprises.Modules.Util
     {
         // ---- Calculation constants (for Excel only; DOCX has no math) ----
         private const double KG_PER_BALE = 150.0; // typical bale weight
-        private const double KG_PER_MAUND = 40.0;  // 1 maund = 40 kg
+        private const double KG_PER_MAUND = 37.3242;  // 1 maund = 37.3242 kg
 
         /* =========================================
            WORD: Single Contract DOCX (paragraphs)
@@ -396,7 +396,12 @@ namespace MadinaEnterprises.Modules.Util
                     var cPayments = paymentLookup.GetValueOrDefault(c.ContractID, new System.Collections.Generic.List<Payment>());
 
                     double rate = c.PricePerBatch;                       // per maund
-                    double estKg = c.TotalBales * KG_PER_BALE;
+                    double estKg = cDeliveries.Sum(d => d.FactoryWeight);
+                    if (estKg <= 0)
+                    {
+                        estKg = c.TotalBales * KG_PER_BALE;
+                    }
+
                     double estMd = estKg / KG_PER_MAUND;
                     double estAmt = estMd * rate;
 
@@ -570,7 +575,12 @@ namespace MadinaEnterprises.Modules.Util
                         var pay = gPayments.Where(p => p.ContractID == c.ContractID).Sum(p => p.AmountPaid);
 
                         var rate = c.PricePerBatch;
-                        var eKg = c.TotalBales * KG_PER_BALE;
+                        var eKg = gDeliveries.Where(d => d.ContractID == c.ContractID).Sum(d => d.FactoryWeight);
+                        if (eKg <= 0)
+                        {
+                            eKg = c.TotalBales * KG_PER_BALE;
+                        }
+
                         var eMd = eKg / KG_PER_MAUND;
                         var eAmt = eMd * rate;
 
