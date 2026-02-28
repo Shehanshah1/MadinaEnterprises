@@ -71,7 +71,6 @@ namespace MadinaEnterprises.Modules.Views
 
             loginButton.IsEnabled = true;
         }
-
         private async Task ProcessPendingApprovals(string adminEmail)
         {
             var pending = await App.DatabaseService.GetPendingApprovalEmails();
