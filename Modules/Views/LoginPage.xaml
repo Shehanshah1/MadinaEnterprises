@@ -69,21 +69,21 @@
                                FontSize="24"
                                TextColor="#333333"/>
 
-                        <Label Text="Login to continue"
+                        <Label Text="Use your hardcoded admin credentials"
                                FontSize="16"
                                TextColor="#666666"/>
 
                         <!-- Email -->
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Email"
+                            <Label Text="Username"
                                    TextColor="#A4C400"
                                    FontAttributes="Bold"/>
                             <Entry x:Name="emailEntry"
-                                   Placeholder="Enter your email"
+                                   Placeholder="Enter your username"
                                    BackgroundColor="#F6F8FA"
                                    TextColor="#333333"
                                    HeightRequest="46"
-                                   Keyboard="Email"/>
+                                   Keyboard="Default"/>
                         </VerticalStackLayout>
 
                         <!-- Password + Show/Hide -->
@@ -118,21 +118,6 @@
                                 FontAttributes="Bold"
                                 HeightRequest="50"
                                 Clicked="OnLoginButtonClicked"/>
-
-                        <!-- Create Account -->
-                        <Button Text="Create a new account"
-                                BackgroundColor="#EEEEEE"
-                                TextColor="#A4C400"
-                                FontAttributes="Bold"
-                                HeightRequest="44"
-                                Clicked="OnCreateAccountButtonClicked"/>
-
-                        <!-- Forgot Password -->
-                        <Button Text="Forgot your password?"
-                                BackgroundColor="Transparent"
-                                TextColor="#0B72D2"
-                                FontSize="Small"
-                                Clicked="OnForgotPasswordButtonClicked"/>
                     </VerticalStackLayout>
                 </Grid>
             </Frame>

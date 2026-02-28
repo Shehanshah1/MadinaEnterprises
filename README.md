@@ -84,7 +84,12 @@ madina.db3
 
 ## 🔐 Authentication
 
-Currently uses a placeholder `LoginPage`. You can integrate secure authentication (e.g., Firebase, Microsoft Identity) as needed.
+This project now uses a **simple hardcoded login** flow (no signup and no forgot-password screen).
+
+- Username: `Anees`
+- Password: `4081`
+
+You can change these constants in `Modules/Views/LoginPage.xaml.cs` (`HardcodedUsername` and `HardcodedPassword`).
 
 ---
 
@@ -106,5 +111,3 @@ This project is proprietary and developed for **Madina Enterprises**. Redistribu
 ---
 
 **Built with ❤️ using .NET MAUI**
-```
-
