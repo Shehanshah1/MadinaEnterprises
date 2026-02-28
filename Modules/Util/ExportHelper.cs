@@ -44,14 +44,14 @@ namespace MadinaEnterprises.Modules.Util
                                                               "Attention:";
 
             // Seller line – ginner name with station/address suffix if available
-            string sellerLine = ginner?.GinnerName ?? "";
+            string sellerLine = CleanText(ginner?.GinnerName);
             if (!string.IsNullOrWhiteSpace(ginner?.Station))
-                sellerLine += $", {ginner.Station}";
+                sellerLine += $", {CleanText(ginner.Station)}";
             else if (!string.IsNullOrWhiteSpace(ginner?.Address))
-                sellerLine += $", {ginner.Address}";
+                sellerLine += $", {CleanText(ginner.Address)}";
 
             // Buyer line
-            string buyerLine = mill?.MillName ?? "N/A";
+            string buyerLine = CleanText(mill?.MillName, "N/A");
 
             // Rate line (no math in DOCX)
             string rateLine = $"Rs.{contract.PricePerBatch.ToString("N0", CultureInfo.InvariantCulture)}/-";
@@ -110,7 +110,7 @@ namespace MadinaEnterprises.Modules.Util
 
                 // Contract Date / No on one line (simple spacing)
                 string left = $"Contract Date: {contract.DateCreated:dd-MM-yyyy}";
-                string right = $"Contract No: {contract.ContractID}";
+                string right = $"Contract No: {CleanText(contract.ContractID)}";
                 body.Append(Para(left + Spaces(60) + right));
 
                 // Attention
@@ -132,11 +132,11 @@ namespace MadinaEnterprises.Modules.Util
                     body.Append(Para("")); // spacer
                     body.Append(ParaBold("Account details:"));
                     if (!string.IsNullOrWhiteSpace(ginner?.GinnerName))
-                        body.Append(Para($"Title: {ginner.GinnerName}"));
+                        body.Append(Para($"Title: {CleanText(ginner.GinnerName)}"));
                     if (!string.IsNullOrWhiteSpace(ginner?.IBAN) || !string.IsNullOrWhiteSpace(ginner?.BankAddress))
-                        body.Append(Para($"Account number: {ginner?.IBAN ?? ""}    Bank: {ginner?.BankAddress ?? ""}"));
+                        body.Append(Para($"Account number: {CleanText(ginner?.IBAN)}    Bank: {CleanText(ginner?.BankAddress)}"));
                     if (!string.IsNullOrWhiteSpace(ginner?.NTN) || !string.IsNullOrWhiteSpace(ginner?.STN))
-                        body.Append(Para($"NTN: {ginner?.NTN ?? ""}    STN: {ginner?.STN ?? ""}"));
+                        body.Append(Para($"NTN: {CleanText(ginner?.NTN)}    STN: {CleanText(ginner?.STN)}"));
                 }
 
                 // Buyer & Broker
@@ -148,21 +148,23 @@ namespace MadinaEnterprises.Modules.Util
 
                 // Description
                 if (!string.IsNullOrWhiteSpace(contract.Description))
-                    body.Append(ParaBoldLabelValue("Description: ", contract.Description));
+                    body.Append(ParaBoldLabelValue("Description: ", CleanText(contract.Description)));
 
                 // Rate / Payment / Delivery Date / Address
                 body.Append(ParaBoldLabelValue("Rate: ", rateLine));
 
                 if (!string.IsNullOrWhiteSpace(contract.PaymentNotes))
-                    body.Append(ParaBoldLabelValue("Payment: ", contract.PaymentNotes));
+                    body.Append(ParaBoldLabelValue("Payment: ", CleanText(contract.PaymentNotes)));
                 else
                     body.Append(ParaBoldLabelValue("Payment: ", "As per contract"));
 
-                // You placed delivery date text in DeliveryNotes intentionally — preserved.
-                body.Append(ParaBoldLabelValue("Delivery Date: ", contract.DeliveryNotes));
+                var deliveryLine = !string.IsNullOrWhiteSpace(contract.DeliveryNotes)
+                    ? CleanText(contract.DeliveryNotes)
+                    : deliveryDateStr;
+                body.Append(ParaBoldLabelValue("Delivery Date: ", deliveryLine));
 
                 if (!string.IsNullOrWhiteSpace(mill?.Address))
-                    body.Append(ParaBoldLabelValue("Delivery Address: ", mill.Address));
+                    body.Append(ParaBoldLabelValue("Delivery Address: ", CleanText(mill.Address)));
 
                 // Closing / signature
                 body.Append(Para("Please return to us the copy duly signed by you along with the formal confirmation of the purchase."));
@@ -361,6 +363,14 @@ namespace MadinaEnterprises.Modules.Util
             var allDeliveries = App.DatabaseService.GetAllDeliveries().Result;
             var allPayments = App.DatabaseService.GetAllPayments().Result; // List<Payment>
 
+            var deliveryLookup = allDeliveries.GroupBy(d => d.ContractID)
+                .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+            var paymentLookup = allPayments.GroupBy(p => p.ContractID)
+                .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+            double masterFinalAmount = 0;
+            double masterPaidAmount = 0;
+
             string masterPath = IOPath.Combine(FileSystem.AppDataDirectory, $"Cotton_Contracts_All_{DateTime.Now:yyyyMMdd}.xlsx");
             using (var wb = new XLWorkbook())
             {
@@ -382,8 +392,8 @@ namespace MadinaEnterprises.Modules.Util
                     var g = ginners.FirstOrDefault(x => x.GinnerID == c.GinnerID);
                     var m = mills.FirstOrDefault(x => x.MillID == c.MillID);
 
-                    var cDeliveries = allDeliveries.Where(d => d.ContractID == c.ContractID).ToList();
-                    var cPayments = allPayments.Where(p => p.ContractID == c.ContractID).ToList();
+                    var cDeliveries = deliveryLookup.GetValueOrDefault(c.ContractID, new System.Collections.Generic.List<Deliveries>());
+                    var cPayments = paymentLookup.GetValueOrDefault(c.ContractID, new System.Collections.Generic.List<Payment>());
 
                     double rate = c.PricePerBatch;                       // per maund
                     double estKg = c.TotalBales * KG_PER_BALE;
@@ -396,13 +406,15 @@ namespace MadinaEnterprises.Modules.Util
 
                     double paid = cPayments.Sum(p => p.AmountPaid);
                     double balance = finalAmt - paid;
+                    masterFinalAmount += finalAmt;
+                    masterPaidAmount += paid;
 
-                    wsC.Cell(r, 1).Value = c.ContractID;
-                    wsC.Cell(r, 2).Value = $"{g?.GinnerName} ({g?.GinnerID})";
-                    wsC.Cell(r, 3).Value = $"{m?.MillName} ({m?.MillID})";
-                    wsC.Cell(r, 4).Value = m?.Address ?? "";
-                    wsC.Cell(r, 5).Value = m?.OwnerName ?? "";
-                    wsC.Cell(r, 6).Value = c.Description ?? "";
+                    wsC.Cell(r, 1).Value = CleanText(c.ContractID);
+                    wsC.Cell(r, 2).Value = EntityRef(g?.GinnerName, g?.GinnerID);
+                    wsC.Cell(r, 3).Value = EntityRef(m?.MillName, m?.MillID);
+                    wsC.Cell(r, 4).Value = CleanText(m?.Address);
+                    wsC.Cell(r, 5).Value = CleanText(m?.OwnerName);
+                    wsC.Cell(r, 6).Value = CleanText(c.Description);
                     wsC.Cell(r, 7).Value = c.TotalBales;
                     wsC.Cell(r, 8).Value = rate;
 
@@ -418,12 +430,12 @@ namespace MadinaEnterprises.Modules.Util
                     wsC.Cell(r, 16).Value = balance;
 
                     wsC.Cell(r, 17).Value = c.DateCreated;
-                    wsC.Cell(r, 18).Value = c.DeliveryNotes;
-                    wsC.Cell(r, 19).Value = c.PaymentNotes;
+                    wsC.Cell(r, 18).Value = CleanText(c.DeliveryNotes);
+                    wsC.Cell(r, 19).Value = CleanText(c.PaymentNotes);
 
                     r++;
                 }
-                StyleContractsSheetRich(wsC);
+                StyleContractsSheetRich(wsC, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
 
                 // Deliveries
                 var wsD = wb.Worksheets.Add("Deliveries");
@@ -434,35 +446,59 @@ namespace MadinaEnterprises.Modules.Util
                 r = 2;
                 foreach (var d in allDeliveries)
                 {
-                    wsD.Cell(r, 1).Value = d.DeliveryID;
-                    wsD.Cell(r, 2).Value = d.ContractID;
+                    wsD.Cell(r, 1).Value = CleanText(d.DeliveryID);
+                    wsD.Cell(r, 2).Value = CleanText(d.ContractID);
                     wsD.Cell(r, 3).Value = d.Amount;
                     wsD.Cell(r, 4).Value = d.TotalBales;
                     wsD.Cell(r, 5).Value = d.FactoryWeight;
                     wsD.Cell(r, 6).Value = d.MillWeight;
-                    wsD.Cell(r, 7).Value = d.TruckNumber;
-                    wsD.Cell(r, 8).Value = d.DriverContact;
+                    wsD.Cell(r, 7).Value = CleanText(d.TruckNumber);
+                    wsD.Cell(r, 8).Value = CleanText(d.DriverContact);
                     wsD.Cell(r, 9).Value = d.DepartureDate;
                     wsD.Cell(r, 10).Value = d.DeliveryDate;
                     r++;
                 }
-                StyleDeliveriesSheet(wsD);
+                StyleDeliveriesSheet(wsD, 9, 10);
 
                 // Payments (legacy columns as in your DB)
                 var wsP = wb.Worksheets.Add("Payments");
-                WriteHeaders(wsP, new[] { "PaymentID", "ContractID", "Total Amount (Legacy)", "Amount Paid", "Total Bales (Legacy)", "Date" });
+                WriteHeaders(wsP, new[] { "PaymentID", "ContractID", "Total Amount (Legacy)", "Amount Paid", "Total Bales (Legacy)", "Transaction ID", "Date" });
                 r = 2;
                 foreach (var p in allPayments)
                 {
-                    wsP.Cell(r, 1).Value = p.PaymentID;
-                    wsP.Cell(r, 2).Value = p.ContractID;
+                    wsP.Cell(r, 1).Value = CleanText(p.PaymentID);
+                    wsP.Cell(r, 2).Value = CleanText(p.ContractID);
                     wsP.Cell(r, 3).Value = p.TotalAmount;
                     wsP.Cell(r, 4).Value = p.AmountPaid;
                     wsP.Cell(r, 5).Value = p.TotalBales;
-                    wsP.Cell(r, 6).Value = p.Date;
+                    wsP.Cell(r, 6).Value = CleanText(p.TransactionID);
+                    wsP.Cell(r, 7).Value = p.Date;
                     r++;
                 }
-                StylePaymentsSheet(wsP);
+                StylePaymentsSheet(wsP, 7);
+
+                var wsS = wb.Worksheets.Add("Summary");
+                wsS.Cell(1, 1).Value = "Metric";
+                wsS.Cell(1, 2).Value = "Value";
+                wsS.Cell(2, 1).Value = "Contracts";
+                wsS.Cell(2, 2).Value = contracts.Count;
+                wsS.Cell(3, 1).Value = "Ginners";
+                wsS.Cell(3, 2).Value = ginners.Count;
+                wsS.Cell(4, 1).Value = "Mills";
+                wsS.Cell(4, 2).Value = mills.Count;
+                wsS.Cell(5, 1).Value = "Deliveries";
+                wsS.Cell(5, 2).Value = allDeliveries.Count;
+                wsS.Cell(6, 1).Value = "Payments";
+                wsS.Cell(6, 2).Value = allPayments.Count;
+                wsS.Cell(7, 1).Value = "Final Amount";
+                wsS.Cell(7, 2).Value = masterFinalAmount;
+                wsS.Cell(8, 1).Value = "Paid Amount";
+                wsS.Cell(8, 2).Value = masterPaidAmount;
+                wsS.Cell(9, 1).Value = "Balance";
+                wsS.Cell(9, 2).Value = masterFinalAmount - masterPaidAmount;
+                wsS.Range("A1:A9").Style.Font.Bold = true;
+                wsS.Column(2).Style.NumberFormat.Format = "#,##0.00";
+                wsS.Columns().AdjustToContents();
 
                 wb.SaveAs(masterPath);
             }
@@ -472,9 +508,6 @@ namespace MadinaEnterprises.Modules.Util
             {
                 var gContracts = contracts.Where(c => c.GinnerID == g.GinnerID).ToList();
                 if (gContracts.Count == 0) continue;
-
-                allDeliveries = App.DatabaseService.GetAllDeliveries().Result; // re-use or keep earlier ref
-                allPayments = App.DatabaseService.GetAllPayments().Result;
 
                 var gContractIds = gContracts.Select(c => c.ContractID).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var gDeliveries = allDeliveries.Where(d => gContractIds.Contains(d.ContractID)).ToList();
@@ -491,7 +524,7 @@ namespace MadinaEnterprises.Modules.Util
                     // Summary
                     var wsS = wb.Worksheets.Add("Summary");
                     wsS.Cell(1, 1).Value = "Ginner";
-                    wsS.Cell(1, 2).Value = $"{g.GinnerName} ({g.GinnerID})";
+                    wsS.Cell(1, 2).Value = EntityRef(g.GinnerName, g.GinnerID);
                     wsS.Cell(2, 1).Value = "Contracts";
                     wsS.Cell(2, 2).Value = gContracts.Count;
 
@@ -515,7 +548,7 @@ namespace MadinaEnterprises.Modules.Util
                     wsS.Cell(5, 2).Value = finalAmtSum - paidSum;
                     wsS.Range("A1:A5").Style.Font.Bold = true;
                     wsS.Columns().AdjustToContents();
-                    wsS.Column(2).Style.NumberFormat.Format = "#,##0";
+                    wsS.Column(2).Style.NumberFormat.Format = "#,##0.00";
 
                     // Contracts sheet per ginner
                     var wsC = wb.Worksheets.Add("Contracts");
@@ -545,11 +578,11 @@ namespace MadinaEnterprises.Modules.Util
                         var fAmt = fMd * rate;
                         var bal = fAmt - pay;
 
-                        wsC.Cell(r, 1).Value = c.ContractID;
-                        wsC.Cell(r, 2).Value = $"{m?.MillName} ({m?.MillID})";
-                        wsC.Cell(r, 3).Value = m?.Address ?? "";
-                        wsC.Cell(r, 4).Value = m?.OwnerName ?? "";
-                        wsC.Cell(r, 5).Value = c.Description ?? "";
+                        wsC.Cell(r, 1).Value = CleanText(c.ContractID);
+                        wsC.Cell(r, 2).Value = EntityRef(m?.MillName, m?.MillID);
+                        wsC.Cell(r, 3).Value = CleanText(m?.Address);
+                        wsC.Cell(r, 4).Value = CleanText(m?.OwnerName);
+                        wsC.Cell(r, 5).Value = CleanText(c.Description);
                         wsC.Cell(r, 6).Value = c.TotalBales;
                         wsC.Cell(r, 7).Value = rate;
 
@@ -567,7 +600,7 @@ namespace MadinaEnterprises.Modules.Util
                         wsC.Cell(r, 16).Value = c.DateCreated;
                         r++;
                     }
-                    StyleContractsSheetRich(wsC);
+                    StyleContractsSheetRich(wsC, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
 
                     // Deliveries
                     var wsD = wb.Worksheets.Add("Deliveries");
@@ -578,19 +611,19 @@ namespace MadinaEnterprises.Modules.Util
                     r = 2;
                     foreach (var d in gDeliveries)
                     {
-                        wsD.Cell(r, 1).Value = d.DeliveryID;
-                        wsD.Cell(r, 2).Value = d.ContractID;
+                        wsD.Cell(r, 1).Value = CleanText(d.DeliveryID);
+                        wsD.Cell(r, 2).Value = CleanText(d.ContractID);
                         wsD.Cell(r, 3).Value = d.Amount;
                         wsD.Cell(r, 4).Value = d.TotalBales;
                         wsD.Cell(r, 5).Value = d.FactoryWeight;
                         wsD.Cell(r, 6).Value = d.MillWeight;
                         wsD.Cell(r, 7).Value = d.DepartureDate;
                         wsD.Cell(r, 8).Value = d.DeliveryDate;
-                        wsD.Cell(r, 9).Value = d.TruckNumber;
-                        wsD.Cell(r, 10).Value = d.DriverContact;
+                        wsD.Cell(r, 9).Value = CleanText(d.TruckNumber);
+                        wsD.Cell(r, 10).Value = CleanText(d.DriverContact);
                         r++;
                     }
-                    StyleDeliveriesSheet(wsD);
+                    StyleDeliveriesSheet(wsD, 7, 8);
 
                     // Payments
                     var wsP = wb.Worksheets.Add("Payments");
@@ -601,15 +634,15 @@ namespace MadinaEnterprises.Modules.Util
                     r = 2;
                     foreach (var p in gPayments)
                     {
-                        wsP.Cell(r, 1).Value = p.PaymentID;
-                        wsP.Cell(r, 2).Value = p.ContractID;
+                        wsP.Cell(r, 1).Value = CleanText(p.PaymentID);
+                        wsP.Cell(r, 2).Value = CleanText(p.ContractID);
                         wsP.Cell(r, 3).Value = p.TotalAmount;
                         wsP.Cell(r, 4).Value = p.AmountPaid;
                         wsP.Cell(r, 5).Value = p.TotalBales;
                         wsP.Cell(r, 6).Value = p.Date;
                         r++;
                     }
-                    StylePaymentsSheet(wsP);
+                    StylePaymentsSheet(wsP, 6);
 
                     wb.SaveAs(gPath);
                 }
@@ -632,40 +665,58 @@ namespace MadinaEnterprises.Modules.Util
             ws.SheetView.FreezeRows(1);
         }
 
-        private static void StyleContractsSheetRich(IXLWorksheet ws)
+        private static void StyleContractsSheetRich(IXLWorksheet ws,
+            int totalBalesCol, int rateCol, int estKgCol, int estMaundCol, int estAmountCol,
+            int millWeightCol, int finalMaundCol, int finalAmountCol, int paidCol, int balanceCol, int dateCol)
         {
-            ws.Column(7).Style.NumberFormat.Format = "#,##0";     // Total Bales
-            ws.Column(8).Style.NumberFormat.Format = "#,##0";     // Rate/Maund
-            ws.Column(9).Style.NumberFormat.Format = "#,##0";     // Est Kg
-            ws.Column(10).Style.NumberFormat.Format = "#,##0";    // Est Maunds
-            ws.Column(11).Style.NumberFormat.Format = "#,##0";    // Est Amount
-            ws.Column(12).Style.NumberFormat.Format = "#,##0";    // Mill Weight Kg
-            ws.Column(13).Style.NumberFormat.Format = "#,##0";    // Final Maunds
-            ws.Column(14).Style.NumberFormat.Format = "#,##0";    // Final Amount
-            ws.Column(15).Style.NumberFormat.Format = "#,##0";    // Paid
-            ws.Column(16).Style.NumberFormat.Format = "#,##0";    // Balance
-            ws.Column(17).Style.DateFormat.Format = "yyyy-mm-dd";
+            ws.Column(totalBalesCol).Style.NumberFormat.Format = "#,##0";
+            ws.Column(rateCol).Style.NumberFormat.Format = "#,##0";
+            ws.Column(estKgCol).Style.NumberFormat.Format = "#,##0";
+            ws.Column(estMaundCol).Style.NumberFormat.Format = "#,##0.00";
+            ws.Column(estAmountCol).Style.NumberFormat.Format = "#,##0.00";
+            ws.Column(millWeightCol).Style.NumberFormat.Format = "#,##0.00";
+            ws.Column(finalMaundCol).Style.NumberFormat.Format = "#,##0.00";
+            ws.Column(finalAmountCol).Style.NumberFormat.Format = "#,##0.00";
+            ws.Column(paidCol).Style.NumberFormat.Format = "#,##0.00";
+            ws.Column(balanceCol).Style.NumberFormat.Format = "#,##0.00";
+            ws.Column(dateCol).Style.DateFormat.Format = "yyyy-mm-dd";
             ws.Columns().AdjustToContents();
         }
 
-        private static void StyleDeliveriesSheet(IXLWorksheet ws)
+        private static void StyleDeliveriesSheet(IXLWorksheet ws, int departureDateCol, int deliveryDateCol)
         {
             ws.Column(3).Style.NumberFormat.Format = "#,##0.00";   // Amount
             ws.Column(4).Style.NumberFormat.Format = "#,##0";      // Total Bales
             ws.Column(5).Style.NumberFormat.Format = "#,##0.00";   // Factory Weight
             ws.Column(6).Style.NumberFormat.Format = "#,##0.00";   // Mill Weight
-            ws.Column(9).Style.DateFormat.Format = "yyyy-mm-dd";   // Departure
-            ws.Column(10).Style.DateFormat.Format = "yyyy-mm-dd";  // Delivery
+            ws.Column(departureDateCol).Style.DateFormat.Format = "yyyy-mm-dd";
+            ws.Column(deliveryDateCol).Style.DateFormat.Format = "yyyy-mm-dd";
             ws.Columns().AdjustToContents();
         }
 
-        private static void StylePaymentsSheet(IXLWorksheet ws)
+        private static void StylePaymentsSheet(IXLWorksheet ws, int dateCol)
         {
             ws.Column(3).Style.NumberFormat.Format = "#,##0.00";   // Legacy Total Amount
             ws.Column(4).Style.NumberFormat.Format = "#,##0.00";   // Amount Paid
             ws.Column(5).Style.NumberFormat.Format = "#,##0";      // Legacy Total Bales
-            ws.Column(6).Style.DateFormat.Format = "yyyy-mm-dd";   // Date
+            ws.Column(dateCol).Style.DateFormat.Format = "yyyy-mm-dd";
             ws.Columns().AdjustToContents();
+        }
+
+        private static string EntityRef(string? name, string? id)
+        {
+            var cleanName = CleanText(name, "Unknown");
+            var cleanId = CleanText(id, "N/A");
+            return $"{cleanName} ({cleanId})";
+        }
+
+        private static string CleanText(string? value, string fallback = "")
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return fallback;
+
+            var collapsed = Regex.Replace(value.Trim(), @"\s+", " ");
+            return collapsed;
         }
 
         private static string SanitizeFileName(string? name)
