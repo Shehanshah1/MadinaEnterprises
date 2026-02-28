@@ -1,30 +1,6 @@
-﻿/*
-TODO: CreateAccount – production-readiness
-
-SECURITY
-- [ ] Backend /auth/register must hash passwords with strong KDF (Argon2id / bcrypt / PBKDF2) and per-user salt.
-- [ ] Enforce HTTPS; never log passwords or full tokens; secrets in secure vaults.
-- [ ] Rate-limit by IP/user/device; apply CAPTCHA after repeated attempts.
-- [ ] Email verification: send signed, time-limited token; block login until verified (configurable).
-- [ ] Unique email constraint at DB + normalized email casing; transactional create (user + verification token).
-- [ ] Privacy-safe logs/metrics (no PII beyond necessary IDs).
-
-UX & ACCESSIBILITY
-- [ ] Localize strings; support RTL; larger hit targets; semantic hints for screen readers.
-- [ ] Password strength meter; breached-password check (k-anon HIBP).
-- [ ] Terms/Privacy links to actual documents; record consent timestamp/version.
-
-CLIENT ROBUSTNESS
-- [ ] CancellationToken, HttpClient timeout, retry (Polly) on transient 5xx only.
-- [ ] Offline detection & graceful failure; resend verification flow with cooldown.
-
-TESTING & OPS
-- [ ] Unit tests: validators; API client happy/sad paths; error mapping (409/400/5xx).
-- [ ] E2E tests: register → verify → login.
-- [ ] Observability: events (register_attempt, register_success, register_fail), dashboards & alerting on spikes.
-*/
-
+using System.Net;
 using System.Net.Http;
+using System.Net.Mail;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -52,7 +28,6 @@ public partial class CreateAccountPage : ContentPage
         var password = passwordEntry.Text ?? string.Empty;
         var confirmPassword = confirmPasswordEntry.Text ?? string.Empty;
 
-        // Required fields
         if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email) ||
             string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
         {
@@ -60,21 +35,18 @@ public partial class CreateAccountPage : ContentPage
             return;
         }
 
-        // Basic name sanity
         if (name.Length < 2)
         {
             ShowError("Please enter your full name.");
             return;
         }
 
-        // Email
         if (!IsValidEmail(email))
         {
             ShowError("Please enter a valid email.");
             return;
         }
 
-        // Password policy
         if (!IsStrongPassword(password))
         {
             ShowError("Password must be 8+ chars and include letters, numbers, and symbols.");
@@ -87,7 +59,6 @@ public partial class CreateAccountPage : ContentPage
             return;
         }
 
-        // Terms
         if (!(termsCheckBox?.IsChecked ?? false))
         {
             ShowError("You must agree to the Terms of Service and Privacy Policy.");
@@ -105,17 +76,37 @@ public partial class CreateAccountPage : ContentPage
                 Password = password
             });
 
-            if (result.Success)
-            {
-                await DisplayAlert("Account Created",
-                    "We’ve sent a verification link to your email. Please verify to complete setup.",
-                    "OK");
-                await App.NavigateToPage(new LoginPage());
-            }
-            else
+            if (!result.Success)
             {
                 ShowError(result.ErrorMessage ?? "Could not create account. Please try again.");
+                return;
             }
+
+            var code = await DisplayPromptAsync("Email Verification", "Enter the verification code sent to your email.", "Verify", "Cancel", keyboard: Keyboard.Numeric);
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                ShowError("Verification is required before login.");
+                return;
+            }
+
+            var verified = await _registrationService.VerifyEmailCodeAsync(email, code);
+            if (!verified)
+            {
+                ShowError("Invalid or expired verification code.");
+                return;
+            }
+
+            var message = result.NeedsAdminApproval
+                ? "Email verified. Your account now awaits admin approval before login."
+                : "Email verified. Your account is active and ready to use.";
+
+            if (result.IsFirstAdmin)
+            {
+                message = "Email verified. You are the first account and have permanent admin access.";
+            }
+
+            await DisplayAlert("Account Created", message, "OK");
+            await App.NavigateToPage(new LoginPage());
         }
         catch
         {
@@ -149,7 +140,6 @@ public partial class CreateAccountPage : ContentPage
     private bool IsValidEmail(string email)
         => Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
 
-    // 8+ chars, at least one letter, one digit, one symbol
     private bool IsStrongPassword(string pwd)
     {
         if (string.IsNullOrWhiteSpace(pwd) || pwd.Length < 8) return false;
@@ -185,10 +175,6 @@ public partial class CreateAccountPage : ContentPage
     }
 }
 
-/* ===========================
-   Service Layer (swappable)
-   =========================== */
-
 public record RegistrationRequest
 {
     public string Name { get; init; } = "";
@@ -199,45 +185,59 @@ public record RegistrationRequest
 public sealed class RegistrationResult
 {
     public bool Success { get; set; }
+    public bool IsFirstAdmin { get; set; }
+    public bool NeedsAdminApproval { get; set; }
     public string? ErrorMessage { get; set; }
 
-    public static RegistrationResult Ok() => new() { Success = true };
     public static RegistrationResult Fail(string msg) => new() { Success = false, ErrorMessage = msg };
 }
 
 public interface IRegistrationService
 {
     Task<RegistrationResult> RegisterAsync(RegistrationRequest request);
+    Task<bool> VerifyEmailCodeAsync(string email, string code);
 }
 
-/// <summary>
-/// Default stub implementation.
-/// Swap ApiEndpoint to a real URL to integrate.
-/// </summary>
+public interface IEmailService
+{
+    Task SendVerificationCodeAsync(string email, string code);
+}
+
 public sealed class RegistrationService : IRegistrationService
 {
     private static readonly Lazy<RegistrationService> _lazy = new(() => new RegistrationService());
     public static RegistrationService Instance => _lazy.Value;
 
-    // Set to your real API, e.g. "https://api.madinaenterprises.com/auth/register"
     public string? ApiEndpoint { get; set; } = null;
 
     private readonly HttpClient _http = new();
+    private readonly IEmailService _emailService = new SmtpEmailService();
 
     private RegistrationService() { }
 
     public async Task<RegistrationResult> RegisterAsync(RegistrationRequest request)
     {
-        // Simulated flow if no endpoint is configured
         if (string.IsNullOrWhiteSpace(ApiEndpoint))
         {
-            await Task.Delay(700);
+            var created = await App.DatabaseService.RegisterUser(request.Name, request.Email, request.Password);
+            if (!created.Success)
+            {
+                return RegistrationResult.Fail(created.ErrorMessage ?? "Could not create account.");
+            }
 
-            // Simulate "email already in use"
-            if (request.Email.EndsWith("@exists.com", StringComparison.OrdinalIgnoreCase))
-                return RegistrationResult.Fail("This email is already in use.");
+            var code = await App.DatabaseService.GetVerificationCodeForEmail(request.Email);
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                return RegistrationResult.Fail("Could not generate verification code.");
+            }
 
-            return RegistrationResult.Ok();
+            await _emailService.SendVerificationCodeAsync(request.Email, code);
+            return new RegistrationResult
+            {
+                Success = true,
+                IsFirstAdmin = created.IsFirstAdmin,
+                NeedsAdminApproval = created.NeedsAdminApproval
+            };
         }
 
         try
@@ -247,10 +247,9 @@ public sealed class RegistrationService : IRegistrationService
             var resp = await _http.PostAsync(ApiEndpoint, content);
 
             if (resp.IsSuccessStatusCode)
-                return RegistrationResult.Ok();
+                return new RegistrationResult { Success = true };
 
             var body = await resp.Content.ReadAsStringAsync();
-            // Map typical errors (409: email exists, 400: invalid)
             if ((int)resp.StatusCode == 409) return RegistrationResult.Fail("This email is already in use.");
             if ((int)resp.StatusCode == 400) return RegistrationResult.Fail("Invalid registration details.");
             return RegistrationResult.Fail(string.IsNullOrWhiteSpace(body) ? "Registration failed." : body);
@@ -259,5 +258,43 @@ public sealed class RegistrationService : IRegistrationService
         {
             return RegistrationResult.Fail("Network error. Please try again.");
         }
+    }
+
+    public Task<bool> VerifyEmailCodeAsync(string email, string code)
+        => App.DatabaseService.VerifyEmailCode(email, code);
+}
+
+public sealed class SmtpEmailService : IEmailService
+{
+    public async Task SendVerificationCodeAsync(string email, string code)
+    {
+        var host = Environment.GetEnvironmentVariable("MADINA_SMTP_HOST");
+        var user = Environment.GetEnvironmentVariable("MADINA_SMTP_USER");
+        var pass = Environment.GetEnvironmentVariable("MADINA_SMTP_PASS");
+        var from = Environment.GetEnvironmentVariable("MADINA_SMTP_FROM") ?? user;
+
+        if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(user) ||
+            string.IsNullOrWhiteSpace(pass) || string.IsNullOrWhiteSpace(from))
+        {
+            // Fallback to local debug output when SMTP is not configured.
+            System.Diagnostics.Debug.WriteLine($"[EmailFallback] verification code for {email}: {code}");
+            return;
+        }
+
+        using var client = new SmtpClient(host)
+        {
+            Port = int.TryParse(Environment.GetEnvironmentVariable("MADINA_SMTP_PORT"), out var p) ? p : 587,
+            EnableSsl = true,
+            Credentials = new NetworkCredential(user, pass)
+        };
+
+        using var message = new MailMessage(from, email)
+        {
+            Subject = "Madina Enterprises verification code",
+            Body = $"Your verification code is {code}. It expires in 15 minutes.",
+            IsBodyHtml = false
+        };
+
+        await client.SendMailAsync(message);
     }
 }
