@@ -25,31 +25,14 @@
         <ScrollView Grid.Column="1">
             <VerticalStackLayout Padding="30" Spacing="20">
 
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                    <VerticalStackLayout Grid.Column="0" Spacing="4">
-                        <Label Text="Dashboard"
-                               FontSize="34"
-                               FontAttributes="Bold"
-                               TextColor="#111827"
-                               HorizontalOptions="Start"/>
-                        <Label Text="Overview of business performance and current metrics"
-                               FontSize="14"
-                               TextColor="#6B7280"/>
-                    </VerticalStackLayout>
-                    <Frame Grid.Column="1"
-                           BackgroundColor="#F3F4F6"
-                           BorderColor="#E5E7EB"
-                           CornerRadius="10"
-                           Padding="12,8"
-                           HasShadow="False"
-                           VerticalOptions="Center">
-                        <Label Text="Live Stats"
-                               FontAttributes="Bold"
-                               TextColor="#374151"/>
-                    </Frame>
-                </Grid>
+                <!-- Title -->
+           <Label Text="Dashboard"
+            FontSize="Header"
+            FontAttributes="Bold"
+            TextColor="Black"
+            HorizontalOptions="Start"/>
 
-                <BoxView HeightRequest="2" BackgroundColor="#111827" Opacity="0.9"/>
+                    <BoxView HeightRequest="2" BackgroundColor="#111827" Opacity="0.9"/>
 
                 <!-- Widgets Grid -->
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="20" RowSpacing="20">

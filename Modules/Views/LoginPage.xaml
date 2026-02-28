@@ -14,7 +14,6 @@
                 <Label Text="MADINA ENTERPRISES"
                        FontAttributes="Bold"
                        FontSize="52"
-                       LetterSpacing="1"
                        TextColor="#333333"
                        HorizontalOptions="Center"
                        VerticalOptions="Center"/>
