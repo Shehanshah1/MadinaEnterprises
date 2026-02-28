@@ -51,11 +51,9 @@ namespace MadinaEnterprises.Modules.Views
 
             await Task.Delay(100); // Simulate API delay
 
-            // Replace with actual backend validation
-            const string testEmail = "user@example.com";
-            const string testPassword = "pass";
+            var isValid = await App.DatabaseService.ValidateUserCredentials(email, password);
 
-            if (email == testEmail && password == testPassword)
+            if (isValid)
             {
                 await App.NavigateToPage(new DashboardPage());
             }
