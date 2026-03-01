@@ -19,6 +19,7 @@
             <Button Text="Contracts" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0"/>
             <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
             <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
+            <Button Text="Ginner Ledger" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnerLedgerPageButtonClicked"/>
             <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
         </StackLayout>
         <!-- Main Content -->
@@ -66,7 +67,7 @@
                             <Entry x:Name="pricePerBatchEntry" Placeholder="Price per Batch" Keyboard="Numeric"  BackgroundColor="White" Grid.Row="6" Grid.Column="1" TextColor="Black" />
                             <Entry  x:Name="commissionEntry" Placeholder="Commission (%)" Keyboard="Numeric" BackgroundColor="White"     Grid.Row="7" Grid.Column="1" TextColor="Black"/>
                             <DatePicker x:Name="contractDatePicker"  BackgroundColor="White"                                             Grid.Row="8" Grid.Column="1"  TextColor="Black" />
-                            <Editor x:Name="deliveryNotesEditor" Placeholder="Delivery Notes" AutoSize="TextChanges" Keyboard="Telephone"  Grid.Row="9" Grid.Column="1" TextColor="Black"  BackgroundColor="White"/>
+                            <Editor x:Name="deliveryNotesEditor" Placeholder="Delivery Notes" AutoSize="TextChanges"  Grid.Row="9" Grid.Column="1" TextColor="Black"  BackgroundColor="White"/>
                             <Editor x:Name="paymentNotesEditor" Placeholder="Payment Notes" AutoSize="TextChanges"                         Grid.Row="10" Grid.Column="1" TextColor="Black" BackgroundColor="White" />
                             <Entry  x:Name="descriptionEntry" Placeholder="Composition, Percentage, Notes" BackgroundColor="White"       Grid.Row="11" Grid.Column="1" TextColor="Black"/>
 

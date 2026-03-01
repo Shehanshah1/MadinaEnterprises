@@ -4,14 +4,12 @@ namespace MadinaEnterprises
 {
     public partial class App : Application
     {
-        // Instance of DatabaseService (guaranteed initialized)
-        public static DatabaseService DatabaseService { get; private set; } = new();
+        public static DatabaseService DatabaseService { get; private set; } = null!;
 
         public App()
         {
             InitializeComponent();
 
-            // Initialize the database service
             DatabaseService = new DatabaseService();
 
             // Set the startup page
@@ -48,6 +46,15 @@ namespace MadinaEnterprises
             if (Current?.MainPage is NavigationPage navigationPage)
             {
                 await navigationPage.PopAsync();
+            }
+        }
+
+        // Logout: reset navigation stack to LoginPage
+        public static void Logout()
+        {
+            if (Current != null)
+            {
+                Current.MainPage = new NavigationPage(new LoginPage());
             }
         }
     }

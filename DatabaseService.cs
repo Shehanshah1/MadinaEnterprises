@@ -70,7 +70,8 @@ namespace MadinaEnterprises
             TotalAmount REAL,
             AmountPaid REAL,
             TotalBales INTEGER,
-            Date TEXT
+            Date TEXT,
+            TransactionID TEXT
         );
 
         CREATE TABLE IF NOT EXISTS Ginners (
@@ -130,6 +131,28 @@ namespace MadinaEnterprises
                 if (!hasDescription)
                 {
                     using var alter = new SqliteCommand("ALTER TABLE Contracts ADD COLUMN Description TEXT;", connection);
+                    alter.ExecuteNonQuery();
+                }
+            }
+
+            // ---- Migration: add TransactionID to Payments if missing
+            using (var pragma2 = new SqliteCommand("PRAGMA table_info(Payments);", connection))
+            using (var reader2 = pragma2.ExecuteReader())
+            {
+                bool hasTransactionID = false;
+                while (reader2.Read())
+                {
+                    var colName = reader2["name"]?.ToString();
+                    if (string.Equals(colName, "TransactionID", StringComparison.OrdinalIgnoreCase))
+                    {
+                        hasTransactionID = true;
+                        break;
+                    }
+                }
+
+                if (!hasTransactionID)
+                {
+                    using var alter = new SqliteCommand("ALTER TABLE Payments ADD COLUMN TransactionID TEXT;", connection);
                     alter.ExecuteNonQuery();
                 }
             }
@@ -365,7 +388,8 @@ namespace MadinaEnterprises
                     TotalAmount = Convert.ToDouble(reader["TotalAmount"]),
                     AmountPaid = Convert.ToDouble(reader["AmountPaid"]),
                     TotalBales = Convert.ToInt32(reader["TotalBales"]),
-                    Date = DateTime.Parse(reader["Date"].ToString())
+                    Date = DateTime.Parse(reader["Date"].ToString()),
+                    TransactionID = reader["TransactionID"] is DBNull ? "" : reader["TransactionID"]?.ToString() ?? ""
                 });
             }
             return list;
@@ -376,8 +400,8 @@ namespace MadinaEnterprises
             using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
             var cmd = new SqliteCommand(@"
-                INSERT INTO Payments (PaymentID, ContractID, TotalAmount, AmountPaid, TotalBales, Date)
-                VALUES (@PaymentID, @ContractID, @TotalAmount, @AmountPaid, @TotalBales, @Date)", conn);
+                INSERT INTO Payments (PaymentID, ContractID, TotalAmount, AmountPaid, TotalBales, Date, TransactionID)
+                VALUES (@PaymentID, @ContractID, @TotalAmount, @AmountPaid, @TotalBales, @Date, @TransactionID)", conn);
 
             cmd.Parameters.AddWithValue("@PaymentID", p.PaymentID);
             cmd.Parameters.AddWithValue("@ContractID", p.ContractID);
@@ -385,6 +409,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@AmountPaid", p.AmountPaid);
             cmd.Parameters.AddWithValue("@TotalBales", p.TotalBales);
             cmd.Parameters.AddWithValue("@Date", p.Date.ToString("yyyy-MM-dd"));
+            cmd.Parameters.AddWithValue("@TransactionID", (object?)p.TransactionID ?? DBNull.Value);
 
             await cmd.ExecuteNonQueryAsync();
         }
@@ -394,7 +419,7 @@ namespace MadinaEnterprises
             using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
             var cmd = new SqliteCommand(@"
-                UPDATE Payments SET ContractID=@ContractID, TotalAmount=@TotalAmount, AmountPaid=@AmountPaid, TotalBales=@TotalBales, Date=@Date
+                UPDATE Payments SET ContractID=@ContractID, TotalAmount=@TotalAmount, AmountPaid=@AmountPaid, TotalBales=@TotalBales, Date=@Date, TransactionID=@TransactionID
                 WHERE PaymentID=@PaymentID", conn);
 
             cmd.Parameters.AddWithValue("@PaymentID", p.PaymentID);
@@ -403,6 +428,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@AmountPaid", p.AmountPaid);
             cmd.Parameters.AddWithValue("@TotalBales", p.TotalBales);
             cmd.Parameters.AddWithValue("@Date", p.Date.ToString("yyyy-MM-dd"));
+            cmd.Parameters.AddWithValue("@TransactionID", (object?)p.TransactionID ?? DBNull.Value);
 
             await cmd.ExecuteNonQueryAsync();
         }

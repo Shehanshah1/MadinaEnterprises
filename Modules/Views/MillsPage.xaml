@@ -19,6 +19,7 @@
             <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
             <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
             <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
+            <Button Text="Ginner Ledger" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnerLedgerPageButtonClicked"/>
             <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
         </StackLayout>
 
@@ -52,10 +53,10 @@
                             <Label Text="Owner"              Grid.Row="3" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
 
                             <!-- Inputs (names unchanged) -->
-                            <Entry x:Name="millIDEntry"              Grid.Row="0" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="e.g., GNR-001"/>
-                            <Entry x:Name="millNameEntry"            Grid.Row="1" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="e.g., Al-Noor Ginning"/>
-                            <Entry x:Name="millAddressEntry"         Grid.Row="2" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="Phone/Email"/>
-                            <Entry x:Name="millOwnerNameEntry"       Grid.Row="3" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="IBAN #"/>
+                            <Entry x:Name="millIDEntry"              Grid.Row="0" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="e.g., MIL-001"/>
+                            <Entry x:Name="millNameEntry"            Grid.Row="1" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="e.g., Nishat Mills"/>
+                            <Entry x:Name="millAddressEntry"         Grid.Row="2" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="Street, City"/>
+                            <Entry x:Name="millOwnerNameEntry"       Grid.Row="3" Grid.Column="1" BackgroundColor="White" TextColor="Black" Placeholder="Owner Name"/>
                         </Grid>
 
                         <!-- Action Buttons (now inside the same container) -->

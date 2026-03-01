@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MadinaEnterprises.Modules.Views.GinnerLedgerPage"
+             BackgroundColor="#242424"
+             MinimumHeightRequest="600"
+             MinimumWidthRequest="1200">
+
+    <Grid ColumnDefinitions="253,*">
+        <!-- Sidebar -->
+        <BoxView Grid.Column="0" Color="#98cb00" />
+        <BoxView Grid.Column="1" Color="White" />
+
+        <!-- Sidebar Buttons -->
+        <StackLayout Grid.Column="0" Padding="10" Spacing="30">
+            <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked"/>
+            <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnersPageButtonClicked"/>
+            <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked"/>
+            <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
+            <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
+            <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
+            <Button Text="Ginner Ledger" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0"/>
+            <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
+        </StackLayout>
+
+        <!-- Main Content -->
+        <ScrollView Grid.Column="1">
+            <VerticalStackLayout Padding="20" Spacing="20">
+
+                <Label Text="Ginner Ledger"
+                       FontSize="Header"
+                       FontAttributes="Bold"
+                       TextColor="Black"
+                       HorizontalOptions="Start"/>
+                <BoxView HeightRequest="2" BackgroundColor="Black"/>
+
+                <!-- Form Card -->
+                <Frame Padding="20" BackgroundColor="#f5f5f5" CornerRadius="10" HasShadow="True">
+                    <VerticalStackLayout Spacing="16">
+
+                        <Grid ColumnDefinitions="*,*" RowSpacing="12"
+                              RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+
+                            <!-- Labels -->
+                            <Label Text="Contract ID"   Grid.Row="0" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Deal ID"       Grid.Row="1" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Amount Paid"   Grid.Row="2" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Date Paid"     Grid.Row="3" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+                            <Label Text="Mills Due To"  Grid.Row="4" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
+
+                            <!-- Inputs -->
+                            <Picker x:Name="contractPicker" Title="Select Contract" TitleColor="Black" BackgroundColor="LightGray" TextColor="Black" Grid.Row="0" Grid.Column="1"/>
+                            <Entry x:Name="dealIDEntry" Placeholder="Deal ID" BackgroundColor="White" TextColor="Black" Grid.Row="1" Grid.Column="1"/>
+                            <Entry x:Name="amountPaidEntry" Placeholder="Amount Paid" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="2" Grid.Column="1"/>
+                            <DatePicker x:Name="datePaidPicker" TextColor="Black" BackgroundColor="White" Grid.Row="3" Grid.Column="1"/>
+                            <Entry x:Name="millsDueToEntry" Placeholder="Mills Due To" BackgroundColor="White" TextColor="Black" Grid.Row="4" Grid.Column="1"/>
+                        </Grid>
+
+                        <!-- Action Buttons -->
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                            <Button Text="Save" Clicked="OnSaveClicked" BackgroundColor="#98cb00" TextColor="White" CornerRadius="5"/>
+                            <Button Text="Update" Clicked="OnUpdateClicked" BackgroundColor="#ff9800" TextColor="White" CornerRadius="5"/>
+                            <Button Text="Delete" Clicked="OnDeleteClicked" BackgroundColor="Red" TextColor="White" CornerRadius="5"/>
+                        </HorizontalStackLayout>
+
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- List Section -->
+                <Label Text="Existing Ledger Entries" FontSize="20" FontAttributes="Bold" TextColor="Black"/>
+                <SearchBar x:Name="ledgerSearchBar" Placeholder="Search by Contract ID or Deal ID..." TextChanged="OnSearchTextChanged" BackgroundColor="White" TextColor="Black"/>
+
+                <CollectionView x:Name="ledgerListView"
+                                BackgroundColor="WhiteSmoke"
+                                HeightRequest="300"
+                                SelectionMode="Single"
+                                SelectionChanged="OnLedgerListSelected"
+                                Margin="0,0,0,20">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Padding="10" Margin="5" BorderColor="#1976d2" CornerRadius="5" BackgroundColor="White">
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                    <Label Grid.Row="0" Grid.Column="0" FontSize="16" FontAttributes="Bold" TextColor="Black">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding ContractID}" FontAttributes="Bold" TextColor="Black"/>
+                                                <Span Text=" / " TextColor="#666666"/>
+                                                <Span Text="{Binding DealID}" TextColor="Black"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Label Grid.Row="0" Grid.Column="1"
+                                           Text="{Binding AmountPaid, StringFormat='Rs.{0:N2}'}"
+                                           FontSize="14"
+                                           TextColor="#444444"
+                                           HorizontalTextAlignment="End"/>
+                                    <Label Grid.Row="1" Grid.ColumnSpan="2"
+                                           Text="{Binding MillsDueTo}"
+                                           FontSize="13"
+                                           TextColor="#666666"/>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

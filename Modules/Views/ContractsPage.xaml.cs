@@ -48,6 +48,7 @@ public partial class ContractsPage : ContentPage
         contractIDEntry.Text = c.ContractID;
         ginnerPicker.SelectedIndex = ginners.FindIndex(g => g.GinnerID == c.GinnerID);
         millPicker.SelectedIndex = mills.FindIndex(m => m.MillID == c.MillID);
+        amountEntry.Text = c.TotalAmount.ToString("F2");
         totalBalesEntry.Text = c.TotalBales.ToString();
         pricePerBatchEntry.Text = c.PricePerBatch.ToString("F2");
         commissionEntry.Text = c.CommissionPercentage.ToString("F2");
@@ -62,6 +63,7 @@ public partial class ContractsPage : ContentPage
         contractIDEntry.Text = "";
         ginnerPicker.SelectedIndex = -1;
         millPicker.SelectedIndex = -1;
+        amountEntry.Text = "";
         totalBalesEntry.Text = "";
         pricePerBatchEntry.Text = "";
         commissionEntry.Text = "";
@@ -106,6 +108,7 @@ public partial class ContractsPage : ContentPage
             MillID = mills[millPicker.SelectedIndex].MillID,
             TotalBales = int.TryParse(totalBalesEntry.Text, out var bales) ? bales : 0,
             PricePerBatch = double.TryParse(pricePerBatchEntry.Text, out var price) ? price : 0,
+            TotalAmount = double.TryParse(amountEntry.Text, out var amount) ? amount : 0,
             CommissionPercentage = double.TryParse(commissionEntry.Text, out var comm) ? comm : 0,
             DateCreated = contractDatePicker.Date,
             DeliveryNotes = deliveryNotesEditor.Text ?? "",
@@ -140,6 +143,7 @@ public partial class ContractsPage : ContentPage
             MillID = mills[millPicker.SelectedIndex].MillID,
             TotalBales = int.TryParse(totalBalesEntry.Text, out var bales) ? bales : 0,
             PricePerBatch = double.TryParse(pricePerBatchEntry.Text, out var price) ? price : 0,
+            TotalAmount = double.TryParse(amountEntry.Text, out var amount) ? amount : 0,
             CommissionPercentage = double.TryParse(commissionEntry.Text, out var comm) ? comm : 0,
             DateCreated = contractDatePicker.Date,
             DeliveryNotes = deliveryNotesEditor.Text ?? "",
@@ -199,5 +203,6 @@ public partial class ContractsPage : ContentPage
     private async void OnMillsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new MillsPage());
     private async void OnDeliveriesPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new DeliveriesPage());
     private async void OnPaymentsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new PaymentsPage());
-    private async void OnLogOutButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new LoginPage());
+    private async void OnGinnerLedgerPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new GinnerLedgerPage());
+    private void OnLogOutButtonClicked(object sender, EventArgs e) => App.Logout();
 }

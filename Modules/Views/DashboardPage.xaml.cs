@@ -42,9 +42,9 @@ public partial class DashboardPage : ContentPage
             int millCount = mills.Count;
             double avgCommission = contracts.Any() ? contracts.Average(c => c.CommissionPercentage) : 0;
 
-            TotalCommissionLabel.Text = $"${totalCommission:F2}";
-            PaymentMadeLabel.Text = $"${totalPaid:F2}";
-            PaymentDueLabel.Text = $"${totalDue:F2}";
+            TotalCommissionLabel.Text = $"Rs.{totalCommission:N2}";
+            PaymentMadeLabel.Text = $"Rs.{totalPaid:N2}";
+            PaymentDueLabel.Text = $"Rs.{totalDue:N2}";
             BalesSoldLabel.Text = balesSold.ToString();
             TotalGinnersLabel.Text = ginnerCount.ToString();
             TotalMillsLabel.Text = millCount.ToString();
@@ -62,5 +62,6 @@ public partial class DashboardPage : ContentPage
     private async void OnContractsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new ContractsPage());
     private async void OnDeliveriesPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new DeliveriesPage());
     private async void OnPaymentsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new PaymentsPage());
-    private async void OnLogOutButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new LoginPage());
+    private async void OnGinnerLedgerPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new GinnerLedgerPage());
+    private void OnLogOutButtonClicked(object sender, EventArgs e) => App.Logout();
 }
