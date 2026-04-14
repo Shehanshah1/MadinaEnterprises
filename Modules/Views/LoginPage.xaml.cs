@@ -5,7 +5,7 @@ namespace MadinaEnterprises.Modules.Views;
 public partial class LoginPage : ContentPage
 {
     private const string HardcodedUsername = "Anees";
-    private const string HardcodedPassword = "4081";
+    private const string HardcodedPassword = "0000";
 
     private bool _isPasswordVisible;
 

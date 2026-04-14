@@ -87,7 +87,7 @@ madina.db3
 This project now uses a **simple hardcoded login** flow (no signup and no forgot-password screen).
 
 - Username: `Anees`
-- Password: `4081`
+- Password: `0000`
 
 You can change these constants in `Modules/Views/LoginPage.xaml.cs` (`HardcodedUsername` and `HardcodedPassword`).
 
