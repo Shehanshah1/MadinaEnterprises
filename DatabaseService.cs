@@ -87,15 +87,6 @@ namespace MadinaEnterprises
             Station TEXT
         );
         
-        CREATE TABLE IF NOT EXISTS GinnerLedger (
-            ContractID TEXT,
-            DealID TEXT,
-            AmountPaid REAL,
-            DatePaid TEXT,
-            MillsDueTo TEXT,
-            PRIMARY KEY (ContractID, DealID)
-        );
-
         CREATE TABLE IF NOT EXISTS Mills (
             MillName TEXT,
             MillID TEXT PRIMARY KEY,
@@ -577,73 +568,6 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@MillID", millId);
             await cmd.ExecuteNonQueryAsync();
         }
-        public async Task<List<GinnerLedger>> GetAllGinnerLedger()
-        {
-            var ginnerLedgerList = new List<GinnerLedger>();
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-
-            var command = new SqliteCommand("SELECT * FROM GinnerLedger", conn);
-            using var reader = await command.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                ginnerLedgerList.Add(new GinnerLedger
-                {
-                    ContractID = reader["ContractID"].ToString() ?? "",
-                    DealID = reader["DealID"].ToString() ?? "",
-                    AmountPaid = Convert.ToDouble(reader["AmountPaid"]),
-                    DatePaid = DateTime.Parse(reader["DatePaid"].ToString() ?? DateTime.Today.ToString()),
-                    MillsDueTo = reader["MillsDueTo"].ToString() ?? ""
-                });
-            }
-
-            return ginnerLedgerList;
-        }
-
-        public async Task AddGinnerLedger(GinnerLedger g)
-        {
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqliteCommand(@"
-        INSERT INTO GinnerLedger (ContractID, DealID, AmountPaid, DatePaid, MillsDueTo)
-        VALUES (@ContractID, @DealID, @AmountPaid, @DatePaid, @MillsDueTo)", conn);
-
-            cmd.Parameters.AddWithValue("@ContractID", g.ContractID);
-            cmd.Parameters.AddWithValue("@DealID", g.DealID);
-            cmd.Parameters.AddWithValue("@AmountPaid", g.AmountPaid);
-            cmd.Parameters.AddWithValue("@DatePaid", g.DatePaid.ToString("yyyy-MM-dd"));
-            cmd.Parameters.AddWithValue("@MillsDueTo", g.MillsDueTo);
-
-            await cmd.ExecuteNonQueryAsync();
-        }
-
-        public async Task UpdateGinnerLedger(GinnerLedger g)
-        {
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqliteCommand(@"
-        UPDATE GinnerLedger SET AmountPaid=@AmountPaid, DatePaid=@DatePaid, MillsDueTo=@MillsDueTo
-        WHERE ContractID=@ContractID AND DealID=@DealID", conn);
-
-            cmd.Parameters.AddWithValue("@ContractID", g.ContractID);
-            cmd.Parameters.AddWithValue("@DealID", g.DealID);
-            cmd.Parameters.AddWithValue("@AmountPaid", g.AmountPaid);
-            cmd.Parameters.AddWithValue("@DatePaid", g.DatePaid.ToString("yyyy-MM-dd"));
-            cmd.Parameters.AddWithValue("@MillsDueTo", g.MillsDueTo);
-
-            await cmd.ExecuteNonQueryAsync();
-        }
-
-        public async Task DeleteGinnerLedger(string contractId, string dealId)
-        {
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqliteCommand("DELETE FROM GinnerLedger WHERE ContractID = @ContractID AND DealID = @DealID", conn);
-            cmd.Parameters.AddWithValue("@ContractID", contractId);
-            cmd.Parameters.AddWithValue("@DealID", dealId);
-            await cmd.ExecuteNonQueryAsync();
-        }
-
         // ========== USERS / AUTH ==========
         public async Task<bool> RegisterUser(string name, string email, string password)
         {
