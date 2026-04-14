@@ -26,29 +26,49 @@ public partial class LoginPage : ContentPage
         loginButton.IsEnabled = false;
         errorMessageLabel.IsVisible = false;
 
-        var username = emailEntry.Text?.Trim() ?? string.Empty;
-        var password = passwordEntry.Text ?? string.Empty;
-
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        try
         {
-            errorMessageLabel.Text = "Enter username and password.";
-            errorMessageLabel.IsVisible = true;
-            loginButton.IsEnabled = true;
-            return;
+            var username = emailEntry.Text?.Trim() ?? string.Empty;
+            var password = passwordEntry.Text ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                ShowError("Enter username and password.");
+                return;
+            }
+
+            var usernameMatches = string.Equals(username, HardcodedUsername, StringComparison.OrdinalIgnoreCase);
+            var passwordMatches = string.Equals(password, HardcodedPassword, StringComparison.Ordinal);
+
+            if (!usernameMatches || !passwordMatches)
+            {
+                ShowError("Invalid login credentials.");
+                passwordEntry.Text = string.Empty;
+                return;
+            }
+
+            await App.NavigateToPage(new DashboardPage());
+
+            // Reset form so a later logout returns to a clean login screen.
+            passwordEntry.Text = string.Empty;
         }
-
-        var usernameMatches = string.Equals(username, HardcodedUsername, StringComparison.OrdinalIgnoreCase);
-        var passwordMatches = string.Equals(password, HardcodedPassword, StringComparison.Ordinal);
-
-        if (!usernameMatches || !passwordMatches)
+        catch (Exception ex)
         {
-            errorMessageLabel.Text = "Invalid login credentials.";
-            errorMessageLabel.IsVisible = true;
-            loginButton.IsEnabled = true;
-            return;
+            ShowError($"Login failed: {ex.Message}");
         }
-
-        await App.NavigateToPage(new DashboardPage());
-        loginButton.IsEnabled = true;
+        finally
+        {
+            loginButton.IsEnabled = true;
+        }
     }
+
+    private void ShowError(string message)
+    {
+        errorMessageLabel.Text = message;
+        errorMessageLabel.IsVisible = true;
+    }
+
+    private void OnUsernameCompleted(object sender, EventArgs e) => passwordEntry.Focus();
+
+    private void OnPasswordCompleted(object sender, EventArgs e) => OnLoginButtonClicked(sender, e);
 }

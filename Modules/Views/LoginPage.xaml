@@ -100,7 +100,9 @@
                                    BackgroundColor="#F6F8FA"
                                    TextColor="#333333"
                                    PlaceholderColor="#9CA3AF"
-                                   HeightRequest="50"/>
+                                   HeightRequest="50"
+                                   ReturnType="Next"
+                                   Completed="OnUsernameCompleted"/>
                         </VerticalStackLayout>
 
                         <!-- Password + Show/Hide -->
@@ -116,6 +118,8 @@
                                        TextColor="#333333"
                                        PlaceholderColor="#9CA3AF"
                                        HeightRequest="50"
+                                       ReturnType="Go"
+                                       Completed="OnPasswordCompleted"
                                        Grid.Column="0"/>
                                 <Button x:Name="showHidePasswordButton"
                                         Text="Show"
