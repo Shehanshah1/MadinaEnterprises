@@ -1,35 +1,39 @@
-﻿using MadinaEnterprises.Modules.Models;
+using MadinaEnterprises.Modules.Models;
 using System;
 using System.Collections.Generic;
 using Microsoft.Data.Sqlite;
+using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MadinaEnterprises
 {
-    public sealed class LoginValidationResult
-    {
-        public bool IsValid { get; init; }
-        public bool IsAdmin { get; init; }
-        public string? ErrorMessage { get; init; }
-
-        public static LoginValidationResult Fail(string message) => new() { IsValid = false, ErrorMessage = message };
-        public static LoginValidationResult Success(bool isAdmin) => new() { IsValid = true, IsAdmin = isAdmin };
-    }
-
     public class DatabaseService
     {
-                private readonly string _databasePath;
+        private readonly string _databasePath;
         private readonly string _connectionString;
 
         public DatabaseService()
         {
             _databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "madina.db3");
-            _connectionString = $"Data Source={_databasePath}";
+            _connectionString = $"Data Source={_databasePath};Foreign Keys=True";
             InitializeDatabase();
+        }
+
+        private static DateTime ParseDateOrDefault(object? value)
+        {
+            var text = value?.ToString();
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return DateTime.MinValue;
+            }
+
+            if (DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.TryParse(text, out parsed) ? parsed : DateTime.MinValue;
         }
 
         private void InitializeDatabase()
@@ -39,41 +43,6 @@ namespace MadinaEnterprises
             using var command = connection.CreateCommand();
 
             command.CommandText = @"
-        CREATE TABLE IF NOT EXISTS Contracts (
-            ContractID TEXT PRIMARY KEY,
-            GinnerID TEXT,
-            MillID TEXT,
-            TotalBales INTEGER,
-            PricePerBatch REAL,
-            TotalAmount REAL,
-            CommissionPercentage REAL,
-            DateCreated TEXT,
-            DeliveryNotes TEXT,
-            PaymentNotes TEXT,
-            Description TEXT   -- NEW (nullable)
-        );
-        CREATE TABLE IF NOT EXISTS Deliveries (
-            DeliveryID TEXT PRIMARY KEY,
-            ContractID TEXT,
-            Amount REAL,
-            TotalBales INTEGER,
-            FactoryWeight REAL,
-            MillWeight REAL,
-            TruckNumber TEXT,
-            DriverContact TEXT,
-            DepartureDate TEXT,
-            DeliveryDate TEXT
-        );
-        CREATE TABLE IF NOT EXISTS Payments (
-            PaymentID TEXT PRIMARY KEY,
-            ContractID TEXT,
-            TotalAmount REAL,
-            AmountPaid REAL,
-            TotalBales INTEGER,
-            Date TEXT,
-            TransactionID TEXT
-        );
-
         CREATE TABLE IF NOT EXISTS Ginners (
             GinnerID TEXT PRIMARY KEY,
             GinnerName TEXT,
@@ -86,7 +55,7 @@ namespace MadinaEnterprises
             ContactPerson TEXT,
             Station TEXT
         );
-        
+
         CREATE TABLE IF NOT EXISTS Mills (
             MillName TEXT,
             MillID TEXT PRIMARY KEY,
@@ -94,12 +63,45 @@ namespace MadinaEnterprises
             OwnerName TEXT
         );
 
-        CREATE TABLE IF NOT EXISTS Users (
-            UserID TEXT PRIMARY KEY,
-            Name TEXT NOT NULL,
-            Email TEXT NOT NULL UNIQUE,
-            PasswordHash TEXT NOT NULL,
-            CreatedAt TEXT NOT NULL
+        CREATE TABLE IF NOT EXISTS Contracts (
+            ContractID TEXT PRIMARY KEY,
+            GinnerID TEXT,
+            MillID TEXT,
+            TotalBales INTEGER,
+            PricePerBatch REAL,
+            TotalAmount REAL,
+            CommissionPercentage REAL,
+            DateCreated TEXT,
+            DeliveryNotes TEXT,
+            PaymentNotes TEXT,
+            Description TEXT,
+            FOREIGN KEY (GinnerID) REFERENCES Ginners(GinnerID) ON UPDATE CASCADE ON DELETE RESTRICT,
+            FOREIGN KEY (MillID)   REFERENCES Mills(MillID)     ON UPDATE CASCADE ON DELETE RESTRICT
+        );
+
+        CREATE TABLE IF NOT EXISTS Deliveries (
+            DeliveryID TEXT PRIMARY KEY,
+            ContractID TEXT,
+            Amount REAL,
+            TotalBales INTEGER,
+            FactoryWeight REAL,
+            MillWeight REAL,
+            TruckNumber TEXT,
+            DriverContact TEXT,
+            DepartureDate TEXT,
+            DeliveryDate TEXT,
+            FOREIGN KEY (ContractID) REFERENCES Contracts(ContractID) ON UPDATE CASCADE ON DELETE RESTRICT
+        );
+
+        CREATE TABLE IF NOT EXISTS Payments (
+            PaymentID TEXT PRIMARY KEY,
+            ContractID TEXT,
+            TotalAmount REAL,
+            AmountPaid REAL,
+            TotalBales INTEGER,
+            Date TEXT,
+            TransactionID TEXT,
+            FOREIGN KEY (ContractID) REFERENCES Contracts(ContractID) ON UPDATE CASCADE ON DELETE RESTRICT
         );
     ";
             command.ExecuteNonQuery();
@@ -147,34 +149,6 @@ namespace MadinaEnterprises
                     alter.ExecuteNonQuery();
                 }
             }
-
-            EnsureUserColumns(connection);
-        }
-
-        private static void EnsureUserColumns(SqliteConnection connection)
-        {
-            var cols = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            using var pragma = new SqliteCommand("PRAGMA table_info(Users);", connection);
-            using var reader = pragma.ExecuteReader();
-            while (reader.Read())
-            {
-                cols.Add(reader["name"]?.ToString() ?? string.Empty);
-            }
-
-            static void AddColumnIfMissing(SqliteConnection conn, HashSet<string> existing, string column, string sql)
-            {
-                if (existing.Contains(column)) return;
-                using var cmd = new SqliteCommand(sql, conn);
-                cmd.ExecuteNonQuery();
-                existing.Add(column);
-            }
-
-            AddColumnIfMissing(connection, cols, "IsAdmin", "ALTER TABLE Users ADD COLUMN IsAdmin INTEGER NOT NULL DEFAULT 0;");
-            AddColumnIfMissing(connection, cols, "IsEmailVerified", "ALTER TABLE Users ADD COLUMN IsEmailVerified INTEGER NOT NULL DEFAULT 0;");
-            AddColumnIfMissing(connection, cols, "IsApproved", "ALTER TABLE Users ADD COLUMN IsApproved INTEGER NOT NULL DEFAULT 0;");
-            AddColumnIfMissing(connection, cols, "ApprovedBy", "ALTER TABLE Users ADD COLUMN ApprovedBy TEXT;");
-            AddColumnIfMissing(connection, cols, "VerificationCode", "ALTER TABLE Users ADD COLUMN VerificationCode TEXT;");
-            AddColumnIfMissing(connection, cols, "VerificationExpiresAt", "ALTER TABLE Users ADD COLUMN VerificationExpiresAt TEXT;");
         }
 
         // ========== CONTRACTS ==========
@@ -197,10 +171,10 @@ namespace MadinaEnterprises
                     PricePerBatch = Convert.ToDouble(reader["PricePerBatch"]),
                     TotalAmount = Convert.ToDouble(reader["TotalAmount"]),
                     CommissionPercentage = Convert.ToDouble(reader["CommissionPercentage"]),
-                    DateCreated = DateTime.Parse(reader["DateCreated"].ToString()),
+                    DateCreated = ParseDateOrDefault(reader["DateCreated"]),
                     DeliveryNotes = reader["DeliveryNotes"].ToString(),
                     PaymentNotes = reader["PaymentNotes"].ToString(),
-                    Description = reader["Description"] is DBNull ? null : reader["Description"]?.ToString()   // NEW
+                    Description = reader["Description"] is DBNull ? null : reader["Description"]?.ToString()
                 });
 
             }
@@ -231,7 +205,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@DateCreated", c.DateCreated.ToString("yyyy-MM-dd"));
             cmd.Parameters.AddWithValue("@DeliveryNotes", (object?)c.DeliveryNotes ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@PaymentNotes", (object?)c.PaymentNotes ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@Description", (object?)c.Description ?? DBNull.Value);   // NEW
+            cmd.Parameters.AddWithValue("@Description", (object?)c.Description ?? DBNull.Value);
 
             await cmd.ExecuteNonQueryAsync();
         }
@@ -264,7 +238,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@DateCreated", c.DateCreated.ToString("yyyy-MM-dd"));
             cmd.Parameters.AddWithValue("@DeliveryNotes", (object?)c.DeliveryNotes ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@PaymentNotes", (object?)c.PaymentNotes ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@Description", (object?)c.Description ?? DBNull.Value);   // NEW
+            cmd.Parameters.AddWithValue("@Description", (object?)c.Description ?? DBNull.Value);
 
             await cmd.ExecuteNonQueryAsync();
         }
@@ -299,8 +273,8 @@ namespace MadinaEnterprises
                     MillWeight = Convert.ToDouble(reader["MillWeight"]),
                     TruckNumber = reader["TruckNumber"].ToString(),
                     DriverContact = reader["DriverContact"].ToString(),
-                    DepartureDate = DateTime.Parse(reader["DepartureDate"].ToString()),
-                    DeliveryDate = DateTime.Parse(reader["DeliveryDate"].ToString())
+                    DepartureDate = ParseDateOrDefault(reader["DepartureDate"]),
+                    DeliveryDate = ParseDateOrDefault(reader["DeliveryDate"])
                 });
             }
             return list;
@@ -379,7 +353,7 @@ namespace MadinaEnterprises
                     TotalAmount = Convert.ToDouble(reader["TotalAmount"]),
                     AmountPaid = Convert.ToDouble(reader["AmountPaid"]),
                     TotalBales = Convert.ToInt32(reader["TotalBales"]),
-                    Date = DateTime.Parse(reader["Date"].ToString()),
+                    Date = ParseDateOrDefault(reader["Date"]),
                     TransactionID = reader["TransactionID"] is DBNull ? "" : reader["TransactionID"]?.ToString() ?? ""
                 });
             }
@@ -568,219 +542,5 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@MillID", millId);
             await cmd.ExecuteNonQueryAsync();
         }
-        // ========== USERS / AUTH ==========
-        public async Task<bool> RegisterUser(string name, string email, string password)
-        {
-            var normalizedEmail = email.Trim().ToLowerInvariant();
-            if (await UserExists(normalizedEmail))
-            {
-                return false;
-            }
-
-            var salt = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
-            var hash = HashPassword(password, salt);
-
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-            var countCmd = new SqliteCommand("SELECT COUNT(1) FROM Users", conn);
-            var isFirstUser = Convert.ToInt32(await countCmd.ExecuteScalarAsync()) == 0;
-
-            var cmd = new SqliteCommand(@"INSERT INTO Users
-                (UserID, Name, Email, PasswordHash, CreatedAt, IsAdmin, IsEmailVerified, IsApproved, ApprovedBy)
-                VALUES
-                (@UserID, @Name, @Email, @PasswordHash, @CreatedAt, @IsAdmin, @IsEmailVerified, @IsApproved, @ApprovedBy)", conn);
-            cmd.Parameters.AddWithValue("@UserID", Guid.NewGuid().ToString("N"));
-            cmd.Parameters.AddWithValue("@Name", name.Trim());
-            cmd.Parameters.AddWithValue("@Email", normalizedEmail);
-            cmd.Parameters.AddWithValue("@PasswordHash", $"{salt}:{hash}");
-            cmd.Parameters.AddWithValue("@CreatedAt", DateTime.UtcNow.ToString("O"));
-            cmd.Parameters.AddWithValue("@IsAdmin", isFirstUser ? 1 : 0);
-            cmd.Parameters.AddWithValue("@IsEmailVerified", 0);
-            cmd.Parameters.AddWithValue("@IsApproved", isFirstUser ? 1 : 0);
-            cmd.Parameters.AddWithValue("@ApprovedBy", isFirstUser ? "SYSTEM" : DBNull.Value);
-
-            await cmd.ExecuteNonQueryAsync();
-            return true;
-        }
-
-        public async Task<LoginValidationResult> ValidateUserCredentials(string email, string password)
-        {
-            var normalizedEmail = email.Trim().ToLowerInvariant();
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqliteCommand(@"SELECT PasswordHash, IsAdmin, IsEmailVerified, IsApproved
-                                          FROM Users WHERE Email = @Email LIMIT 1", conn);
-            cmd.Parameters.AddWithValue("@Email", normalizedEmail);
-
-            using var reader = await cmd.ExecuteReaderAsync();
-            if (!await reader.ReadAsync())
-            {
-                return LoginValidationResult.Fail("Incorrect email or password.");
-            }
-
-            var stored = reader["PasswordHash"]?.ToString() ?? string.Empty;
-            var parts = stored.Split(':', 2);
-            if (parts.Length != 2)
-            {
-                return LoginValidationResult.Fail("Incorrect email or password.");
-            }
-
-            var computed = HashPassword(password, parts[0]);
-            if (!string.Equals(computed, parts[1], StringComparison.Ordinal))
-            {
-                return LoginValidationResult.Fail("Incorrect email or password.");
-            }
-
-            var isEmailVerified = Convert.ToInt32(reader["IsEmailVerified"]) == 1;
-            if (!isEmailVerified)
-            {
-                return LoginValidationResult.Fail("Please verify your email before logging in.");
-            }
-
-            var isApproved = Convert.ToInt32(reader["IsApproved"]) == 1;
-            if (!isApproved)
-            {
-                return LoginValidationResult.Fail("Your account is pending admin approval.");
-            }
-
-            var isAdmin = Convert.ToInt32(reader["IsAdmin"]) == 1;
-            return LoginValidationResult.Success(isAdmin);
-        }
-
-
-        public async Task DeleteUserIfUnverified(string email)
-        {
-            var normalizedEmail = email.Trim().ToLowerInvariant();
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqliteCommand(@"DELETE FROM Users
-                                          WHERE Email = @Email
-                                            AND IsEmailVerified = 0", conn);
-            cmd.Parameters.AddWithValue("@Email", normalizedEmail);
-            await cmd.ExecuteNonQueryAsync();
-        }
-
-        public async Task<bool> UserExists(string email)
-        {
-            var normalizedEmail = email.Trim().ToLowerInvariant();
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqliteCommand("SELECT COUNT(1) FROM Users WHERE Email = @Email", conn);
-            cmd.Parameters.AddWithValue("@Email", normalizedEmail);
-            var count = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-            return count > 0;
-        }
-
-        private static string HashPassword(string password, string salt)
-        {
-            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"{salt}:{password}"));
-            return Convert.ToHexString(bytes);
-        }
-
-        public async Task SaveVerificationCode(string email, string code, DateTime expiresAtUtc)
-        {
-            var normalizedEmail = email.Trim().ToLowerInvariant();
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqliteCommand(@"UPDATE Users
-                                          SET VerificationCode = @Code,
-                                              VerificationExpiresAt = @ExpiresAt
-                                          WHERE Email = @Email", conn);
-            cmd.Parameters.AddWithValue("@Code", code);
-            cmd.Parameters.AddWithValue("@ExpiresAt", expiresAtUtc.ToString("O"));
-            cmd.Parameters.AddWithValue("@Email", normalizedEmail);
-            await cmd.ExecuteNonQueryAsync();
-        }
-
-        public async Task<bool> VerifyEmailCode(string email, string code)
-        {
-            var normalizedEmail = email.Trim().ToLowerInvariant();
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-
-            var select = new SqliteCommand(@"SELECT VerificationCode, VerificationExpiresAt
-                                             FROM Users WHERE Email = @Email LIMIT 1", conn);
-            select.Parameters.AddWithValue("@Email", normalizedEmail);
-
-            using var reader = await select.ExecuteReaderAsync();
-            if (!await reader.ReadAsync())
-            {
-                return false;
-            }
-
-            var expectedCode = reader["VerificationCode"]?.ToString();
-            var expiresRaw = reader["VerificationExpiresAt"]?.ToString();
-            if (string.IsNullOrWhiteSpace(expectedCode) || string.IsNullOrWhiteSpace(expiresRaw))
-            {
-                return false;
-            }
-
-            if (!DateTime.TryParse(expiresRaw, out var expiresAt) || DateTime.UtcNow > expiresAt)
-            {
-                return false;
-            }
-
-            if (!string.Equals(expectedCode, code.Trim(), StringComparison.Ordinal))
-            {
-                return false;
-            }
-
-            var update = new SqliteCommand(@"UPDATE Users
-                                             SET IsEmailVerified = 1,
-                                                 VerificationCode = NULL,
-                                                 VerificationExpiresAt = NULL
-                                             WHERE Email = @Email", conn);
-            update.Parameters.AddWithValue("@Email", normalizedEmail);
-            await update.ExecuteNonQueryAsync();
-            return true;
-        }
-
-        public async Task<List<string>> GetPendingApprovalEmails()
-        {
-            var list = new List<string>();
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqliteCommand(@"SELECT Email FROM Users
-                                          WHERE IsEmailVerified = 1
-                                            AND IsApproved = 0
-                                          ORDER BY CreatedAt ASC", conn);
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                list.Add(reader["Email"]?.ToString() ?? string.Empty);
-            }
-
-            return list.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-        }
-
-        public async Task ApproveUser(string adminEmail, string pendingEmail)
-        {
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqliteCommand(@"UPDATE Users
-                                          SET IsApproved = 1,
-                                              ApprovedBy = @ApprovedBy
-                                          WHERE Email = @Email", conn);
-            cmd.Parameters.AddWithValue("@ApprovedBy", adminEmail.Trim().ToLowerInvariant());
-            cmd.Parameters.AddWithValue("@Email", pendingEmail.Trim().ToLowerInvariant());
-            await cmd.ExecuteNonQueryAsync();
-        }
-
-        public async Task<bool> IsUserAdmin(string email)
-        {
-            using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync();
-            var cmd = new SqliteCommand("SELECT IsAdmin FROM Users WHERE Email = @Email LIMIT 1", conn);
-            cmd.Parameters.AddWithValue("@Email", email.Trim().ToLowerInvariant());
-            var result = await cmd.ExecuteScalarAsync();
-            if (result is null || result == DBNull.Value)
-            {
-                return false;
-            }
-
-            return Convert.ToInt32(result) == 1;
-        }
-
-
     }
 }

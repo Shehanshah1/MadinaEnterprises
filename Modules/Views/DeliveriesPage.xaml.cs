@@ -189,6 +189,12 @@ public partial class DeliveriesPage : ContentPage
             return;
         }
 
+        if (contractPicker.SelectedIndex < 0 || contractPicker.SelectedIndex >= contracts.Count)
+        {
+            await DisplayAlert("Validation Error", "Please select a Contract.", "OK");
+            return;
+        }
+
         RecalculateActualAmount();
 
         var delivery = new Deliveries

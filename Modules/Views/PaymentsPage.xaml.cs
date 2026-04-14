@@ -110,7 +110,18 @@ public partial class PaymentsPage : ContentPage
             return;
         }
 
-        var contract = contracts.First(c => c.ContractID == contractPicker.SelectedItem.ToString());
+        if (contractPicker.SelectedItem is not string selectedContractId)
+        {
+            await DisplayAlert("Validation Error", "Please select a Contract.", "OK");
+            return;
+        }
+
+        var contract = contracts.FirstOrDefault(c => c.ContractID == selectedContractId);
+        if (contract == null)
+        {
+            await DisplayAlert("Error", "Selected contract was not found.", "OK");
+            return;
+        }
 
         RecalculateTotalAmountForSelectedContract();
         var totalAmount = RateCalculation.TryParseDouble(totalAmountEntry.Text, out var calcTotal) ? calcTotal : 0;
@@ -139,9 +150,24 @@ public partial class PaymentsPage : ContentPage
 
     private async void OnUpdatePaymentClicked(object sender, EventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(paymentIDEntry.Text)) return;
+        if (string.IsNullOrWhiteSpace(paymentIDEntry.Text))
+        {
+            await DisplayAlert("Validation", "Payment ID is required.", "OK");
+            return;
+        }
 
-        var contract = contracts.First(c => c.ContractID == contractPicker.SelectedItem.ToString());
+        if (contractPicker.SelectedItem is not string selectedContractId)
+        {
+            await DisplayAlert("Validation Error", "Please select a Contract.", "OK");
+            return;
+        }
+
+        var contract = contracts.FirstOrDefault(c => c.ContractID == selectedContractId);
+        if (contract == null)
+        {
+            await DisplayAlert("Error", "Selected contract was not found.", "OK");
+            return;
+        }
 
         RecalculateTotalAmountForSelectedContract();
         var totalAmount = RateCalculation.TryParseDouble(totalAmountEntry.Text, out var calcTotal) ? calcTotal : 0;
