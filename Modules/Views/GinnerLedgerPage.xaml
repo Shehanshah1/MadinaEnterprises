@@ -24,8 +24,10 @@
         </StackLayout>
 
         <!-- Main Content -->
-        <ScrollView Grid.Column="1">
-            <VerticalStackLayout Padding="20" Spacing="20">
+        <Grid Grid.Column="1">
+
+            <!-- ============ SELECTION VIEW ============ -->
+            <VerticalStackLayout x:Name="SelectionView" Padding="20" Spacing="15">
 
                 <Label Text="Ginner Ledger"
                        FontSize="Header"
@@ -34,70 +36,37 @@
                        HorizontalOptions="Start"/>
                 <BoxView HeightRequest="2" BackgroundColor="Black"/>
 
-                <!-- Form Card -->
-                <Frame Padding="20" BackgroundColor="#f5f5f5" CornerRadius="10" HasShadow="True">
-                    <VerticalStackLayout Spacing="16">
+                <Label Text="Select a ginner to view their complete ledger, contracts, deliveries and payments."
+                       TextColor="#555555" FontSize="14"/>
 
-                        <Grid ColumnDefinitions="*,*" RowSpacing="12"
-                              RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                <SearchBar x:Name="ginnerSearchBar"
+                           Placeholder="Search by Ginner Name or Ginner ID..."
+                           TextChanged="OnGinnerSearchTextChanged"
+                           BackgroundColor="White"
+                           TextColor="Black"/>
 
-                            <!-- Labels -->
-                            <Label Text="Contract ID"   Grid.Row="0" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
-                            <Label Text="Deal ID"       Grid.Row="1" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
-                            <Label Text="Amount Paid"   Grid.Row="2" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
-                            <Label Text="Date Paid"     Grid.Row="3" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
-                            <Label Text="Mills Due To"  Grid.Row="4" Grid.Column="0" TextColor="Black" VerticalTextAlignment="Center" HorizontalOptions="Center"/>
-
-                            <!-- Inputs -->
-                            <Picker x:Name="contractPicker" Title="Select Contract" TitleColor="Black" BackgroundColor="LightGray" TextColor="Black" Grid.Row="0" Grid.Column="1"/>
-                            <Entry x:Name="dealIDEntry" Placeholder="Deal ID" BackgroundColor="White" TextColor="Black" Grid.Row="1" Grid.Column="1"/>
-                            <Entry x:Name="amountPaidEntry" Placeholder="Amount Paid" Keyboard="Numeric" BackgroundColor="White" TextColor="Black" Grid.Row="2" Grid.Column="1"/>
-                            <DatePicker x:Name="datePaidPicker" TextColor="Black" BackgroundColor="White" Grid.Row="3" Grid.Column="1"/>
-                            <Entry x:Name="millsDueToEntry" Placeholder="Mills Due To" BackgroundColor="White" TextColor="Black" Grid.Row="4" Grid.Column="1"/>
-                        </Grid>
-
-                        <!-- Action Buttons -->
-                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                            <Button Text="Save" Clicked="OnSaveClicked" BackgroundColor="#98cb00" TextColor="White" CornerRadius="5"/>
-                            <Button Text="Update" Clicked="OnUpdateClicked" BackgroundColor="#ff9800" TextColor="White" CornerRadius="5"/>
-                            <Button Text="Delete" Clicked="OnDeleteClicked" BackgroundColor="Red" TextColor="White" CornerRadius="5"/>
-                        </HorizontalStackLayout>
-
-                    </VerticalStackLayout>
-                </Frame>
-
-                <!-- List Section -->
-                <Label Text="Existing Ledger Entries" FontSize="20" FontAttributes="Bold" TextColor="Black"/>
-                <SearchBar x:Name="ledgerSearchBar" Placeholder="Search by Contract ID or Deal ID..." TextChanged="OnSearchTextChanged" BackgroundColor="White" TextColor="Black"/>
-
-                <CollectionView x:Name="ledgerListView"
+                <CollectionView x:Name="ginnerListView"
                                 BackgroundColor="WhiteSmoke"
-                                HeightRequest="300"
+                                HeightRequest="500"
                                 SelectionMode="Single"
-                                SelectionChanged="OnLedgerListSelected"
-                                Margin="0,0,0,20">
+                                SelectionChanged="OnGinnerSelected">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Frame Padding="10" Margin="5" BorderColor="#1976d2" CornerRadius="5" BackgroundColor="White">
-                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                                    <Label Grid.Row="0" Grid.Column="0" FontSize="16" FontAttributes="Bold" TextColor="Black">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="{Binding ContractID}" FontAttributes="Bold" TextColor="Black"/>
-                                                <Span Text=" / " TextColor="#666666"/>
-                                                <Span Text="{Binding DealID}" TextColor="Black"/>
-                                            </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
+                            <Frame Padding="12" Margin="5" BorderColor="#98cb00" CornerRadius="6" BackgroundColor="White">
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                    <Label Grid.Row="0" Grid.Column="0"
+                                           Text="{Binding GinnerName}"
+                                           FontSize="17" FontAttributes="Bold" TextColor="Black"/>
                                     <Label Grid.Row="0" Grid.Column="1"
-                                           Text="{Binding AmountPaid, StringFormat='Rs.{0:N2}'}"
-                                           FontSize="14"
-                                           TextColor="#444444"
+                                           Text="{Binding GinnerID}"
+                                           FontSize="13" TextColor="#666666"
                                            HorizontalTextAlignment="End"/>
                                     <Label Grid.Row="1" Grid.ColumnSpan="2"
-                                           Text="{Binding MillsDueTo}"
-                                           FontSize="13"
-                                           TextColor="#666666"/>
+                                           Text="{Binding Contact}"
+                                           FontSize="13" TextColor="#555555"/>
+                                    <Label Grid.Row="2" Grid.ColumnSpan="2"
+                                           Text="{Binding Station}"
+                                           FontSize="12" TextColor="#777777"/>
                                 </Grid>
                             </Frame>
                         </DataTemplate>
@@ -105,6 +74,241 @@
                 </CollectionView>
 
             </VerticalStackLayout>
-        </ScrollView>
+
+            <!-- ============ DETAIL VIEW (Tabs) ============ -->
+            <Grid x:Name="DetailView" IsVisible="False"
+                  RowDefinitions="Auto,Auto,Auto,*"
+                  Padding="20" RowSpacing="10">
+
+                <!-- Header -->
+                <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+                    <Button Grid.Column="0" Text="← Back" BackgroundColor="#333333" TextColor="White" CornerRadius="5" Clicked="OnBackClicked"/>
+                    <VerticalStackLayout Grid.Column="1" Padding="15,0,0,0" VerticalOptions="Center">
+                        <Label x:Name="GinnerNameHeader" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="GinnerInfoHeader" FontSize="13" TextColor="#666666"/>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <BoxView Grid.Row="1" HeightRequest="2" BackgroundColor="Black"/>
+
+                <!-- Tab Bar -->
+                <HorizontalStackLayout Grid.Row="2" Spacing="5" Margin="0,5,0,5">
+                    <Button x:Name="TabContractsBtn"  Text="Contracts"  BackgroundColor="#98cb00" TextColor="Black" CornerRadius="0" Clicked="OnTabContractsClicked"/>
+                    <Button x:Name="TabDashboardBtn"  Text="Dashboard"  BackgroundColor="#333333" TextColor="White" CornerRadius="0" Clicked="OnTabDashboardClicked"/>
+                    <Button x:Name="TabDeliveriesBtn" Text="Deliveries" BackgroundColor="#333333" TextColor="White" CornerRadius="0" Clicked="OnTabDeliveriesClicked"/>
+                    <Button x:Name="TabPaymentsBtn"   Text="Payments"   BackgroundColor="#333333" TextColor="White" CornerRadius="0" Clicked="OnTabPaymentsClicked"/>
+                </HorizontalStackLayout>
+
+                <!-- Tab Content Host -->
+                <Grid Grid.Row="3">
+
+                    <!-- ======== CONTRACTS TAB ======== -->
+                    <Grid x:Name="ContractsTab" RowDefinitions="Auto,*,Auto">
+                        <Label Grid.Row="0" Text="Contracts (edit cells, then press Save All)" FontSize="14" TextColor="#555555" Margin="0,0,0,6"/>
+                        <ScrollView Grid.Row="1" Orientation="Both" BackgroundColor="#FAFAFA">
+                            <VerticalStackLayout>
+                                <!-- Header Row -->
+                                <Grid BackgroundColor="#333333" Padding="6" ColumnSpacing="6"
+                                      ColumnDefinitions="140,140,80,110,120,110,120,180,180,220">
+                                    <Label Grid.Column="0" Text="Contract ID"   TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="1" Text="Mill ID"       TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="2" Text="Bales"         TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="3" Text="Price/Maund"   TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="4" Text="Total Amount"  TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="5" Text="Commission %"  TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="6" Text="Date Created"  TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="7" Text="Delivery Notes" TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="8" Text="Payment Notes"  TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="9" Text="Description"    TextColor="White" FontAttributes="Bold"/>
+                                </Grid>
+
+                                <VerticalStackLayout x:Name="ContractsGrid" Spacing="2">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Padding="6" ColumnSpacing="6"
+                                                  ColumnDefinitions="140,140,80,110,120,110,120,180,180,220"
+                                                  BackgroundColor="White">
+                                                <Label Grid.Column="0"  Text="{Binding ContractID}" TextColor="Black" VerticalTextAlignment="Center"/>
+                                                <Entry Grid.Column="1"  Text="{Binding MillID, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="2"  Text="{Binding TotalBales, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="3"  Text="{Binding PricePerBatch, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="4"  Text="{Binding TotalAmount, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="5"  Text="{Binding CommissionPercentage, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                                                <DatePicker Grid.Column="6" Date="{Binding DateCreated, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="7"  Text="{Binding DeliveryNotes, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="8"  Text="{Binding PaymentNotes, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="9"  Text="{Binding Description, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                                <Label x:Name="ContractsEmptyLabel" Text="No contracts found for this ginner." TextColor="#888888" Padding="20" IsVisible="False"/>
+                            </VerticalStackLayout>
+                        </ScrollView>
+                        <HorizontalStackLayout Grid.Row="2" Spacing="10" Margin="0,10,0,0">
+                            <Button Text="Save All Contracts" Clicked="OnSaveContractsClicked" BackgroundColor="#98cb00" TextColor="White" CornerRadius="5"/>
+                            <Button Text="Reload" Clicked="OnReloadClicked" BackgroundColor="#555555" TextColor="White" CornerRadius="5"/>
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <!-- ======== DASHBOARD TAB ======== -->
+                    <ScrollView x:Name="DashboardTab" IsVisible="False">
+                        <VerticalStackLayout Spacing="15" Padding="0,10,0,10">
+                            <Label Text="Cumulative KPIs for this Ginner" FontSize="18" FontAttributes="Bold" TextColor="Black"/>
+                            <Grid ColumnDefinitions="*,*" RowSpacing="12" ColumnSpacing="12"
+                                  RowDefinitions="Auto,Auto,Auto,Auto">
+
+                                <Frame Grid.Row="0" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
+                                    <VerticalStackLayout>
+                                        <Label Text="Total Contracts" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
+                                        <Label x:Name="KpiContractsLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                                <Frame Grid.Row="0" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
+                                    <VerticalStackLayout>
+                                        <Label Text="Total Bales" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
+                                        <Label x:Name="KpiBalesLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+
+                                <Frame Grid.Row="1" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
+                                    <VerticalStackLayout>
+                                        <Label Text="Total Deal Amount" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
+                                        <Label x:Name="KpiDealAmountLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                                <Frame Grid.Row="1" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
+                                    <VerticalStackLayout>
+                                        <Label Text="Total Commission" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
+                                        <Label x:Name="KpiCommissionLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+
+                                <Frame Grid.Row="2" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
+                                    <VerticalStackLayout>
+                                        <Label Text="Payments Made" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
+                                        <Label x:Name="KpiPaidLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                                <Frame Grid.Row="2" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
+                                    <VerticalStackLayout>
+                                        <Label Text="Payments Due" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
+                                        <Label x:Name="KpiDueLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+
+                                <Frame Grid.Row="3" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
+                                    <VerticalStackLayout>
+                                        <Label Text="Total Deliveries" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
+                                        <Label x:Name="KpiDeliveriesLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                                <Frame Grid.Row="3" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
+                                    <VerticalStackLayout>
+                                        <Label Text="Avg. Commission Rate" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
+                                        <Label x:Name="KpiAvgCommissionLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </ScrollView>
+
+                    <!-- ======== DELIVERIES TAB ======== -->
+                    <Grid x:Name="DeliveriesTab" IsVisible="False" RowDefinitions="Auto,*,Auto">
+                        <Label Grid.Row="0" Text="Deliveries for this ginner's contracts (edit cells, then press Save All)" FontSize="14" TextColor="#555555" Margin="0,0,0,6"/>
+                        <ScrollView Grid.Row="1" Orientation="Both" BackgroundColor="#FAFAFA">
+                            <VerticalStackLayout>
+                                <Grid BackgroundColor="#333333" Padding="6" ColumnSpacing="6"
+                                      ColumnDefinitions="140,140,110,80,110,110,140,160,130,130">
+                                    <Label Grid.Column="0" Text="Delivery ID"    TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="1" Text="Contract ID"    TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="2" Text="Amount"         TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="3" Text="Bales"          TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="4" Text="Factory Wt"     TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="5" Text="Mill Wt"        TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="6" Text="Truck #"        TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="7" Text="Driver Contact" TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="8" Text="Departure"      TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="9" Text="Delivered"      TextColor="White" FontAttributes="Bold"/>
+                                </Grid>
+
+                                <VerticalStackLayout x:Name="DeliveriesGrid" Spacing="2">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Padding="6" ColumnSpacing="6"
+                                                  ColumnDefinitions="140,140,110,80,110,110,140,160,130,130"
+                                                  BackgroundColor="White">
+                                                <Label Grid.Column="0" Text="{Binding DeliveryID}" TextColor="Black" VerticalTextAlignment="Center"/>
+                                                <Label Grid.Column="1" Text="{Binding ContractID}" TextColor="Black" VerticalTextAlignment="Center"/>
+                                                <Entry Grid.Column="2" Text="{Binding Amount, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="3" Text="{Binding TotalBales, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="4" Text="{Binding FactoryWeight, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="5" Text="{Binding MillWeight, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="6" Text="{Binding TruckNumber, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="7" Text="{Binding DriverContact, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
+                                                <DatePicker Grid.Column="8" Date="{Binding DepartureDate, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
+                                                <DatePicker Grid.Column="9" Date="{Binding DeliveryDate, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                                <Label x:Name="DeliveriesEmptyLabel" Text="No deliveries found for this ginner." TextColor="#888888" Padding="20" IsVisible="False"/>
+                            </VerticalStackLayout>
+                        </ScrollView>
+                        <HorizontalStackLayout Grid.Row="2" Spacing="10" Margin="0,10,0,0">
+                            <Button Text="Save All Deliveries" Clicked="OnSaveDeliveriesClicked" BackgroundColor="#98cb00" TextColor="White" CornerRadius="5"/>
+                            <Button Text="Reload" Clicked="OnReloadClicked" BackgroundColor="#555555" TextColor="White" CornerRadius="5"/>
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <!-- ======== PAYMENTS TAB ======== -->
+                    <Grid x:Name="PaymentsTab" IsVisible="False" RowDefinitions="Auto,*,Auto">
+                        <Label Grid.Row="0" Text="Payments for this ginner's contracts (edit cells, then press Save All)" FontSize="14" TextColor="#555555" Margin="0,0,0,6"/>
+                        <ScrollView Grid.Row="1" Orientation="Both" BackgroundColor="#FAFAFA">
+                            <VerticalStackLayout>
+                                <Grid BackgroundColor="#333333" Padding="6" ColumnSpacing="6"
+                                      ColumnDefinitions="140,140,130,130,80,130,160">
+                                    <Label Grid.Column="0" Text="Payment ID"     TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="1" Text="Contract ID"    TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="2" Text="Total Amount"   TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="3" Text="Amount Paid"    TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="4" Text="Bales"          TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="5" Text="Date"           TextColor="White" FontAttributes="Bold"/>
+                                    <Label Grid.Column="6" Text="Transaction ID" TextColor="White" FontAttributes="Bold"/>
+                                </Grid>
+
+                                <VerticalStackLayout x:Name="PaymentsGrid" Spacing="2">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Padding="6" ColumnSpacing="6"
+                                                  ColumnDefinitions="140,140,130,130,80,130,160"
+                                                  BackgroundColor="White">
+                                                <Label Grid.Column="0" Text="{Binding PaymentID}" TextColor="Black" VerticalTextAlignment="Center"/>
+                                                <Label Grid.Column="1" Text="{Binding ContractID}" TextColor="Black" VerticalTextAlignment="Center"/>
+                                                <Entry Grid.Column="2" Text="{Binding TotalAmount, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="3" Text="{Binding AmountPaid, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="4" Text="{Binding TotalBales, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
+                                                <DatePicker Grid.Column="5" Date="{Binding Date, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
+                                                <Entry Grid.Column="6" Text="{Binding TransactionID, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                                <Label x:Name="PaymentsEmptyLabel" Text="No payments found for this ginner." TextColor="#888888" Padding="20" IsVisible="False"/>
+                            </VerticalStackLayout>
+                        </ScrollView>
+                        <HorizontalStackLayout Grid.Row="2" Spacing="10" Margin="0,10,0,0">
+                            <Button Text="Save All Payments" Clicked="OnSavePaymentsClicked" BackgroundColor="#98cb00" TextColor="White" CornerRadius="5"/>
+                            <Button Text="Reload" Clicked="OnReloadClicked" BackgroundColor="#555555" TextColor="White" CornerRadius="5"/>
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                </Grid>
+            </Grid>
+
+        </Grid>
     </Grid>
 </ContentPage>
