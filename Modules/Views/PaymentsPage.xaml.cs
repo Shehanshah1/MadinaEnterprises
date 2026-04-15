@@ -38,6 +38,8 @@ public partial class PaymentsPage : ContentPage
         paymentListView.ItemsSource = filteredPayments;
     }
 
+    private string _loadedTransactionID = string.Empty;
+
     private void PopulateForm(Payment p)
     {
         paymentIDEntry.Text = p.PaymentID;
@@ -50,6 +52,7 @@ public partial class PaymentsPage : ContentPage
         RecalculateRemainingAmount();
         balesEntry.Text = p.TotalBales.ToString();
         paymentDatePicker.Date = p.Date;
+        _loadedTransactionID = p.TransactionID ?? string.Empty;
     }
 
     private void ClearForm()
@@ -64,6 +67,7 @@ public partial class PaymentsPage : ContentPage
         paymentPicker.SelectedItem = null;
         paymentListView.SelectedItem = null;
         _isTotalAmountManuallyEdited = false;
+        _loadedTransactionID = string.Empty;
     }
 
     private void OnContractChanged(object sender, EventArgs e)
@@ -133,7 +137,8 @@ public partial class PaymentsPage : ContentPage
             TotalAmount = totalAmount,
             AmountPaid = RateCalculation.TryParseDouble(paidAmountEntry.Text, out var amt) ? amt : 0,
             TotalBales = int.TryParse(balesEntry.Text, out var bales) ? bales : 0,
-            Date = paymentDatePicker.Date
+            Date = paymentDatePicker.Date,
+            TransactionID = _loadedTransactionID
         };
 
         if (payments.Any(p => p.PaymentID == payment.PaymentID))
@@ -172,6 +177,13 @@ public partial class PaymentsPage : ContentPage
         RecalculateTotalAmountForSelectedContract();
         var totalAmount = RateCalculation.TryParseDouble(totalAmountEntry.Text, out var calcTotal) ? calcTotal : 0;
 
+        // Preserve any stored TransactionID since this page doesn't expose an editor
+        // for it — otherwise updating payments from here would silently wipe it.
+        var existing = payments.FirstOrDefault(p => p.PaymentID == paymentIDEntry.Text);
+        var preservedTransactionId = !string.IsNullOrEmpty(_loadedTransactionID)
+            ? _loadedTransactionID
+            : existing?.TransactionID ?? string.Empty;
+
         var payment = new Payment
         {
             PaymentID = paymentIDEntry.Text,
@@ -179,7 +191,8 @@ public partial class PaymentsPage : ContentPage
             TotalAmount = totalAmount,
             AmountPaid = RateCalculation.TryParseDouble(paidAmountEntry.Text, out var amt) ? amt : 0,
             TotalBales = int.TryParse(balesEntry.Text, out var bales) ? bales : 0,
-            Date = paymentDatePicker.Date
+            Date = paymentDatePicker.Date,
+            TransactionID = preservedTransactionId
         };
 
         await _db.UpdatePayment(payment);
