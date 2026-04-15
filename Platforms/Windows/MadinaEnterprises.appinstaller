@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  App Installer file for Madina Enterprises.
-  This file drives auto-updates for sideloaded MSIX installs.
+  App Installer TEMPLATE for Madina Enterprises.
+
+  DO NOT edit the URIs or Version here manually.
+  scripts/Publish-MsixRelease.ps1 rewrites this file at build time with
+  the correct GitHub Releases URLs and version number.
 
   HOW IT WORKS:
-    1. You publish MadinaEnterprises.msix AND this .appinstaller file to a
-       reachable HTTPS URL (GitHub Releases, Azure Blob, S3, IIS, or even a
-       OneDrive/SharePoint share that exposes direct download links).
-    2. End user opens the .appinstaller URL ONCE -> Windows installs the app
-       and remembers the update source.
-    3. On every launch (or per HoursBetweenUpdateChecks), Windows re-reads
-       this XML. If Version is higher than the installed one, it downloads
-       the new MSIX and updates silently on next launch.
+    1. Run Publish-MsixRelease.ps1 (or push a v*.*.*.* tag to let GitHub
+       Actions do it). The script stamps this file and drops it in ./publish/
+       alongside the signed MSIX.
+    2. The GitHub Actions workflow uploads both to a GitHub Release.
+    3. End user opens the .appinstaller URL ONCE in Edge ->
+       Windows installs the app and remembers the update source.
+    4. On every subsequent launch Windows re-reads this XML. If Version is
+       higher than the installed one it downloads the new MSIX and updates
+       silently on next launch.
 
-  BEFORE PUBLISHING:
-    - Replace https://example.com/madina/ with your real hosting URL.
-    - Update <MainPackage Version="..."/> to match Package.appxmanifest.
-    - The Publisher must match the signing certificate subject EXACTLY
-      (CN=Madina Enterprises here).
-    - Keep ProcessorArchitecture in sync with what you build (x64/arm64).
+  The Publisher value MUST match the signing certificate subject exactly
+  (CN=Madina Enterprises). ProcessorArchitecture must match the build target.
 -->
 <AppInstaller
-    Uri="https://example.com/madina/MadinaEnterprises.appinstaller"
+    Uri="https://github.com/Shehanshah1/MadinaEnterprises/releases/latest/download/MadinaEnterprises.appinstaller"
     Version="1.0.0.0"
     xmlns="http://schemas.microsoft.com/appx/appinstaller/2018">
 
@@ -30,7 +30,7 @@
       Publisher="CN=Madina Enterprises"
       Version="1.0.0.0"
       ProcessorArchitecture="x64"
-      Uri="https://example.com/madina/MadinaEnterprises_1.0.0.0_x64.msix" />
+      Uri="https://github.com/Shehanshah1/MadinaEnterprises/releases/download/v1.0.0.0/MadinaEnterprises_1.0.0.0_x64.msix" />
 
   <UpdateSettings>
     <!-- Check for updates on launch; don't block the user if the check fails. -->
