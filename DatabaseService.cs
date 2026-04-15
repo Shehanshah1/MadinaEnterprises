@@ -1,4 +1,5 @@
 using MadinaEnterprises.Modules.Models;
+using MadinaEnterprises.Modules.Services;
 using System;
 using System.Collections.Generic;
 using Microsoft.Data.Sqlite;
@@ -12,12 +13,28 @@ namespace MadinaEnterprises
     {
         private readonly string _databasePath;
         private readonly string _connectionString;
+        private readonly CloudSyncService _cloud;
 
-        public DatabaseService()
+        public CloudSyncService Cloud => _cloud;
+        public string DatabasePath => _databasePath;
+
+        public DatabaseService() : this(new CloudSyncService()) { }
+
+        public DatabaseService(CloudSyncService cloud)
         {
+            _cloud = cloud;
             _databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "madina.db3");
             _connectionString = $"Data Source={_databasePath};Foreign Keys=True";
             InitializeDatabase();
+        }
+
+        /// <summary>
+        /// Fire-and-forget wrapper for pushing writes to the cloud so the UI
+        /// never waits on the network. Errors surface on <see cref="CloudSyncService.LastError"/>.
+        /// </summary>
+        private void FireAndForget(Task task)
+        {
+            _ = task.ContinueWith(t => { var _ = t.Exception; }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private static DateTime ParseDateOrDefault(object? value)
@@ -208,6 +225,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Description", (object?)c.Description ?? DBNull.Value);
 
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.UpsertAsync("contracts", CloudSyncService.Row(c), "contract_id"));
         }
 
         public async Task UpdateContract(Contracts c)
@@ -241,6 +259,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Description", (object?)c.Description ?? DBNull.Value);
 
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.UpsertAsync("contracts", CloudSyncService.Row(c), "contract_id"));
         }
 
         public async Task DeleteContract(string contractId)
@@ -250,6 +269,7 @@ namespace MadinaEnterprises
             var cmd = new SqliteCommand("DELETE FROM Contracts WHERE ContractID = @id", conn);
             cmd.Parameters.AddWithValue("@id", contractId);
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.DeleteAsync("contracts", "contract_id", contractId));
         }
 
         // ========== DELIVERIES ==========
@@ -300,6 +320,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@DeliveryDate", d.DeliveryDate.ToString("yyyy-MM-dd"));
 
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.UpsertAsync("deliveries", CloudSyncService.Row(d), "delivery_id"));
         }
 
         public async Task UpdateDelivery(Deliveries d)
@@ -324,6 +345,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@DeliveryDate", d.DeliveryDate.ToString("yyyy-MM-dd"));
 
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.UpsertAsync("deliveries", CloudSyncService.Row(d), "delivery_id"));
         }
 
         public async Task DeleteDelivery(string deliveryId)
@@ -333,6 +355,7 @@ namespace MadinaEnterprises
             var cmd = new SqliteCommand("DELETE FROM Deliveries WHERE DeliveryID = @id", conn);
             cmd.Parameters.AddWithValue("@id", deliveryId);
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.DeleteAsync("deliveries", "delivery_id", deliveryId));
         }
 
         // ========== PAYMENTS ==========
@@ -377,6 +400,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@TransactionID", (object?)p.TransactionID ?? DBNull.Value);
 
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.UpsertAsync("payments", CloudSyncService.Row(p), "payment_id"));
         }
 
         public async Task UpdatePayment(Payment p)
@@ -396,6 +420,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@TransactionID", (object?)p.TransactionID ?? DBNull.Value);
 
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.UpsertAsync("payments", CloudSyncService.Row(p), "payment_id"));
         }
 
         public async Task DeletePayment(string paymentId)
@@ -405,6 +430,7 @@ namespace MadinaEnterprises
             var cmd = new SqliteCommand("DELETE FROM Payments WHERE PaymentID = @id", conn);
             cmd.Parameters.AddWithValue("@id", paymentId);
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.DeleteAsync("payments", "payment_id", paymentId));
         }
 
         // ========== GINNERS ==========
@@ -455,6 +481,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Station", g.Station);
 
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.UpsertAsync("ginners", CloudSyncService.Row(g), "ginner_id"));
         }
 
         public async Task UpdateGinner(Ginners g)
@@ -477,6 +504,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Station", g.Station);
 
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.UpsertAsync("ginners", CloudSyncService.Row(g), "ginner_id"));
         }
 
         public async Task DeleteGinner(string GinnerID)
@@ -486,6 +514,7 @@ namespace MadinaEnterprises
             var cmd = new SqliteCommand("DELETE FROM Ginners WHERE GinnerID = @GinnerID", conn);
             cmd.Parameters.AddWithValue("@GinnerID", GinnerID);
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.DeleteAsync("ginners", "ginner_id", GinnerID));
         }
 
         // ========== MILLS ==========
@@ -520,6 +549,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Address", m.Address);
             cmd.Parameters.AddWithValue("@OwnerName", m.OwnerName);
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.UpsertAsync("mills", CloudSyncService.Row(m), "mill_id"));
         }
 
         public async Task UpdateMill(Mills m)
@@ -532,6 +562,7 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Address", m.Address);
             cmd.Parameters.AddWithValue("@OwnerName", m.OwnerName);
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.UpsertAsync("mills", CloudSyncService.Row(m), "mill_id"));
         }
 
         public async Task DeleteMill(string millId)
@@ -541,6 +572,195 @@ namespace MadinaEnterprises
             var cmd = new SqliteCommand("DELETE FROM Mills WHERE MillID = @MillID", conn);
             cmd.Parameters.AddWithValue("@MillID", millId);
             await cmd.ExecuteNonQueryAsync();
+            FireAndForget(_cloud.DeleteAsync("mills", "mill_id", millId));
+        }
+
+        // ================================================================
+        //                  CLOUD SYNC — pull + push-all
+        // ================================================================
+
+        /// <summary>
+        /// Pulls every row from Supabase and merges it into the local SQLite database.
+        /// Uses INSERT ... ON CONFLICT DO UPDATE so each row is created on first sync
+        /// and updated on subsequent syncs. Existing local-only rows are preserved and
+        /// pushed back to the cloud at the end.
+        /// No-op (and returns false) if cloud sync is not configured.
+        /// </summary>
+        public async Task<bool> SyncFromCloudAsync()
+        {
+            if (!_cloud.IsEnabled) return false;
+
+            // Respect FK order: parents first.
+            var ginners    = await _cloud.FetchAllAsync("ginners");
+            var mills      = await _cloud.FetchAllAsync("mills");
+            var contracts  = await _cloud.FetchAllAsync("contracts");
+            var deliveries = await _cloud.FetchAllAsync("deliveries");
+            var payments   = await _cloud.FetchAllAsync("payments");
+
+            if (ginners == null && mills == null && contracts == null &&
+                deliveries == null && payments == null)
+            {
+                // Network or auth problem — nothing fetched.
+                return false;
+            }
+
+            using var conn = new SqliteConnection(_connectionString);
+            await conn.OpenAsync();
+            using var tx = conn.BeginTransaction();
+
+            if (ginners != null)
+            {
+                foreach (var el in ginners)
+                {
+                    var cmd = new SqliteCommand(@"
+INSERT INTO Ginners (GinnerID, GinnerName, Contact, IBAN, Address, NTN, STN, BankAddress, ContactPerson, Station)
+VALUES (@GinnerID, @GinnerName, @Contact, @IBAN, @Address, @NTN, @STN, @BankAddress, @ContactPerson, @Station)
+ON CONFLICT(GinnerID) DO UPDATE SET
+    GinnerName=excluded.GinnerName, Contact=excluded.Contact, IBAN=excluded.IBAN,
+    Address=excluded.Address, NTN=excluded.NTN, STN=excluded.STN,
+    BankAddress=excluded.BankAddress, ContactPerson=excluded.ContactPerson,
+    Station=excluded.Station;", conn, tx);
+                    cmd.Parameters.AddWithValue("@GinnerID", CloudSyncService.S(el, "ginner_id"));
+                    cmd.Parameters.AddWithValue("@GinnerName", CloudSyncService.S(el, "ginner_name"));
+                    cmd.Parameters.AddWithValue("@Contact", CloudSyncService.S(el, "contact"));
+                    cmd.Parameters.AddWithValue("@IBAN", CloudSyncService.S(el, "iban"));
+                    cmd.Parameters.AddWithValue("@Address", CloudSyncService.S(el, "address"));
+                    cmd.Parameters.AddWithValue("@NTN", CloudSyncService.S(el, "ntn"));
+                    cmd.Parameters.AddWithValue("@STN", CloudSyncService.S(el, "stn"));
+                    cmd.Parameters.AddWithValue("@BankAddress", CloudSyncService.S(el, "bank_address"));
+                    cmd.Parameters.AddWithValue("@ContactPerson", CloudSyncService.S(el, "contact_person"));
+                    cmd.Parameters.AddWithValue("@Station", CloudSyncService.S(el, "station"));
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+
+            if (mills != null)
+            {
+                foreach (var el in mills)
+                {
+                    var cmd = new SqliteCommand(@"
+INSERT INTO Mills (MillID, MillName, Address, OwnerName)
+VALUES (@MillID, @MillName, @Address, @OwnerName)
+ON CONFLICT(MillID) DO UPDATE SET
+    MillName=excluded.MillName, Address=excluded.Address, OwnerName=excluded.OwnerName;", conn, tx);
+                    cmd.Parameters.AddWithValue("@MillID", CloudSyncService.S(el, "mill_id"));
+                    cmd.Parameters.AddWithValue("@MillName", CloudSyncService.S(el, "mill_name"));
+                    cmd.Parameters.AddWithValue("@Address", CloudSyncService.S(el, "address"));
+                    cmd.Parameters.AddWithValue("@OwnerName", CloudSyncService.S(el, "owner_name"));
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+
+            if (contracts != null)
+            {
+                foreach (var el in contracts)
+                {
+                    var cmd = new SqliteCommand(@"
+INSERT INTO Contracts (ContractID, GinnerID, MillID, TotalBales, PricePerBatch, TotalAmount,
+    CommissionPercentage, DateCreated, DeliveryNotes, PaymentNotes, Description)
+VALUES (@ContractID, @GinnerID, @MillID, @TotalBales, @PricePerBatch, @TotalAmount,
+    @CommissionPercentage, @DateCreated, @DeliveryNotes, @PaymentNotes, @Description)
+ON CONFLICT(ContractID) DO UPDATE SET
+    GinnerID=excluded.GinnerID, MillID=excluded.MillID, TotalBales=excluded.TotalBales,
+    PricePerBatch=excluded.PricePerBatch, TotalAmount=excluded.TotalAmount,
+    CommissionPercentage=excluded.CommissionPercentage, DateCreated=excluded.DateCreated,
+    DeliveryNotes=excluded.DeliveryNotes, PaymentNotes=excluded.PaymentNotes,
+    Description=excluded.Description;", conn, tx);
+                    cmd.Parameters.AddWithValue("@ContractID", CloudSyncService.S(el, "contract_id"));
+                    cmd.Parameters.AddWithValue("@GinnerID", CloudSyncService.S(el, "ginner_id"));
+                    cmd.Parameters.AddWithValue("@MillID", CloudSyncService.S(el, "mill_id"));
+                    cmd.Parameters.AddWithValue("@TotalBales", CloudSyncService.I(el, "total_bales"));
+                    cmd.Parameters.AddWithValue("@PricePerBatch", CloudSyncService.D(el, "price_per_batch"));
+                    cmd.Parameters.AddWithValue("@TotalAmount", CloudSyncService.D(el, "total_amount"));
+                    cmd.Parameters.AddWithValue("@CommissionPercentage", CloudSyncService.D(el, "commission_percentage"));
+                    cmd.Parameters.AddWithValue("@DateCreated", CloudSyncService.S(el, "date_created"));
+                    cmd.Parameters.AddWithValue("@DeliveryNotes", (object?)CloudSyncService.SNullable(el, "delivery_notes") ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@PaymentNotes", (object?)CloudSyncService.SNullable(el, "payment_notes") ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Description", (object?)CloudSyncService.SNullable(el, "description") ?? DBNull.Value);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+
+            if (deliveries != null)
+            {
+                foreach (var el in deliveries)
+                {
+                    var cmd = new SqliteCommand(@"
+INSERT INTO Deliveries (DeliveryID, ContractID, Amount, TotalBales, FactoryWeight, MillWeight,
+    TruckNumber, DriverContact, DepartureDate, DeliveryDate)
+VALUES (@DeliveryID, @ContractID, @Amount, @TotalBales, @FactoryWeight, @MillWeight,
+    @TruckNumber, @DriverContact, @DepartureDate, @DeliveryDate)
+ON CONFLICT(DeliveryID) DO UPDATE SET
+    ContractID=excluded.ContractID, Amount=excluded.Amount, TotalBales=excluded.TotalBales,
+    FactoryWeight=excluded.FactoryWeight, MillWeight=excluded.MillWeight,
+    TruckNumber=excluded.TruckNumber, DriverContact=excluded.DriverContact,
+    DepartureDate=excluded.DepartureDate, DeliveryDate=excluded.DeliveryDate;", conn, tx);
+                    cmd.Parameters.AddWithValue("@DeliveryID", CloudSyncService.S(el, "delivery_id"));
+                    cmd.Parameters.AddWithValue("@ContractID", CloudSyncService.S(el, "contract_id"));
+                    cmd.Parameters.AddWithValue("@Amount", CloudSyncService.D(el, "amount"));
+                    cmd.Parameters.AddWithValue("@TotalBales", CloudSyncService.I(el, "total_bales"));
+                    cmd.Parameters.AddWithValue("@FactoryWeight", CloudSyncService.D(el, "factory_weight"));
+                    cmd.Parameters.AddWithValue("@MillWeight", CloudSyncService.D(el, "mill_weight"));
+                    cmd.Parameters.AddWithValue("@TruckNumber", CloudSyncService.S(el, "truck_number"));
+                    cmd.Parameters.AddWithValue("@DriverContact", CloudSyncService.S(el, "driver_contact"));
+                    cmd.Parameters.AddWithValue("@DepartureDate", CloudSyncService.S(el, "departure_date"));
+                    cmd.Parameters.AddWithValue("@DeliveryDate", CloudSyncService.S(el, "delivery_date"));
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+
+            if (payments != null)
+            {
+                foreach (var el in payments)
+                {
+                    var cmd = new SqliteCommand(@"
+INSERT INTO Payments (PaymentID, ContractID, TotalAmount, AmountPaid, TotalBales, Date, TransactionID)
+VALUES (@PaymentID, @ContractID, @TotalAmount, @AmountPaid, @TotalBales, @Date, @TransactionID)
+ON CONFLICT(PaymentID) DO UPDATE SET
+    ContractID=excluded.ContractID, TotalAmount=excluded.TotalAmount, AmountPaid=excluded.AmountPaid,
+    TotalBales=excluded.TotalBales, Date=excluded.Date, TransactionID=excluded.TransactionID;", conn, tx);
+                    cmd.Parameters.AddWithValue("@PaymentID", CloudSyncService.S(el, "payment_id"));
+                    cmd.Parameters.AddWithValue("@ContractID", CloudSyncService.S(el, "contract_id"));
+                    cmd.Parameters.AddWithValue("@TotalAmount", CloudSyncService.D(el, "total_amount"));
+                    cmd.Parameters.AddWithValue("@AmountPaid", CloudSyncService.D(el, "amount_paid"));
+                    cmd.Parameters.AddWithValue("@TotalBales", CloudSyncService.I(el, "total_bales"));
+                    cmd.Parameters.AddWithValue("@Date", CloudSyncService.S(el, "date"));
+                    cmd.Parameters.AddWithValue("@TransactionID", (object?)CloudSyncService.SNullable(el, "transaction_id") ?? DBNull.Value);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+
+            tx.Commit();
+
+            // After pulling, push any local rows the cloud didn't have yet so both sides converge.
+            await PushAllToCloudAsync();
+
+            _cloud.MarkSynced();
+            return true;
+        }
+
+        /// <summary>
+        /// Uploads every locally-stored row to Supabase via bulk upserts. Safe to call
+        /// repeatedly — merge-duplicates means existing rows are just refreshed.
+        /// </summary>
+        public async Task<bool> PushAllToCloudAsync()
+        {
+            if (!_cloud.IsEnabled) return false;
+
+            var ginners    = await GetAllGinners();
+            var mills      = await GetAllMills();
+            var contracts  = await GetAllContracts();
+            var deliveries = await GetAllDeliveries();
+            var payments   = await GetAllPayments();
+
+            await _cloud.UpsertManyAsync("ginners",    ginners.ConvertAll(CloudSyncService.Row),    "ginner_id");
+            await _cloud.UpsertManyAsync("mills",      mills.ConvertAll(CloudSyncService.Row),      "mill_id");
+            await _cloud.UpsertManyAsync("contracts",  contracts.ConvertAll(CloudSyncService.Row),  "contract_id");
+            await _cloud.UpsertManyAsync("deliveries", deliveries.ConvertAll(CloudSyncService.Row), "delivery_id");
+            await _cloud.UpsertManyAsync("payments",   payments.ConvertAll(CloudSyncService.Row),   "payment_id");
+
+            _cloud.MarkSynced();
+            return true;
         }
     }
 }

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MadinaEnterprises.Modules.Views.CloudSyncPage"
+             Title="Cloud Sync"
+             BackgroundColor="#242424">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="18" MaximumWidthRequest="800">
+
+            <Label Text="Cloud Sync (Supabase)"
+                   FontSize="Header" FontAttributes="Bold" TextColor="White"/>
+
+            <BoxView HeightRequest="2" BackgroundColor="#98cb00" Opacity="0.9"/>
+
+            <Label TextColor="#D1D5DB" FontSize="13"
+                   Text="Data is stored locally in SQLite and synced to Supabase so it survives reinstalls and is shared across devices. Writes are pushed automatically; the app pulls from the cloud on startup and when you hit Resume."/>
+
+            <Frame BackgroundColor="#1F2937" BorderColor="#374151" HasShadow="False" CornerRadius="10" Padding="18">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Status" FontAttributes="Bold" TextColor="White" FontSize="16"/>
+                    <Label x:Name="StatusLabel" TextColor="#D1D5DB" FontSize="14"/>
+                    <Label x:Name="LastSyncLabel" TextColor="#9CA3AF" FontSize="12"/>
+                    <Label x:Name="LastErrorLabel" TextColor="#F87171" FontSize="12" IsVisible="False"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BackgroundColor="#1F2937" BorderColor="#374151" HasShadow="False" CornerRadius="10" Padding="18">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Credentials" FontAttributes="Bold" TextColor="White" FontSize="16"/>
+
+                    <Label Text="Supabase Project URL" TextColor="#D1D5DB" FontSize="13"/>
+                    <Entry x:Name="UrlEntry" Placeholder="https://xxxx.supabase.co"
+                           BackgroundColor="#111827" TextColor="White" PlaceholderColor="#6B7280"/>
+
+                    <Label Text="Anon API Key" TextColor="#D1D5DB" FontSize="13"/>
+                    <Entry x:Name="AnonKeyEntry" Placeholder="eyJhbGciOi..."
+                           BackgroundColor="#111827" TextColor="White" PlaceholderColor="#6B7280"/>
+
+                    <Button x:Name="SaveButton" Text="Save Credentials"
+                            BackgroundColor="#98cb00" TextColor="Black"
+                            Clicked="OnSaveClicked"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Grid.Column="0" x:Name="PullButton" Text="Pull from Cloud"
+                        BackgroundColor="Black" TextColor="White" Clicked="OnPullClicked"/>
+                <Button Grid.Column="1" x:Name="PushButton" Text="Push to Cloud"
+                        BackgroundColor="Black" TextColor="White" Clicked="OnPushClicked"/>
+            </Grid>
+
+            <Button Text="Back" BackgroundColor="#374151" TextColor="White"
+                    Clicked="OnBackClicked"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

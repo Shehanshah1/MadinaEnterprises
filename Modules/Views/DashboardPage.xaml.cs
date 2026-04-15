@@ -63,5 +63,6 @@ public partial class DashboardPage : ContentPage
     private async void OnDeliveriesPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new DeliveriesPage());
     private async void OnPaymentsPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new PaymentsPage());
     private async void OnGinnerLedgerPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new GinnerLedgerPage());
+    private async void OnCloudSyncPageButtonClicked(object sender, EventArgs e) => await App.NavigateToPage(new CloudSyncPage());
     private void OnLogOutButtonClicked(object sender, EventArgs e) => App.Logout();
 }

@@ -19,6 +19,7 @@
             <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
             <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
             <Button Text="Ginner Ledger" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnerLedgerPageButtonClicked"/>
+            <Button Text="Cloud Sync" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnCloudSyncPageButtonClicked"/>
             <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
         </StackLayout>
 
