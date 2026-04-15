@@ -1,112 +1,143 @@
 # Deploying Madina Enterprises & Shipping Updates
 
-This doc explains how to get the Windows build into users' hands and — more
-importantly — how to push future updates without asking every user to re-run
-`Install.ps1`.
+This project ships the Windows build via **GitHub Releases** with a
+**self-signed internal code-signing certificate**. Once a user installs the
+app from the `.appinstaller` URL, Windows handles every future update
+automatically — no `Install.ps1` per version.
 
 ---
 
 ## TL;DR
 
-- The `.msix` file you already have is a sealed, signed package. You cannot
-  "git pull" or "patch" it. Every update is a **new MSIX with a bumped
-  version**.
-- To get automatic updates on sideloaded installs, ship an
-  **App Installer (`.appinstaller`) file** alongside the MSIX and host both
-  at a stable HTTPS URL. Windows polls that URL and updates the app silently.
-- For anything larger than a handful of users, consider the **Microsoft Store**
-  (or Microsoft Intune if you manage company PCs). Both give you updates for
-  free.
+1. One-time: generate a signing cert (`scripts/New-SigningCertificate.ps1`).
+2. One-time: add two GitHub secrets (`SIGNING_CERT_PFX_BASE64`, `SIGNING_CERT_PASSWORD`).
+3. Every release: push a tag like `v1.0.1.0`. GitHub Actions builds, signs,
+   and publishes automatically.
+4. Users install once from the **stable** URL below; updates arrive on launch.
+
+User-facing install URL (never changes):
+```
+https://github.com/Shehanshah1/MadinaEnterprises/releases/latest/download/MadinaEnterprises.appinstaller
+```
 
 ---
 
-## 1. One-time: prepare a hosting location
+## 1. One-time setup
 
-Pick any HTTPS location that serves files with their correct MIME types:
-
-| Host | Good for | Notes |
-|---|---|---|
-| **GitHub Releases** | Free, simple | Public repo; drop `.msix` + `.appinstaller` as release assets |
-| **Azure Blob Storage (static website)** | Private/commercial | Cheap, fast |
-| **Amazon S3 + CloudFront** | Private/commercial | Same |
-| **IIS / Nginx on your own server** | On-prem | Make sure `.msix` and `.appinstaller` MIME types are registered |
-| **SharePoint / OneDrive for Business** | Internal only | Use the "Direct download" URL form |
-
-Whatever you choose, you need a stable base URL, e.g.
-`https://downloads.madinaenterprises.com/app/`.
-
-> ⚠️ The URL **must be HTTPS** and must not change between releases — users'
-> installs remember it.
-
----
-
-## 2. One-time: code signing
-
-MSIX packages must be signed. Options:
-
-1. **Self-signed cert** (`CN=Madina Enterprises`, matching
-   `Package.appxmanifest`). Users must install the `.cer` once as a Trusted
-   Root — this is what your current `Install.ps1` does. The App Installer
-   auto-update flow still works after that first trust.
-2. **Code-signing cert from a public CA** (DigiCert, Sectigo, etc., ~$200/yr).
-   No user-side cert install required. Strongly recommended for external
-   customers.
-
-Put the cert's thumbprint somewhere you can pass to the build script (Windows
-Credential Manager, CI secret, etc.).
-
----
-
-## 3. Cutting a release
-
-On a Windows machine with the .NET MAUI + Windows SDK workloads installed:
+### 1a. Generate the signing certificate (Windows, admin PowerShell)
 
 ```powershell
-# from the repo root
+cd <repo root>
+./scripts/New-SigningCertificate.ps1 -Password (Read-Host -AsSecureString "PFX password")
+```
+
+This creates (in the git-ignored `certs/` folder):
+
+- `MadinaEnterprises.pfx` — private key. **Never commit. Never share.**
+- `MadinaEnterprises.cer` — public cert. Safe to share; users install it to
+  trust your signature.
+
+It also installs the cert into your `CurrentUser\My` store so you can sign
+builds locally with `-CertThumbprint`.
+
+> The cert subject is `CN=Madina Enterprises`, matching `Publisher` in
+> `Platforms/Windows/Package.appxmanifest`. If you ever change one, change
+> both — they must match byte-for-byte or the install fails.
+
+### 1b. Add the cert to GitHub secrets
+
+Encode the PFX:
+
+```powershell
+$b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("./certs/MadinaEnterprises.pfx"))
+$b64 | Set-Clipboard
+```
+
+In GitHub → **Settings → Secrets and variables → Actions → New repository secret**:
+
+| Secret name | Value |
+|---|---|
+| `SIGNING_CERT_PFX_BASE64` | the clipboard contents from above |
+| `SIGNING_CERT_PASSWORD`   | the PFX password you chose |
+
+That's it — the workflow has everything it needs.
+
+---
+
+## 2. Cutting a release
+
+```bash
+git tag v1.0.1.0
+git push origin v1.0.1.0
+```
+
+The `.github/workflows/release.yml` workflow then:
+
+1. Installs the MAUI workload on a `windows-latest` runner.
+2. Decodes the PFX from the secret.
+3. Runs `scripts/Publish-MsixRelease.ps1`, which stamps the version into
+   `Package.appxmanifest` and the `.appinstaller`, builds the MSIX, and
+   signs it.
+4. Creates a GitHub Release named `Madina Enterprises 1.0.1.0` and attaches:
+   - `MadinaEnterprises_1.0.1.0_x64.msix`
+   - `MadinaEnterprises.appinstaller`
+   - `MadinaEnterprises.cer`
+5. Marks the release as **Latest**, so `releases/latest/download/...` URLs
+   resolve to it.
+
+> Version rule: four-part, **strictly increasing**. Never reuse a number —
+> Windows caches by version and will refuse to "re-update" to one it's seen.
+
+### Manual runs
+
+You can also trigger the workflow from the **Actions** tab
+(`workflow_dispatch`), supplying a version. Useful for re-releasing if an
+upload failed partway.
+
+### Local-only builds (e.g. for testing before tagging)
+
+```powershell
 ./scripts/Publish-MsixRelease.ps1 `
     -Version 1.0.1.0 `
-    -BaseUri "https://downloads.madinaenterprises.com/app/" `
-    -CertThumbprint "<your-cert-thumbprint>"
+    -GitHubRepo "Shehanshah1/MadinaEnterprises" `
+    -CertThumbprint "<your-thumbprint>"
 ```
 
-The script:
-
-1. Stamps the version into `Platforms/Windows/Package.appxmanifest`.
-2. Runs `dotnet publish` to produce a signed `MadinaEnterprises_<ver>_x64.msix`.
-3. Generates a matching `MadinaEnterprises.appinstaller` pointing at your
-   hosting URL.
-4. Drops both into `./publish/`.
-
-Upload the entire contents of `./publish/` to your hosting base URL.
-
-> The **first** release version must match the `.appinstaller`'s MainPackage
-> version. Every subsequent release bumps both the `AppInstaller` `Version`
-> attribute **and** `MainPackage` `Version`. The script does this for you.
+Outputs to `./publish/`. Nothing is uploaded.
 
 ---
 
-## 4. How end users install (once)
+## 3. First-time user install
 
-Send them this URL (not the `.msix` directly):
+Send users three things:
 
-```
-https://downloads.madinaenterprises.com/app/MadinaEnterprises.appinstaller
-```
+1. The public cert: `MadinaEnterprises.cer` (attached to every release).
+2. A one-time command (right-click → Run as administrator):
 
-Windows opens the App Installer UI → they click **Install** → done. From now
-on, Windows owns the update lifecycle for this app.
+   ```powershell
+   Import-Certificate -FilePath .\MadinaEnterprises.cer `
+                      -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+   ```
 
-If you're using a self-signed cert, they still have to import the `.cer` into
-`Trusted People` or `Trusted Root Certification Authorities` the first time
-(your existing `Install.ps1` already does this). After that, updates work
-without cert prompts because new versions are signed by the same cert.
+   This tells Windows to trust your self-signed cert. Only needed **once per
+   machine, ever** — it covers all current and future versions signed by the
+   same cert.
+
+3. The install link:
+
+   ```
+   https://github.com/Shehanshah1/MadinaEnterprises/releases/latest/download/MadinaEnterprises.appinstaller
+   ```
+
+   Open it in a browser → Windows App Installer UI → **Install**.
+
+From now on the user's machine auto-updates on app launch.
 
 ---
 
-## 5. How updates reach users
+## 4. How updates reach users
 
-With the `.appinstaller` in place, `Platforms/Windows/MadinaEnterprises.appinstaller`
-is configured with:
+With `Platforms/Windows/MadinaEnterprises.appinstaller` configured as:
 
 ```xml
 <OnLaunch HoursBetweenUpdateChecks="0" ShowPrompt="true" UpdateBlocksActivation="false" />
@@ -114,59 +145,66 @@ is configured with:
 <ForceUpdateFromAnyVersion>true</ForceUpdateFromAnyVersion>
 ```
 
-That means:
+- Each launch, Windows silently hits the `/releases/latest/download/MadinaEnterprises.appinstaller` URL.
+- If the version there is higher than what's installed, Windows downloads
+  the new MSIX in the background.
+- The new version is active on the **next** launch — the current session is
+  not interrupted.
+- `ForceUpdateFromAnyVersion="true"` means a user on 1.0.0 can jump straight
+  to 1.5.0; they don't have to pass through intermediate versions.
 
-- **Every launch**, Windows fetches the `.appinstaller` in the background.
-- If a newer MainPackage version is listed, Windows downloads and stages it.
-- The update applies on the **next** launch (the current session is not
-  interrupted — `UpdateBlocksActivation="false"`).
-- `ForceUpdateFromAnyVersion` lets you skip versions (e.g. 1.0.0 → 1.2.0
-  directly).
-
-Flip `UpdateBlocksActivation` to `true` if you'd rather force users to take
-critical updates immediately.
-
-### Why not git / patching?
-
-An MSIX is a cryptographically signed ZIP of your compiled binaries plus a
-manifest. Windows verifies the signature and contents on install. You can't
-modify one in place — any change breaks the signature, and Windows refuses
-to load it. That's by design and is the reason MSIX is considered safe. So
-"updates" always mean "ship a new MSIX, Windows replaces the old one
-atomically."
+If you ever need to force immediate updates (e.g. critical fix), change
+`UpdateBlocksActivation` to `true` in the template and ship a new release.
 
 ---
 
-## 6. Alternative: Microsoft Store
+## 5. Migrating existing users off the old `Install.ps1` install
 
-If your userbase is wider than a few machines, publish through the Microsoft
-Store. You upload the same MSIX, Microsoft signs and distributes it, and
-updates are 100% automatic without you hosting anything. Cost: a one-time
-developer account fee.
+Users who installed a previous build the manual way have **no update source
+registered**. They'll keep running the old version forever unless you
+migrate them. Two options:
 
----
-
-## 7. Alternative: Intune / MDM
-
-For company-managed PCs, push the MSIX through Intune. IT sets an update
-policy; users get updates during normal device sync. This is the standard
-enterprise route.
+- **Easiest:** have each user uninstall the app (Start menu → right-click →
+  Uninstall), then open the `.appinstaller` URL above. After that they're on
+  the auto-update track.
+- **No reinstall needed:** skip — any v1.0.1.0+ MSIX they install through
+  the `.appinstaller` URL will register the update source automatically.
 
 ---
 
-## 8. Troubleshooting
+## 6. Why not git / why not patch?
 
-| Symptom | Likely cause |
+An MSIX is a signed, sealed archive. Modifying even one byte invalidates the
+signature, and Windows refuses to load unsigned or tampered packages — this
+is a security feature of the platform, not a limitation you can engineer
+around. Every update is always a new MSIX with a higher version. The good
+news: Windows uses **block-map diffing**, so even though you ship a full new
+MSIX, only the changed blocks are transferred over the wire.
+
+---
+
+## 7. Troubleshooting
+
+| Symptom | Likely cause / fix |
 |---|---|
-| "App installation failed with error message: The signature is invalid" | MSIX signed with a different cert than last time, or cert not trusted on the machine. |
-| Updates never arrive | `.appinstaller` URL is not HTTPS, returns wrong MIME type, or `MainPackage Version` wasn't bumped. |
-| "This app package's publisher certificate could not be verified" | Self-signed cert isn't in Trusted Root / Trusted People on that machine. Run `Install.ps1` once. |
-| Update check fails silently | Check Event Viewer → `Applications and Services Logs → Microsoft → Windows → AppXDeploymentServer`. |
+| `The signature is invalid` on install | User hasn't trusted the `.cer` yet (see §3), or you re-generated the cert. Re-run the `Import-Certificate` command. |
+| Workflow fails on `dotnet workload install` | Runner image churn. Re-run the workflow; Microsoft occasionally breaks workloads transiently. |
+| Updates never arrive on user machines | The new GitHub Release wasn't marked "Latest", or version wasn't bumped. Check the release page and `Package.appxmanifest`. |
+| `releases/latest/download/...` 404s | No release is marked Latest. In the workflow, `make_latest: 'true'` handles this; check the release page if you triggered manually. |
+| `This app package's publisher certificate could not be verified` | The cert was rotated. Ship the new `.cer` and have users import it once. |
+
+Windows logs every App Installer update attempt to
+`Event Viewer → Applications and Services Logs → Microsoft → Windows → AppXDeploymentServer`.
+That's the first place to look when an update silently doesn't arrive.
 
 ---
 
-## Files in this repo that support deployment
+## Files involved
 
-- `Platforms/Windows/Package.appxmanifest` — app identity & version
-- `Platforms/Windows/MadinaEnterprises.appinstaller` — update manifest template
-- `scripts/Publish-MsixRelease.ps1` — one-shot build/sign/stage script
+| Path | Purpose |
+|---|---|
+| `Platforms/Windows/Package.appxmanifest` | App identity & version |
+| `Platforms/Windows/MadinaEnterprises.appinstaller` | Update manifest template |
+| `scripts/New-SigningCertificate.ps1` | One-time cert generation |
+| `scripts/Publish-MsixRelease.ps1` | Build + sign + stage a release |
+| `.github/workflows/release.yml` | CI: runs the above on tag push |

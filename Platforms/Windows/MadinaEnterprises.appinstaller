@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   App Installer file for Madina Enterprises.
-  This file drives auto-updates for sideloaded MSIX installs.
+  This file drives auto-updates for sideloaded MSIX installs hosted on
+  GitHub Releases.
 
-  HOW IT WORKS:
-    1. You publish MadinaEnterprises.msix AND this .appinstaller file to a
-       reachable HTTPS URL (GitHub Releases, Azure Blob, S3, IIS, or even a
-       OneDrive/SharePoint share that exposes direct download links).
-    2. End user opens the .appinstaller URL ONCE -> Windows installs the app
-       and remembers the update source.
-    3. On every launch (or per HoursBetweenUpdateChecks), Windows re-reads
-       this XML. If Version is higher than the installed one, it downloads
-       the new MSIX and updates silently on next launch.
+  HOW THE URLS WORK:
+    - The .appinstaller itself is published as a release asset and served
+      through the STABLE "latest/download" URL that GitHub Releases provides.
+      That URL redirects to whichever release is currently tagged "Latest",
+      so installs never need to change the bookmark they remember.
+    - The MSIX inside MainPackage is a VERSIONED URL pointing at a specific
+      tag (e.g. v1.0.1.0). The Publish-MsixRelease.ps1 script rewrites that
+      Uri for each release.
 
-  BEFORE PUBLISHING:
-    - Replace https://example.com/madina/ with your real hosting URL.
-    - Update <MainPackage Version="..."/> to match Package.appxmanifest.
-    - The Publisher must match the signing certificate subject EXACTLY
-      (CN=Madina Enterprises here).
-    - Keep ProcessorArchitecture in sync with what you build (x64/arm64).
+  VERSIONING:
+    The <AppInstaller Version="..."/> and <MainPackage Version="..."/> values
+    are stamped by Publish-MsixRelease.ps1. Do not edit them by hand.
 -->
 <AppInstaller
-    Uri="https://example.com/madina/MadinaEnterprises.appinstaller"
+    Uri="https://github.com/Shehanshah1/MadinaEnterprises/releases/latest/download/MadinaEnterprises.appinstaller"
     Version="1.0.0.0"
     xmlns="http://schemas.microsoft.com/appx/appinstaller/2018">
 
@@ -30,7 +27,7 @@
       Publisher="CN=Madina Enterprises"
       Version="1.0.0.0"
       ProcessorArchitecture="x64"
-      Uri="https://example.com/madina/MadinaEnterprises_1.0.0.0_x64.msix" />
+      Uri="https://github.com/Shehanshah1/MadinaEnterprises/releases/download/v1.0.0.0/MadinaEnterprises_1.0.0.0_x64.msix" />
 
   <UpdateSettings>
     <!-- Check for updates on launch; don't block the user if the check fails. -->

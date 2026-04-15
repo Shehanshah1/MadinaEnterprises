@@ -1,0 +1,102 @@
+name: Release MSIX
+
+# Triggers on a version tag push, e.g. `git tag v1.0.1.0 && git push --tags`.
+# Builds, signs with the PFX stored in secrets, and publishes a GitHub Release
+# with the MSIX, .appinstaller, and public .cer attached.
+on:
+  push:
+    tags:
+      - 'v*.*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Four-part version to publish (e.g. 1.0.1.0). Leave blank to use tag.'
+        required: false
+
+permissions:
+  contents: write  # needed to create the GitHub Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install MAUI workload
+        shell: pwsh
+        run: dotnet workload install maui-windows
+
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        run: |
+          $v = '${{ github.event.inputs.version }}'
+          if ([string]::IsNullOrWhiteSpace($v)) {
+            $v = '${{ github.ref_name }}' -replace '^v', ''
+          }
+          if ($v -notmatch '^\d+\.\d+\.\d+\.\d+$') {
+            throw "Version '$v' is not four-part (expected N.N.N.N)"
+          }
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "tag=v$v"    | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Decode signing PFX from secret
+        shell: pwsh
+        env:
+          PFX_B64: ${{ secrets.SIGNING_CERT_PFX_BASE64 }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:PFX_B64)) {
+            throw "SIGNING_CERT_PFX_BASE64 secret is not set. Run scripts/New-SigningCertificate.ps1 locally and upload the base64 of the PFX."
+          }
+          $bytes = [Convert]::FromBase64String($env:PFX_B64)
+          New-Item -ItemType Directory -Force -Path certs | Out-Null
+          [IO.File]::WriteAllBytes("certs/signing.pfx", $bytes)
+
+      - name: Export public CER from PFX
+        shell: pwsh
+        env:
+          PFX_PWD: ${{ secrets.SIGNING_CERT_PASSWORD }}
+        run: |
+          $secure = ConvertTo-SecureString $env:PFX_PWD -AsPlainText -Force
+          $cert   = Get-PfxCertificate -FilePath certs/signing.pfx -Password $secure
+          Export-Certificate -Cert $cert -FilePath certs/MadinaEnterprises.cer | Out-Null
+
+      - name: Build, sign, and stage release
+        shell: pwsh
+        env:
+          PFX_PWD: ${{ secrets.SIGNING_CERT_PASSWORD }}
+        run: |
+          ./scripts/Publish-MsixRelease.ps1 `
+            -Version '${{ steps.ver.outputs.version }}' `
+            -GitHubRepo '${{ github.repository }}' `
+            -PfxPath 'certs/signing.pfx' `
+            -PfxPassword $env:PFX_PWD `
+            -CerPath 'certs/MadinaEnterprises.cer' `
+            -OutputDir 'publish'
+
+      - name: Upload build artifact (for manual inspection)
+        uses: actions/upload-artifact@v4
+        with:
+          name: MadinaEnterprises-${{ steps.ver.outputs.version }}
+          path: publish/*
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: Madina Enterprises ${{ steps.ver.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          make_latest: 'true'  # critical: only "latest" releases are served by /releases/latest/download/*
+          files: |
+            publish/MadinaEnterprises_${{ steps.ver.outputs.version }}_x64.msix
+            publish/MadinaEnterprises.appinstaller
+            publish/MadinaEnterprises.cer

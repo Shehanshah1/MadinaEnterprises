@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Madina Enterprises: code-signing material produced by
+# scripts/New-SigningCertificate.ps1 — NEVER commit the PFX.
+certs/
