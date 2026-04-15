@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  App Installer file for Madina Enterprises.
+  This file drives auto-updates for sideloaded MSIX installs.
+
+  HOW IT WORKS:
+    1. You publish MadinaEnterprises.msix AND this .appinstaller file to a
+       reachable HTTPS URL (GitHub Releases, Azure Blob, S3, IIS, or even a
+       OneDrive/SharePoint share that exposes direct download links).
+    2. End user opens the .appinstaller URL ONCE -> Windows installs the app
+       and remembers the update source.
+    3. On every launch (or per HoursBetweenUpdateChecks), Windows re-reads
+       this XML. If Version is higher than the installed one, it downloads
+       the new MSIX and updates silently on next launch.
+
+  BEFORE PUBLISHING:
+    - Replace https://example.com/madina/ with your real hosting URL.
+    - Update <MainPackage Version="..."/> to match Package.appxmanifest.
+    - The Publisher must match the signing certificate subject EXACTLY
+      (CN=Madina Enterprises here).
+    - Keep ProcessorArchitecture in sync with what you build (x64/arm64).
+-->
+<AppInstaller
+    Uri="https://example.com/madina/MadinaEnterprises.appinstaller"
+    Version="1.0.0.0"
+    xmlns="http://schemas.microsoft.com/appx/appinstaller/2018">
+
+  <MainPackage
+      Name="MadinaEnterprises"
+      Publisher="CN=Madina Enterprises"
+      Version="1.0.0.0"
+      ProcessorArchitecture="x64"
+      Uri="https://example.com/madina/MadinaEnterprises_1.0.0.0_x64.msix" />
+
+  <UpdateSettings>
+    <!-- Check for updates on launch; don't block the user if the check fails. -->
+    <OnLaunch HoursBetweenUpdateChecks="0" ShowPrompt="true" UpdateBlocksActivation="false" />
+    <!-- Allow the app to also force an update programmatically via PackageManager APIs. -->
+    <AutomaticBackgroundTask />
+    <ForceUpdateFromAnyVersion>true</ForceUpdateFromAnyVersion>
+  </UpdateSettings>
+
+</AppInstaller>
