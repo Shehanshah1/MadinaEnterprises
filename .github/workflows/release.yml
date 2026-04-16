@@ -29,9 +29,9 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Install MAUI workload
+      - name: Install MAUI workloads
         shell: pwsh
-        run: dotnet workload install maui-windows
+        run: dotnet workload install maui-windows android wasm-tools-net8
 
       - name: Resolve version
         id: ver
@@ -95,7 +95,7 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
-          make_latest: 'true'  # critical: only "latest" releases are served by /releases/latest/download/*
+          make_latest: 'true'
           files: |
             publish/MadinaEnterprises_${{ steps.ver.outputs.version }}_x64.msix
             publish/MadinaEnterprises.appinstaller
