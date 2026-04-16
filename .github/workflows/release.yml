@@ -29,9 +29,9 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Install MAUI workloads
+      - name: Install MAUI Windows workload
         shell: pwsh
-        run: dotnet workload install maui-windows android wasm-tools-net8
+        run: dotnet workload install maui-windows
 
       - name: Resolve version
         id: ver

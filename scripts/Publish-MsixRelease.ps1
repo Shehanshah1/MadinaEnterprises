@@ -85,6 +85,8 @@ $appinstTmpl = Join-Path $repoRoot 'Platforms/Windows/MadinaEnterprises.appinsta
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 $OutputDir = (Resolve-Path $OutputDir).Path
 
+$winTfm = 'net8.0-windows10.0.19041.0'
+
 # --- URLs for GitHub Releases hosting ---------------------------------------
 # .appinstaller served from the STABLE "latest/download" URL, which redirects
 # to whichever release is tagged Latest. The MSIX inside is pinned to this
@@ -117,11 +119,16 @@ if ($PSCmdlet.ParameterSetName -eq 'Thumbprint') {
 }
 
 # --- Publish -----------------------------------------------------------------
+# -p:TargetFrameworks=... overrides the multi-TFM csproj so the SDK only
+# evaluates the Windows target. Without this, it requires android/ios/wasm
+# workloads even though we're only building Windows.
 Write-Host "==> dotnet publish (Release, win10-x64)" -ForegroundColor Cyan
 $publishArgs = @(
     'publish', $csproj,
-    '-f', 'net8.0-windows10.0.19041.0',
+    '-f', $winTfm,
     '-c', 'Release',
+    "-p:TargetFrameworks=$winTfm",
+    "-p:TargetFramework=$winTfm",
     '-p:RuntimeIdentifierOverride=win10-x64',
     '-p:GenerateAppxPackageOnBuild=true',
     '-p:AppxPackageSigningEnabled=true',
@@ -136,7 +143,7 @@ if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed with exit code $LASTEXIT
 # --- Locate the MSIX the publish just produced and flatten to OutputDir -----
 $msix = Get-ChildItem -Path $OutputDir -Recurse -Filter $msixAssetName |
         Select-Object -First 1
-if (-not $msix) { throw "Expected $msixAssetName under $OutputDir — not found." }
+if (-not $msix) { throw "Expected $msixAssetName under $OutputDir â€” not found." }
 $flatMsix = Join-Path $OutputDir $msixAssetName
 if ($msix.FullName -ne $flatMsix) {
     Copy-Item $msix.FullName -Destination $flatMsix -Force
