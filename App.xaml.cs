@@ -19,10 +19,17 @@ namespace MadinaEnterprises
 
             // Kick off Supabase config load + initial pull without blocking the UI thread.
             InitialSyncTask = InitializeCloudSyncAsync();
-
-            // Set the startup page
-            MainPage = new NavigationPage(new LoginPage());
         }
+
+        // MAUI 9+: set the startup page by overriding CreateWindow instead of
+        // assigning Application.MainPage (which is now obsolete).
+        protected override Window CreateWindow(IActivationState? activationState)
+        {
+            return new Window(new NavigationPage(new LoginPage()));
+        }
+
+        private static NavigationPage? RootNavigationPage =>
+            Current?.Windows?.FirstOrDefault()?.Page as NavigationPage;
 
         private static async Task InitializeCloudSyncAsync()
         {
@@ -68,7 +75,7 @@ namespace MadinaEnterprises
         // Navigation helper
         public static async Task NavigateToPage(Page page)
         {
-            if (Current?.MainPage is NavigationPage navigationPage)
+            if (RootNavigationPage is NavigationPage navigationPage)
             {
                 await navigationPage.PushAsync(page);
             }
@@ -77,7 +84,7 @@ namespace MadinaEnterprises
         // Back navigation helper
         public static async Task GoBack()
         {
-            if (Current?.MainPage is NavigationPage navigationPage)
+            if (RootNavigationPage is NavigationPage navigationPage)
             {
                 await navigationPage.PopAsync();
             }
@@ -86,9 +93,10 @@ namespace MadinaEnterprises
         // Logout: reset navigation stack to LoginPage
         public static void Logout()
         {
-            if (Current != null)
+            var window = Current?.Windows?.FirstOrDefault();
+            if (window != null)
             {
-                Current.MainPage = new NavigationPage(new LoginPage());
+                window.Page = new NavigationPage(new LoginPage());
             }
         }
     }

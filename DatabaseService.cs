@@ -181,16 +181,16 @@ namespace MadinaEnterprises
             {
                 list.Add(new Contracts
                 {
-                    ContractID = reader["ContractID"].ToString(),
-                    GinnerID = reader["GinnerID"].ToString(),
-                    MillID = reader["MillID"].ToString(),
+                    ContractID = reader["ContractID"]?.ToString() ?? string.Empty,
+                    GinnerID = reader["GinnerID"]?.ToString() ?? string.Empty,
+                    MillID = reader["MillID"]?.ToString() ?? string.Empty,
                     TotalBales = Convert.ToInt32(reader["TotalBales"]),
                     PricePerBatch = Convert.ToDouble(reader["PricePerBatch"]),
                     TotalAmount = Convert.ToDouble(reader["TotalAmount"]),
                     CommissionPercentage = Convert.ToDouble(reader["CommissionPercentage"]),
                     DateCreated = ParseDateOrDefault(reader["DateCreated"]),
-                    DeliveryNotes = reader["DeliveryNotes"].ToString(),
-                    PaymentNotes = reader["PaymentNotes"].ToString(),
+                    DeliveryNotes = reader["DeliveryNotes"]?.ToString() ?? string.Empty,
+                    PaymentNotes = reader["PaymentNotes"]?.ToString() ?? string.Empty,
                     Description = reader["Description"] is DBNull ? null : reader["Description"]?.ToString()
                 });
 
@@ -285,14 +285,14 @@ namespace MadinaEnterprises
             {
                 list.Add(new Deliveries
                 {
-                    DeliveryID = reader["DeliveryID"].ToString(),
-                    ContractID = reader["ContractID"].ToString(),
+                    DeliveryID = reader["DeliveryID"]?.ToString() ?? string.Empty,
+                    ContractID = reader["ContractID"]?.ToString() ?? string.Empty,
                     Amount = Convert.ToDouble(reader["Amount"]),
                     TotalBales = Convert.ToInt32(reader["TotalBales"]),
                     FactoryWeight = Convert.ToDouble(reader["FactoryWeight"]),
                     MillWeight = Convert.ToDouble(reader["MillWeight"]),
-                    TruckNumber = reader["TruckNumber"].ToString(),
-                    DriverContact = reader["DriverContact"].ToString(),
+                    TruckNumber = reader["TruckNumber"]?.ToString() ?? string.Empty,
+                    DriverContact = reader["DriverContact"]?.ToString() ?? string.Empty,
                     DepartureDate = ParseDateOrDefault(reader["DepartureDate"]),
                     DeliveryDate = ParseDateOrDefault(reader["DeliveryDate"])
                 });
@@ -371,8 +371,8 @@ namespace MadinaEnterprises
             {
                 list.Add(new Payment
                 {
-                    PaymentID = reader["PaymentID"].ToString(),
-                    ContractID = reader["ContractID"].ToString(),
+                    PaymentID = reader["PaymentID"]?.ToString() ?? string.Empty,
+                    ContractID = reader["ContractID"]?.ToString() ?? string.Empty,
                     TotalAmount = Convert.ToDouble(reader["TotalAmount"]),
                     AmountPaid = Convert.ToDouble(reader["AmountPaid"]),
                     TotalBales = Convert.ToInt32(reader["TotalBales"]),
@@ -446,16 +446,16 @@ namespace MadinaEnterprises
             {
                 list.Add(new Ginners
                 {
-                    GinnerID = reader["GinnerID"].ToString(),
-                    GinnerName = reader["GinnerName"].ToString(),
-                    Contact = reader["Contact"].ToString(),
-                    IBAN = reader["IBAN"].ToString(),
-                    Address = reader["Address"].ToString(),
-                    NTN = reader["NTN"].ToString(),
-                    STN = reader["STN"].ToString(),
-                    BankAddress = reader["BankAddress"].ToString(),
-                    ContactPerson = reader["ContactPerson"].ToString(),
-                    Station = reader["Station"].ToString()
+                    GinnerID = reader["GinnerID"]?.ToString() ?? string.Empty,
+                    GinnerName = reader["GinnerName"]?.ToString() ?? string.Empty,
+                    Contact = reader["Contact"]?.ToString() ?? string.Empty,
+                    IBAN = reader["IBAN"]?.ToString() ?? string.Empty,
+                    Address = reader["Address"]?.ToString() ?? string.Empty,
+                    NTN = reader["NTN"]?.ToString() ?? string.Empty,
+                    STN = reader["STN"]?.ToString() ?? string.Empty,
+                    BankAddress = reader["BankAddress"]?.ToString() ?? string.Empty,
+                    ContactPerson = reader["ContactPerson"]?.ToString() ?? string.Empty,
+                    Station = reader["Station"]?.ToString() ?? string.Empty
                 });
             }
             return list;
@@ -530,10 +530,10 @@ namespace MadinaEnterprises
             {
                 list.Add(new Mills
                 {
-                    MillName = reader["MillName"].ToString(),
-                    MillID = reader["MillID"].ToString(),
-                    Address = reader["Address"].ToString(),
-                    OwnerName = reader["OwnerName"].ToString()
+                    MillName = reader["MillName"]?.ToString() ?? string.Empty,
+                    MillID = reader["MillID"]?.ToString() ?? string.Empty,
+                    Address = reader["Address"]?.ToString() ?? string.Empty,
+                    OwnerName = reader["OwnerName"]?.ToString() ?? string.Empty
                 });
             }
             return list;
