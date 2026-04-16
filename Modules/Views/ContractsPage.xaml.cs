@@ -122,10 +122,17 @@ public partial class ContractsPage : ContentPage
             return;
         }
 
-        await _db.AddContract(contract);
-        await DisplayAlert("Success", "Contract saved.", "OK");
-        ClearForm();
-        await LoadData();
+        try
+        {
+            await _db.AddContract(contract);
+            await DisplayAlert("Success", "Contract saved.", "OK");
+            ClearForm();
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to save contract: {ex.Message}", "OK");
+        }
     }
 
     private async void OnUpdateContractClicked(object sender, EventArgs e)
@@ -133,6 +140,13 @@ public partial class ContractsPage : ContentPage
         if (string.IsNullOrWhiteSpace(contractIDEntry.Text))
         {
             await DisplayAlert("Validation Error", "Contract ID is required to update.", "OK");
+            return;
+        }
+
+        if (ginnerPicker.SelectedIndex < 0 || ginnerPicker.SelectedIndex >= ginners.Count ||
+            millPicker.SelectedIndex < 0 || millPicker.SelectedIndex >= mills.Count)
+        {
+            await DisplayAlert("Validation Error", "Please select a Ginner and a Mill.", "OK");
             return;
         }
 
@@ -151,20 +165,45 @@ public partial class ContractsPage : ContentPage
             Description = descriptionEntry.Text ?? ""
         };
 
-        await _db.UpdateContract(contract);
-        await DisplayAlert("Updated", "Contract updated successfully.", "OK");
-        ClearForm();
-        await LoadData();
+        try
+        {
+            await _db.UpdateContract(contract);
+            await DisplayAlert("Updated", "Contract updated successfully.", "OK");
+            ClearForm();
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to update contract: {ex.Message}", "OK");
+        }
     }
 
     private async void OnDeleteContractClicked(object sender, EventArgs e)
     {
-        if (contractPicker.SelectedItem is string id)
+        if (contractPicker.SelectedItem is not string id)
+        {
+            await DisplayAlert("Validation Error", "Select a contract to delete.", "OK");
+            return;
+        }
+
+        bool confirm = await DisplayAlert("Confirm", $"Delete contract '{id}'?", "Yes", "No");
+        if (!confirm) return;
+
+        try
         {
             await _db.DeleteContract(id);
             await DisplayAlert("Deleted", "Contract deleted.", "OK");
             ClearForm();
             await LoadData();
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Friendly message from DatabaseService when dependent deliveries/payments exist.
+            await DisplayAlert("Cannot Delete", ex.Message, "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to delete contract: {ex.Message}", "OK");
         }
     }
 

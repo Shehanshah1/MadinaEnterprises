@@ -147,10 +147,17 @@ public partial class PaymentsPage : ContentPage
             return;
         }
 
-        await _db.AddPayment(payment);
-        await DisplayAlert("Success", "Payment added successfully.", "OK");
-        ClearForm();
-        await LoadData();
+        try
+        {
+            await _db.AddPayment(payment);
+            await DisplayAlert("Success", "Payment added successfully.", "OK");
+            ClearForm();
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to save payment: {ex.Message}", "OK");
+        }
     }
 
     private async void OnUpdatePaymentClicked(object sender, EventArgs e)
@@ -195,20 +202,41 @@ public partial class PaymentsPage : ContentPage
             TransactionID = preservedTransactionId
         };
 
-        await _db.UpdatePayment(payment);
-        await DisplayAlert("Success", "Payment updated successfully.", "OK");
-        ClearForm();
-        await LoadData();
+        try
+        {
+            await _db.UpdatePayment(payment);
+            await DisplayAlert("Success", "Payment updated successfully.", "OK");
+            ClearForm();
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to update payment: {ex.Message}", "OK");
+        }
     }
 
     private async void OnDeletePaymentClicked(object sender, EventArgs e)
     {
-        if (paymentPicker.SelectedItem is not string id) return;
+        if (paymentPicker.SelectedItem is not string id)
+        {
+            await DisplayAlert("Validation Error", "Select a payment to delete.", "OK");
+            return;
+        }
 
-        await _db.DeletePayment(id);
-        await DisplayAlert("Deleted", "Payment deleted successfully.", "OK");
-        ClearForm();
-        await LoadData();
+        bool confirm = await DisplayAlert("Confirm", $"Delete payment '{id}'?", "Yes", "No");
+        if (!confirm) return;
+
+        try
+        {
+            await _db.DeletePayment(id);
+            await DisplayAlert("Deleted", "Payment deleted successfully.", "OK");
+            ClearForm();
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to delete payment: {ex.Message}", "OK");
+        }
     }
 
     private void OnPaidAmountChanged(object sender, TextChangedEventArgs e)

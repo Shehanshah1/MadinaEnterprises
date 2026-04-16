@@ -78,10 +78,17 @@ public partial class GinnersPage : ContentPage
             Station = GinnerStationEntry.Text ?? ""
         };
 
-        await _databaseService.AddGinner(ginner);
-        await DisplayAlert("Success", "Ginner profile created successfully.", "OK");
-        ClearEntries();
-        await LoadGinners();
+        try
+        {
+            await _databaseService.AddGinner(ginner);
+            await DisplayAlert("Success", "Ginner profile created successfully.", "OK");
+            ClearEntries();
+            await LoadGinners();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to save ginner: {ex.Message}", "OK");
+        }
     }
 
     private async void OnUpdateGinnerClicked(object sender, EventArgs e)
@@ -115,10 +122,17 @@ public partial class GinnersPage : ContentPage
             Station = GinnerStationEntry.Text ?? ""
         };
 
-        await _databaseService.UpdateGinner(ginner);
-        await DisplayAlert("Success", "Ginner profile updated successfully.", "OK");
-        ClearEntries();
-        await LoadGinners();
+        try
+        {
+            await _databaseService.UpdateGinner(ginner);
+            await DisplayAlert("Success", "Ginner profile updated successfully.", "OK");
+            ClearEntries();
+            await LoadGinners();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to update ginner: {ex.Message}", "OK");
+        }
     }
 
     private async void OnDeleteGinnerClicked(object sender, EventArgs e)
@@ -129,10 +143,25 @@ public partial class GinnersPage : ContentPage
             return;
         }
 
-        await _databaseService.DeleteGinner(GinnerIDEntry.Text);
-        await DisplayAlert("Success", "Ginner profile deleted successfully.", "OK");
-        ClearEntries();
-        await LoadGinners();
+        bool confirm = await DisplayAlert("Confirm", $"Delete ginner '{GinnerIDEntry.Text}'?", "Yes", "No");
+        if (!confirm) return;
+
+        try
+        {
+            await _databaseService.DeleteGinner(GinnerIDEntry.Text);
+            await DisplayAlert("Success", "Ginner profile deleted successfully.", "OK");
+            ClearEntries();
+            await LoadGinners();
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Friendly message from DatabaseService when dependent contracts exist.
+            await DisplayAlert("Cannot Delete", ex.Message, "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to delete ginner: {ex.Message}", "OK");
+        }
     }
 
     private void OnGinnerSelected(object sender, SelectedItemChangedEventArgs e)

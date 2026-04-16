@@ -53,6 +53,18 @@ namespace MadinaEnterprises
             return DateTime.TryParse(text, out parsed) ? parsed : DateTime.MinValue;
         }
 
+        // SQLite FK violation code. We translate these into friendly InvalidOperationException
+        // messages so callers can show something useful to the user instead of a raw crash.
+        private const int SqliteConstraintForeignKey = 787;
+
+        private static async Task<long> CountAsync(SqliteConnection conn, string sql, string paramName, string paramValue)
+        {
+            using var cmd = new SqliteCommand(sql, conn);
+            cmd.Parameters.AddWithValue(paramName, paramValue);
+            var result = await cmd.ExecuteScalarAsync();
+            return result is null || result is DBNull ? 0 : Convert.ToInt64(result);
+        }
+
         private void InitializeDatabase()
         {
             using var connection = new SqliteConnection(_connectionString);
@@ -224,7 +236,16 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@PaymentNotes", (object?)c.PaymentNotes ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@Description", (object?)c.Description ?? DBNull.Value);
 
-            await cmd.ExecuteNonQueryAsync();
+            try
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == SqliteConstraintForeignKey)
+            {
+                throw new InvalidOperationException(
+                    "Could not save contract: the selected Ginner or Mill does not exist. " +
+                    "Make sure both exist before saving the contract.", ex);
+            }
             FireAndForget(_cloud.UpsertAsync("contracts", CloudSyncService.Row(c), "contract_id"));
         }
 
@@ -258,7 +279,15 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@PaymentNotes", (object?)c.PaymentNotes ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@Description", (object?)c.Description ?? DBNull.Value);
 
-            await cmd.ExecuteNonQueryAsync();
+            try
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == SqliteConstraintForeignKey)
+            {
+                throw new InvalidOperationException(
+                    "Could not update contract: the selected Ginner or Mill does not exist.", ex);
+            }
             FireAndForget(_cloud.UpsertAsync("contracts", CloudSyncService.Row(c), "contract_id"));
         }
 
@@ -266,9 +295,36 @@ namespace MadinaEnterprises
         {
             using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
+
+            // Pre-check: refuse to delete if deliveries or payments still reference this contract.
+            // Otherwise the underlying SQLite FK constraint would throw and crash the UI.
+            var deliveries = await CountAsync(conn,
+                "SELECT COUNT(*) FROM Deliveries WHERE ContractID = @id", "@id", contractId);
+            var payments = await CountAsync(conn,
+                "SELECT COUNT(*) FROM Payments WHERE ContractID = @id", "@id", contractId);
+
+            if (deliveries > 0 || payments > 0)
+            {
+                var parts = new List<string>();
+                if (deliveries > 0) parts.Add($"{deliveries} delivery record(s)");
+                if (payments > 0) parts.Add($"{payments} payment record(s)");
+                throw new InvalidOperationException(
+                    $"Cannot delete contract '{contractId}' because it still has {string.Join(" and ", parts)}. " +
+                    "Delete or reassign those records first.");
+            }
+
             var cmd = new SqliteCommand("DELETE FROM Contracts WHERE ContractID = @id", conn);
             cmd.Parameters.AddWithValue("@id", contractId);
-            await cmd.ExecuteNonQueryAsync();
+            try
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == SqliteConstraintForeignKey)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot delete contract '{contractId}' because other records still reference it.", ex);
+            }
+
             FireAndForget(_cloud.DeleteAsync("contracts", "contract_id", contractId));
         }
 
@@ -319,7 +375,15 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@DepartureDate", d.DepartureDate.ToString("yyyy-MM-dd"));
             cmd.Parameters.AddWithValue("@DeliveryDate", d.DeliveryDate.ToString("yyyy-MM-dd"));
 
-            await cmd.ExecuteNonQueryAsync();
+            try
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == SqliteConstraintForeignKey)
+            {
+                throw new InvalidOperationException(
+                    "Could not save delivery: the selected Contract does not exist.", ex);
+            }
             FireAndForget(_cloud.UpsertAsync("deliveries", CloudSyncService.Row(d), "delivery_id"));
         }
 
@@ -344,7 +408,15 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@DepartureDate", d.DepartureDate.ToString("yyyy-MM-dd"));
             cmd.Parameters.AddWithValue("@DeliveryDate", d.DeliveryDate.ToString("yyyy-MM-dd"));
 
-            await cmd.ExecuteNonQueryAsync();
+            try
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == SqliteConstraintForeignKey)
+            {
+                throw new InvalidOperationException(
+                    "Could not update delivery: the selected Contract does not exist.", ex);
+            }
             FireAndForget(_cloud.UpsertAsync("deliveries", CloudSyncService.Row(d), "delivery_id"));
         }
 
@@ -399,7 +471,15 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Date", p.Date.ToString("yyyy-MM-dd"));
             cmd.Parameters.AddWithValue("@TransactionID", (object?)p.TransactionID ?? DBNull.Value);
 
-            await cmd.ExecuteNonQueryAsync();
+            try
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == SqliteConstraintForeignKey)
+            {
+                throw new InvalidOperationException(
+                    "Could not save payment: the selected Contract does not exist.", ex);
+            }
             FireAndForget(_cloud.UpsertAsync("payments", CloudSyncService.Row(p), "payment_id"));
         }
 
@@ -419,7 +499,15 @@ namespace MadinaEnterprises
             cmd.Parameters.AddWithValue("@Date", p.Date.ToString("yyyy-MM-dd"));
             cmd.Parameters.AddWithValue("@TransactionID", (object?)p.TransactionID ?? DBNull.Value);
 
-            await cmd.ExecuteNonQueryAsync();
+            try
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == SqliteConstraintForeignKey)
+            {
+                throw new InvalidOperationException(
+                    "Could not update payment: the selected Contract does not exist.", ex);
+            }
             FireAndForget(_cloud.UpsertAsync("payments", CloudSyncService.Row(p), "payment_id"));
         }
 
@@ -511,9 +599,29 @@ namespace MadinaEnterprises
         {
             using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
+
+            // Pre-check: refuse to delete if contracts still reference this ginner.
+            var contracts = await CountAsync(conn,
+                "SELECT COUNT(*) FROM Contracts WHERE GinnerID = @GinnerID", "@GinnerID", GinnerID);
+            if (contracts > 0)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot delete ginner '{GinnerID}' because {contracts} contract(s) still reference it. " +
+                    "Delete or reassign those contracts first.");
+            }
+
             var cmd = new SqliteCommand("DELETE FROM Ginners WHERE GinnerID = @GinnerID", conn);
             cmd.Parameters.AddWithValue("@GinnerID", GinnerID);
-            await cmd.ExecuteNonQueryAsync();
+            try
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == SqliteConstraintForeignKey)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot delete ginner '{GinnerID}' because other records still reference it.", ex);
+            }
+
             FireAndForget(_cloud.DeleteAsync("ginners", "ginner_id", GinnerID));
         }
 
@@ -569,9 +677,29 @@ namespace MadinaEnterprises
         {
             using var conn = new SqliteConnection(_connectionString);
             await conn.OpenAsync();
+
+            // Pre-check: refuse to delete if contracts still reference this mill.
+            var contracts = await CountAsync(conn,
+                "SELECT COUNT(*) FROM Contracts WHERE MillID = @MillID", "@MillID", millId);
+            if (contracts > 0)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot delete mill '{millId}' because {contracts} contract(s) still reference it. " +
+                    "Delete or reassign those contracts first.");
+            }
+
             var cmd = new SqliteCommand("DELETE FROM Mills WHERE MillID = @MillID", conn);
             cmd.Parameters.AddWithValue("@MillID", millId);
-            await cmd.ExecuteNonQueryAsync();
+            try
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == SqliteConstraintForeignKey)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot delete mill '{millId}' because other records still reference it.", ex);
+            }
+
             FireAndForget(_cloud.DeleteAsync("mills", "mill_id", millId));
         }
 
