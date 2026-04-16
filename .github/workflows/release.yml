@@ -29,9 +29,13 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Install MAUI Windows workload
+      # Install the full MAUI workload family. The csproj multi-targets
+      # android/ios/maccatalyst/windows, so the SDK validates workloads for
+      # every TFM before it'll build any of them. 'maui' is the umbrella
+      # that pulls them all in.
+      - name: Install MAUI workloads
         shell: pwsh
-        run: dotnet workload install maui-windows
+        run: dotnet workload install maui
 
       - name: Resolve version
         id: ver

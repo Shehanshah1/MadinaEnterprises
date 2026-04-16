@@ -85,8 +85,6 @@ $appinstTmpl = Join-Path $repoRoot 'Platforms/Windows/MadinaEnterprises.appinsta
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 $OutputDir = (Resolve-Path $OutputDir).Path
 
-$winTfm = 'net8.0-windows10.0.19041.0'
-
 # --- URLs for GitHub Releases hosting ---------------------------------------
 # .appinstaller served from the STABLE "latest/download" URL, which redirects
 # to whichever release is tagged Latest. The MSIX inside is pinned to this
@@ -119,16 +117,11 @@ if ($PSCmdlet.ParameterSetName -eq 'Thumbprint') {
 }
 
 # --- Publish -----------------------------------------------------------------
-# -p:TargetFrameworks=... overrides the multi-TFM csproj so the SDK only
-# evaluates the Windows target. Without this, it requires android/ios/wasm
-# workloads even though we're only building Windows.
 Write-Host "==> dotnet publish (Release, win10-x64)" -ForegroundColor Cyan
 $publishArgs = @(
     'publish', $csproj,
-    '-f', $winTfm,
+    '-f', 'net8.0-windows10.0.19041.0',
     '-c', 'Release',
-    "-p:TargetFrameworks=$winTfm",
-    "-p:TargetFramework=$winTfm",
     '-p:RuntimeIdentifierOverride=win10-x64',
     '-p:GenerateAppxPackageOnBuild=true',
     '-p:AppxPackageSigningEnabled=true',
