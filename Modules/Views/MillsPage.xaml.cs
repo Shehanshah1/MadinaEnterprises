@@ -72,10 +72,17 @@ namespace MadinaEnterprises.Modules.Views
                 OwnerName = millOwnerNameEntry.Text?.Trim() ?? string.Empty
             };
 
-            await _db.AddMill(mill);
-            await DisplayAlert("Success", "Mill saved successfully!", "OK");
-            ClearForm();
-            await LoadMills();
+            try
+            {
+                await _db.AddMill(mill);
+                await DisplayAlert("Success", "Mill saved successfully!", "OK");
+                ClearForm();
+                await LoadMills();
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Failed to save mill: {ex.Message}", "OK");
+            }
         }
 
         private async void OnUpdateMillClicked(object sender, EventArgs e)
@@ -104,10 +111,17 @@ namespace MadinaEnterprises.Modules.Views
                 OwnerName = millOwnerNameEntry.Text?.Trim() ?? string.Empty
             };
 
-            await _db.UpdateMill(mill);
-            await DisplayAlert("Updated", "Mill updated successfully.", "OK");
-            ClearForm();
-            await LoadMills();
+            try
+            {
+                await _db.UpdateMill(mill);
+                await DisplayAlert("Updated", "Mill updated successfully.", "OK");
+                ClearForm();
+                await LoadMills();
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Failed to update mill: {ex.Message}", "OK");
+            }
         }
 
         private async void OnDeleteMillClicked(object sender, EventArgs e)
@@ -132,10 +146,22 @@ namespace MadinaEnterprises.Modules.Views
             bool confirm = await DisplayAlert("Confirm", $"Delete mill '{millToDelete.MillName}'?", "Yes", "No");
             if (!confirm) return;
 
-            await _db.DeleteMill(id); // Delete by ID
-            await DisplayAlert("Deleted", "Mill deleted successfully.", "OK");
-            ClearForm();
-            await LoadMills();
+            try
+            {
+                await _db.DeleteMill(id); // Delete by ID
+                await DisplayAlert("Deleted", "Mill deleted successfully.", "OK");
+                ClearForm();
+                await LoadMills();
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Friendly message from DatabaseService when dependent contracts exist.
+                await DisplayAlert("Cannot Delete", ex.Message, "OK");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Failed to delete mill: {ex.Message}", "OK");
+            }
         }
 
         private void ClearForm()

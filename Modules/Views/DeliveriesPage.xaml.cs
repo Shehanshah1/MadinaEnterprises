@@ -175,10 +175,17 @@ public partial class DeliveriesPage : ContentPage
             return;
         }
 
-        await _db.AddDelivery(delivery);
-        await DisplayAlert("Success", "Delivery added.", "OK");
-        ClearForm();
-        await LoadData();
+        try
+        {
+            await _db.AddDelivery(delivery);
+            await DisplayAlert("Success", "Delivery added.", "OK");
+            ClearForm();
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to save delivery: {ex.Message}", "OK");
+        }
     }
 
     private async void OnUpdateDeliveryClicked(object sender, EventArgs e)
@@ -211,20 +218,41 @@ public partial class DeliveriesPage : ContentPage
             DeliveryDate = deliveryDatePicker.Date
         };
 
-        await _db.UpdateDelivery(delivery);
-        await DisplayAlert("Updated", "Delivery updated successfully.", "OK");
-        ClearForm();
-        await LoadData();
+        try
+        {
+            await _db.UpdateDelivery(delivery);
+            await DisplayAlert("Updated", "Delivery updated successfully.", "OK");
+            ClearForm();
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to update delivery: {ex.Message}", "OK");
+        }
     }
 
     private async void OnDeleteDeliveryClicked(object sender, EventArgs e)
     {
-        if (deliveryPicker.SelectedItem is not string id) return;
+        if (deliveryPicker.SelectedItem is not string id)
+        {
+            await DisplayAlert("Validation Error", "Select a delivery to delete.", "OK");
+            return;
+        }
 
-        await _db.DeleteDelivery(id);
-        await DisplayAlert("Deleted", "Delivery deleted.", "OK");
-        ClearForm();
-        await LoadData();
+        bool confirm = await DisplayAlert("Confirm", $"Delete delivery '{id}'?", "Yes", "No");
+        if (!confirm) return;
+
+        try
+        {
+            await _db.DeleteDelivery(id);
+            await DisplayAlert("Deleted", "Delivery deleted.", "OK");
+            ClearForm();
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to delete delivery: {ex.Message}", "OK");
+        }
     }
 
     // Navigation
