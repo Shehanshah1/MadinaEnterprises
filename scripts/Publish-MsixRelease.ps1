@@ -120,7 +120,7 @@ if ($PSCmdlet.ParameterSetName -eq 'Thumbprint') {
 Write-Host "==> dotnet publish (Release, win10-x64)" -ForegroundColor Cyan
 $publishArgs = @(
     'publish', $csproj,
-    '-f', 'net8.0-windows10.0.19041.0',
+    '-f', 'net9.0-windows10.0.19041.0',
     '-c', 'Release',
     '-p:RuntimeIdentifierOverride=win10-x64',
     '-p:GenerateAppxPackageOnBuild=true',
