@@ -1,113 +1,161 @@
 # Madina Enterprises – Cotton Brokerage App
 
-This is a cross-platform cotton brokerage management system developed in **.NET MAUI** for **Madina Enterprises**. The app provides modules to manage core entities such as **Ginners, Mills, Contracts, Deliveries, Payments**, and **Ginner Ledger**, all powered by a local **SQLite database**.
+A cross-platform cotton brokerage management system built in **.NET MAUI** for
+**Madina Enterprises**. It manages **Ginners, Mills, Contracts, Deliveries,
+Payments**, and the **Ginner Ledger**, backed by a local **SQLite database**
+with optional **Supabase cloud sync** so data follows you across machines.
 
 ---
 
-## 🏗 Project Structure
+## Project structure
 
 ```
 MadinaEnterprises/
 ├── Modules/
-│   ├── Models/        # Data Models (e.g., Contracts, Ginners, Mills, etc.)
-│   ├── Views/         # XAML UI Pages with Code-Behind logic
-├── DatabaseService.cs # All database interaction (CRUD for each module)
-├── App.xaml.cs        # Application startup and navigation
+│   ├── Models/           # Data models (Contracts, Ginners, Mills, etc.)
+│   ├── Services/         # CloudSyncService and other shared services
+│   ├── Util/
+│   └── Views/            # XAML pages + code-behind
+├── Platforms/Windows/    # Package.appxmanifest, .appinstaller template
+├── Resources/Raw/
+│   ├── supabase_schema.sql  # Run this once in your Supabase project
+│   └── cloudsync.json       # Optional baked-in Supabase credentials
+├── scripts/              # PowerShell helpers for signing and publishing
+├── .github/workflows/    # release.yml — CI build + sign + publish on tag
+├── DatabaseService.cs    # SQLite CRUD + cloud push/pull
+├── App.xaml.cs           # App startup, sleep/resume sync hooks
+├── DEPLOYMENT.md         # MSIX signing + release how-to
+└── SUPABASE_SETUP.md     # Cloud sync setup steps
 ```
 
 ---
 
-## 💡 Features
+## Features
 
-- **Ginners Management** – Create, update, delete cotton ginners with profile info.
-- **Mills Management** – Track mills with addresses and owner data.
-- **Contracts** – Manage contracts between ginners and mills with commission and bale info.
-- **Deliveries** – Register and track dispatches, truck info, weights, and dates.
-- **Payments** – Record total and paid amounts per contract.
-- **Ginner Ledger** – Maintain deal-level payment records with date and mill due tracking.
-- **Navigation Panel** – A persistent sidebar for quick page access.
-- **Offline Data Storage** – Uses SQLite with local file persistence.
-
----
-
-## ⚙ Technologies Used
-
-- **.NET MAUI (Multi-platform App UI)**
-- **C# with XAML**
-- **SQLite for local data**
-- **MVVM-like structure (code-behind with logical separation)**
+- **Ginners, Mills, Contracts, Deliveries, Payments** – full CRUD with
+  friendly error messages when foreign-key constraints would be violated
+  (e.g. you can't delete a ginner that still has contracts).
+- **Ginner Ledger** – deal-level payment records with date and mill due
+  tracking.
+- **Supabase cloud sync** – every add / update / delete is fire-and-forget
+  pushed to Supabase; on app start and resume the local DB is reconciled
+  with the cloud (last-write-wins). Works offline and catches up later.
+- **Modernised UI** – refreshed design system across every page.
+- **Persistent sidebar navigation** from the Dashboard.
+- **Offline-first SQLite** – data is always local; the cloud is a mirror.
+- **Auto-updating Windows installer** via MSIX + `.appinstaller` hosted on
+  GitHub Releases. Users install once, updates arrive on launch.
 
 ---
 
-## 🧩 How to Run
+## Technologies
 
-1. **Clone the repository**
-
-```bash
-git clone https://github.com/yourusername/MadinaEnterprises.git
-cd MadinaEnterprises
-```
-
-2. **Build in Visual Studio 2022 or later**
-   - Target: **.NET 7.0 or higher**
-   - Platforms: **Windows / Android / iOS / macOS**
-
-3. **Run the app**
-   - The app launches with the `LoginPage`.
-   - After login, access all modules via the left-side navigation.
+- **.NET 9 / .NET MAUI**
+- **C# + XAML**
+- **SQLite** (via `Microsoft.Data.Sqlite`) for local storage
+- **Supabase** (PostgREST over HTTPS) for cloud sync
+- **GitHub Actions** for signed MSIX release builds
 
 ---
 
-## 📁 Data Storage
+## Running locally
 
-SQLite DB is created at runtime inside:
+1. **Clone**
+
+   ```bash
+   git clone https://github.com/Shehanshah1/MadinaEnterprises.git
+   cd MadinaEnterprises
+   ```
+
+2. **Build in Visual Studio 2022 (17.12+) with the .NET 9 MAUI workload**
+   - Primary target: **Windows (`net9.0-windows10.0.19041.0`)**
+   - Other targets available in the csproj: Android, iOS, MacCatalyst
+
+3. **Run** – the app opens on `LoginPage`. After login everything is reachable
+   from the sidebar on the Dashboard, including the **Cloud Sync** panel.
+
+---
+
+## Data storage
+
+Local SQLite DB is created at:
 
 ```
-Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+%LOCALAPPDATA%\madina.db3
 ```
 
-The database file is named:
+Local cloud-sync credentials (if entered in the app) are stored at:
 
 ```
-madina.db3
+%LOCALAPPDATA%\madina\cloudsync.json
 ```
 
 ---
 
-## 📌 Notes
+## Cloud sync (Supabase)
 
-- The app uses hardcoded navigation (`NavigationPage.PushAsync(...)`).
-- All data operations are handled asynchronously via `DatabaseService.cs`.
-- No cloud sync yet – ideal for offline-first businesses.
+See [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md) for full setup. Quick version:
+
+1. Create a free Supabase project.
+2. Run [`Resources/Raw/supabase_schema.sql`](Resources/Raw/supabase_schema.sql)
+   in the Supabase SQL Editor (creates the 5 tables + RLS policies).
+3. Launch the app → **Cloud Sync** in the sidebar → paste your Project URL
+   and anon key → **Save Credentials**, then **Pull from Cloud** or
+   **Push to Cloud**.
+
+Each device can point at the same Supabase project to stay in sync.
 
 ---
 
-## 🔐 Authentication
+## Deployment & updates
 
-This project uses a **simple hardcoded login** flow (no signup, no email verification, no forgot-password screen).
+The Windows build ships via **GitHub Releases** as a signed MSIX, with an
+`.appinstaller` URL that makes Windows auto-update the app on launch.
+
+- Full process (certs, secrets, tagging): [`DEPLOYMENT.md`](DEPLOYMENT.md).
+- Cut a release by pushing a strictly-increasing four-part tag:
+
+  ```bash
+  git tag v1.0.2.0
+  git push origin v1.0.2.0
+  ```
+
+- User-facing install URL (never changes):
+
+  ```
+  https://github.com/Shehanshah1/MadinaEnterprises/releases/latest/download/MadinaEnterprises.appinstaller
+  ```
+
+---
+
+## Authentication
+
+Simple hardcoded login (no signup / email / password reset):
 
 - Username: `Anees`
 - Password: `0000`
 
-You can change these constants in `Modules/Views/LoginPage.xaml.cs` (`HardcodedUsername` and `HardcodedPassword`).
+Change the constants `HardcodedUsername` / `HardcodedPassword` in
+`Modules/Views/LoginPage.xaml.cs` if needed.
 
 ---
 
-## 📣 Contribution
+## Contributing
 
-Open to collaboration – feel free to fork and PR enhancements such as:
+Open to collaboration. Nice-to-haves:
 
 - Charting & analytics
-- Data export (CSV/Excel)
-- UI polish & animations
+- Data export (CSV / Excel)
+- Supabase Auth instead of the single anon-key model
 - Dark mode toggle
 
 ---
 
-## 📃 License
+## License
 
-This project is proprietary and developed for **Madina Enterprises**. Redistribution is subject to owner permission.
+Proprietary — developed for **Madina Enterprises**. Redistribution is subject
+to owner permission.
 
 ---
 
-**Built with ❤️ using .NET MAUI**
+**Built with .NET MAUI**
