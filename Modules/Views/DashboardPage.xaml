@@ -2,92 +2,251 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MadinaEnterprises.Modules.Views.DashboardPage"
-             BackgroundColor="#242424"
+             BackgroundColor="{StaticResource PageBackground}"
+             NavigationPage.HasNavigationBar="False"
              MinimumHeightRequest="600"
              MinimumWidthRequest="1200">
 
-    <Grid ColumnDefinitions="253,*">
-        <!-- Sidebar -->
-        <BoxView Grid.Column="0" Color="#98cb00"/>
-        <BoxView Grid.Column="1" Color="White"/>
+    <Grid ColumnDefinitions="260,*">
 
-        <StackLayout Grid.Column="0" Padding="10" Spacing="30">
-            <Button Text="Dashboard" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0" Margin="0,50,0,0"/>
-            <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnersPageButtonClicked"/>
-            <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked"/>
-            <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
-            <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
-            <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
-            <Button Text="Ginner Ledger" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnerLedgerPageButtonClicked"/>
-            <Button Text="Cloud Sync" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnCloudSyncPageButtonClicked"/>
-            <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
-        </StackLayout>
+        <!-- ============================================= -->
+        <!-- Sidebar                                       -->
+        <!-- ============================================= -->
+        <Grid Grid.Column="0" BackgroundColor="{StaticResource SidebarBackground}">
+            <Grid RowDefinitions="Auto,*,Auto" Padding="16,24">
 
-        <!-- Main Content -->
+                <!-- Brand -->
+                <VerticalStackLayout Grid.Row="0" Spacing="14" Margin="8,0,8,24">
+                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                        <Frame BackgroundColor="#1E293B"
+                               BorderColor="#334155"
+                               CornerRadius="10"
+                               Padding="8"
+                               HasShadow="False"
+                               HeightRequest="42" WidthRequest="42">
+                            <Image Source="madina_logo.png" Aspect="AspectFit"/>
+                        </Frame>
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+                            <Label Text="MADINA"
+                                   FontFamily="OpenSansSemibold"
+                                   TextColor="{StaticResource SidebarBrandText}"
+                                   FontSize="14"
+                                   CharacterSpacing="3"/>
+                            <Label Text="Enterprises"
+                                   TextColor="{StaticResource SidebarBrandAccent}"
+                                   FontSize="11"
+                                   CharacterSpacing="2"/>
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                    <BoxView HeightRequest="1" BackgroundColor="#1E293B"/>
+                </VerticalStackLayout>
+
+                <!-- Nav -->
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="WORKSPACE"
+                               TextColor="{StaticResource SidebarSectionLabel}"
+                               FontFamily="OpenSansSemibold"
+                               FontSize="10"
+                               CharacterSpacing="2"
+                               Margin="12,0,0,6"/>
+                        <Button Text="Dashboard"  Style="{StaticResource SidebarItemActive}"/>
+                        <Button Text="Ginners"    Style="{StaticResource SidebarItem}" Clicked="OnGinnersPageButtonClicked"/>
+                        <Button Text="Mills"      Style="{StaticResource SidebarItem}" Clicked="OnMillsPageButtonClicked"/>
+                        <Button Text="Contracts"  Style="{StaticResource SidebarItem}" Clicked="OnContractsPageButtonClicked"/>
+                        <Button Text="Deliveries" Style="{StaticResource SidebarItem}" Clicked="OnDeliveriesPageButtonClicked"/>
+                        <Button Text="Payments"   Style="{StaticResource SidebarItem}" Clicked="OnPaymentsPageButtonClicked"/>
+
+                        <Label Text="REPORTS"
+                               TextColor="{StaticResource SidebarSectionLabel}"
+                               FontFamily="OpenSansSemibold"
+                               FontSize="10"
+                               CharacterSpacing="2"
+                               Margin="12,16,0,6"/>
+                        <Button Text="Ginner Ledger" Style="{StaticResource SidebarItem}" Clicked="OnGinnerLedgerPageButtonClicked"/>
+
+                        <Label Text="SYSTEM"
+                               TextColor="{StaticResource SidebarSectionLabel}"
+                               FontFamily="OpenSansSemibold"
+                               FontSize="10"
+                               CharacterSpacing="2"
+                               Margin="12,16,0,6"/>
+                        <Button Text="Cloud Sync" Style="{StaticResource SidebarItem}" Clicked="OnCloudSyncPageButtonClicked"/>
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <!-- Logout -->
+                <VerticalStackLayout Grid.Row="2" Spacing="8" Margin="0,16,0,0">
+                    <BoxView HeightRequest="1" BackgroundColor="#1E293B"/>
+                    <Button Text="Log out" Style="{StaticResource SidebarLogout}" Clicked="OnLogOutButtonClicked"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Grid>
+
+        <!-- ============================================= -->
+        <!-- Main content                                  -->
+        <!-- ============================================= -->
         <ScrollView Grid.Column="1">
-            <VerticalStackLayout Padding="30" Spacing="20">
+            <VerticalStackLayout Padding="36,32" Spacing="24">
 
-                <!-- Title -->
-           <Label Text="Dashboard"
-            FontSize="Header"
-            FontAttributes="Bold"
-            TextColor="Black"
-            HorizontalOptions="Start"/>
+                <!-- Header -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="DASHBOARD" Style="{StaticResource Eyebrow}"/>
+                    <Label Text="Business overview" Style="{StaticResource PageTitle}"/>
+                    <Label Text="Key performance indicators across contracts, deliveries and payments."
+                           Style="{StaticResource PageSubtitle}"/>
+                </VerticalStackLayout>
 
-                    <BoxView HeightRequest="2" BackgroundColor="#111827" Opacity="0.9"/>
+                <!-- Stat grid -->
+                <Grid ColumnDefinitions="*,*,*,*"
+                      RowDefinitions="Auto,Auto"
+                      ColumnSpacing="16"
+                      RowSpacing="16">
 
-                <!-- Widgets Grid -->
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="20" RowSpacing="20">
-
-                    <Frame Grid.Row="0" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Total Commission" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
-                            <Label x:Name="TotalCommissionLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                    <!-- Commission -->
+                    <Frame Grid.Row="0" Grid.Column="0" Style="{StaticResource StatCard}">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="TOTAL COMMISSION" Style="{StaticResource Eyebrow}"/>
+                            <Label x:Name="TotalCommissionLabel"
+                                   Text="Loading…"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="24"
+                                   TextColor="{StaticResource TextPrimary}"/>
+                            <Label Text="Earned across all contracts"
+                                   Style="{StaticResource Caption}"/>
                         </VerticalStackLayout>
                     </Frame>
 
-                    <Frame Grid.Row="0" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Payment Made" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
-                            <Label x:Name="PaymentMadeLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                    <!-- Payment made -->
+                    <Frame Grid.Row="0" Grid.Column="1" Style="{StaticResource StatCard}">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="PAYMENTS MADE" Style="{StaticResource Eyebrow}"/>
+                            <Label x:Name="PaymentMadeLabel"
+                                   Text="Loading…"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="24"
+                                   TextColor="{StaticResource Success}"/>
+                            <Label Text="Paid to ginners to date"
+                                   Style="{StaticResource Caption}"/>
                         </VerticalStackLayout>
                     </Frame>
 
-                    <Frame Grid.Row="1" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Payment Due" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
-                            <Label x:Name="PaymentDueLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                    <!-- Payment due -->
+                    <Frame Grid.Row="0" Grid.Column="2" Style="{StaticResource StatCard}">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="PAYMENTS DUE" Style="{StaticResource Eyebrow}"/>
+                            <Label x:Name="PaymentDueLabel"
+                                   Text="Loading…"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="24"
+                                   TextColor="{StaticResource Warning}"/>
+                            <Label Text="Outstanding balance"
+                                   Style="{StaticResource Caption}"/>
                         </VerticalStackLayout>
                     </Frame>
 
-                    <Frame Grid.Row="1" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Bales Sold" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
-                            <Label x:Name="BalesSoldLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                    <!-- Bales sold -->
+                    <Frame Grid.Row="0" Grid.Column="3" Style="{StaticResource StatCard}">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="BALES SOLD" Style="{StaticResource Eyebrow}"/>
+                            <Label x:Name="BalesSoldLabel"
+                                   Text="Loading…"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="24"
+                                   TextColor="{StaticResource TextPrimary}"/>
+                            <Label Text="Total volume delivered"
+                                   Style="{StaticResource Caption}"/>
                         </VerticalStackLayout>
                     </Frame>
 
-                    <Frame Grid.Row="2" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Total Ginners" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
-                            <Label x:Name="TotalGinnersLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                    <!-- Total ginners -->
+                    <Frame Grid.Row="1" Grid.Column="0" Style="{StaticResource StatCard}">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="TOTAL GINNERS" Style="{StaticResource Eyebrow}"/>
+                            <Label x:Name="TotalGinnersLabel"
+                                   Text="Loading…"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="24"
+                                   TextColor="{StaticResource TextPrimary}"/>
+                            <Label Text="Active ginners on file"
+                                   Style="{StaticResource Caption}"/>
                         </VerticalStackLayout>
                     </Frame>
 
-                    <Frame Grid.Row="2" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Total Mills" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
-                            <Label x:Name="TotalMillsLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                    <!-- Total mills -->
+                    <Frame Grid.Row="1" Grid.Column="1" Style="{StaticResource StatCard}">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="TOTAL MILLS" Style="{StaticResource Eyebrow}"/>
+                            <Label x:Name="TotalMillsLabel"
+                                   Text="Loading…"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="24"
+                                   TextColor="{StaticResource TextPrimary}"/>
+                            <Label Text="Buyers in your network"
+                                   Style="{StaticResource Caption}"/>
                         </VerticalStackLayout>
                     </Frame>
 
-                    <Frame Grid.Row="3" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="14" HasShadow="False" Padding="16">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Avg. Commission Rate" FontSize="15" FontAttributes="Bold" TextColor="#111827"/>
-                            <Label x:Name="AvgCommissionRateLabel" Text="Loading..." FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
-                        </VerticalStackLayout>
+                    <!-- Avg commission rate -->
+                    <Frame Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Style="{StaticResource StatCard}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="10">
+                                <Label Text="AVERAGE COMMISSION RATE" Style="{StaticResource Eyebrow}"/>
+                                <Label x:Name="AvgCommissionRateLabel"
+                                       Text="Loading…"
+                                       FontFamily="OpenSansSemibold"
+                                       FontSize="24"
+                                       TextColor="{StaticResource Brand600}"/>
+                                <Label Text="Across all contracts"
+                                       Style="{StaticResource Caption}"/>
+                            </VerticalStackLayout>
+                            <Frame Grid.Column="1"
+                                   BackgroundColor="{StaticResource Brand50}"
+                                   BorderColor="{StaticResource Brand200}"
+                                   CornerRadius="10"
+                                   Padding="14,10"
+                                   VerticalOptions="Center"
+                                   HasShadow="False">
+                                <Label Text="Healthy"
+                                       TextColor="{StaticResource Brand700}"
+                                       FontFamily="OpenSansSemibold"
+                                       FontSize="12"/>
+                            </Frame>
+                        </Grid>
                     </Frame>
                 </Grid>
+
+                <!-- Quick actions -->
+                <Frame Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="14">
+                        <Label Text="Quick actions" Style="{StaticResource SectionTitle}"/>
+                        <Label Text="Jump straight into a common task."
+                               Style="{StaticResource PageSubtitle}"/>
+                        <FlexLayout Wrap="Wrap" JustifyContent="Start" AlignItems="Center" Margin="0,4,0,0">
+                            <Button Text="New contract"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Margin="0,0,10,10"
+                                    Clicked="OnContractsPageButtonClicked"/>
+                            <Button Text="Record delivery"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Margin="0,0,10,10"
+                                    Clicked="OnDeliveriesPageButtonClicked"/>
+                            <Button Text="Log payment"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Margin="0,0,10,10"
+                                    Clicked="OnPaymentsPageButtonClicked"/>
+                            <Button Text="Add ginner"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Margin="0,0,10,10"
+                                    Clicked="OnGinnersPageButtonClicked"/>
+                            <Button Text="Open ledger"
+                                    Style="{StaticResource GhostButton}"
+                                    Margin="0,0,10,10"
+                                    Clicked="OnGinnerLedgerPageButtonClicked"/>
+                        </FlexLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

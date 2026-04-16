@@ -2,212 +2,298 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MadinaEnterprises.Modules.Views.GinnerLedgerPage"
-             BackgroundColor="#242424"
+             BackgroundColor="{StaticResource PageBackground}"
+             NavigationPage.HasNavigationBar="False"
              MinimumHeightRequest="600"
              MinimumWidthRequest="1200">
 
-    <Grid ColumnDefinitions="253,*">
-        <!-- Sidebar -->
-        <BoxView Grid.Column="0" Color="#98cb00" />
-        <BoxView Grid.Column="1" Color="White" />
+    <Grid ColumnDefinitions="260,*">
 
-        <!-- Sidebar Buttons -->
-        <StackLayout Grid.Column="0" Padding="10" Spacing="30">
-            <Button Text="Dashboard" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Margin="0,50,0,0" Clicked="OnDashboardPageButtonClicked"/>
-            <Button Text="Ginners" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnGinnersPageButtonClicked"/>
-            <Button Text="Mills" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnMillsPageButtonClicked"/>
-            <Button Text="Contracts" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnContractsPageButtonClicked"/>
-            <Button Text="Deliveries" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnDeliveriesPageButtonClicked"/>
-            <Button Text="Payments" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnPaymentsPageButtonClicked"/>
-            <Button Text="Ginner Ledger" FontSize="Small" BackgroundColor="White" TextColor="Black" CornerRadius="0"/>
-            <Button Text="Logout" FontSize="Small" BackgroundColor="Black" TextColor="White" CornerRadius="0" Clicked="OnLogOutButtonClicked"/>
-        </StackLayout>
+        <!-- Sidebar -->
+        <Grid Grid.Column="0" BackgroundColor="{StaticResource SidebarBackground}">
+            <Grid RowDefinitions="Auto,*,Auto" Padding="16,24">
+                <VerticalStackLayout Grid.Row="0" Spacing="14" Margin="8,0,8,24">
+                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                        <Frame BackgroundColor="#1E293B" BorderColor="#334155"
+                               CornerRadius="10" Padding="8" HasShadow="False"
+                               HeightRequest="42" WidthRequest="42">
+                            <Image Source="madina_logo.png" Aspect="AspectFit"/>
+                        </Frame>
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+                            <Label Text="MADINA" FontFamily="OpenSansSemibold"
+                                   TextColor="{StaticResource SidebarBrandText}"
+                                   FontSize="14" CharacterSpacing="3"/>
+                            <Label Text="Enterprises"
+                                   TextColor="{StaticResource SidebarBrandAccent}"
+                                   FontSize="11" CharacterSpacing="2"/>
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                    <BoxView HeightRequest="1" BackgroundColor="#1E293B"/>
+                </VerticalStackLayout>
+
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="WORKSPACE" TextColor="{StaticResource SidebarSectionLabel}"
+                               FontFamily="OpenSansSemibold" FontSize="10"
+                               CharacterSpacing="2" Margin="12,0,0,6"/>
+                        <Button Text="Dashboard"  Style="{StaticResource SidebarItem}" Clicked="OnDashboardPageButtonClicked"/>
+                        <Button Text="Ginners"    Style="{StaticResource SidebarItem}" Clicked="OnGinnersPageButtonClicked"/>
+                        <Button Text="Mills"      Style="{StaticResource SidebarItem}" Clicked="OnMillsPageButtonClicked"/>
+                        <Button Text="Contracts"  Style="{StaticResource SidebarItem}" Clicked="OnContractsPageButtonClicked"/>
+                        <Button Text="Deliveries" Style="{StaticResource SidebarItem}" Clicked="OnDeliveriesPageButtonClicked"/>
+                        <Button Text="Payments"   Style="{StaticResource SidebarItem}" Clicked="OnPaymentsPageButtonClicked"/>
+
+                        <Label Text="REPORTS" TextColor="{StaticResource SidebarSectionLabel}"
+                               FontFamily="OpenSansSemibold" FontSize="10"
+                               CharacterSpacing="2" Margin="12,16,0,6"/>
+                        <Button Text="Ginner Ledger" Style="{StaticResource SidebarItemActive}"/>
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <VerticalStackLayout Grid.Row="2" Spacing="8" Margin="0,16,0,0">
+                    <BoxView HeightRequest="1" BackgroundColor="#1E293B"/>
+                    <Button Text="Log out" Style="{StaticResource SidebarLogout}" Clicked="OnLogOutButtonClicked"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Grid>
 
         <!-- Main Content -->
         <Grid Grid.Column="1">
 
             <!-- ============ SELECTION VIEW ============ -->
-            <VerticalStackLayout x:Name="SelectionView" Padding="20" Spacing="15">
+            <ScrollView x:Name="SelectionView">
+                <VerticalStackLayout Padding="36,32" Spacing="24">
 
-                <Label Text="Ginner Ledger"
-                       FontSize="Header"
-                       FontAttributes="Bold"
-                       TextColor="Black"
-                       HorizontalOptions="Start"/>
-                <BoxView HeightRequest="2" BackgroundColor="Black"/>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="REPORTING" Style="{StaticResource Eyebrow}"/>
+                        <Label Text="Ginner ledger" Style="{StaticResource PageTitle}"/>
+                        <Label Text="Select a ginner to view their complete ledger — contracts, deliveries and payments in one place."
+                               Style="{StaticResource PageSubtitle}"/>
+                    </VerticalStackLayout>
 
-                <Label Text="Select a ginner to view their complete ledger, contracts, deliveries and payments."
-                       TextColor="#555555" FontSize="14"/>
+                    <Frame Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="14">
+                            <Label Text="Choose a ginner" Style="{StaticResource SectionTitle}"/>
 
-                <SearchBar x:Name="ginnerSearchBar"
-                           Placeholder="Search by Ginner Name or Ginner ID..."
-                           TextChanged="OnGinnerSearchTextChanged"
-                           BackgroundColor="White"
-                           TextColor="Black"/>
-
-                <CollectionView x:Name="ginnerListView"
-                                BackgroundColor="WhiteSmoke"
-                                HeightRequest="500"
-                                SelectionMode="Single"
-                                SelectionChanged="OnGinnerSelected">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Frame Padding="12" Margin="5" BorderColor="#98cb00" CornerRadius="6" BackgroundColor="White">
-                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
-                                    <Label Grid.Row="0" Grid.Column="0"
-                                           Text="{Binding GinnerName}"
-                                           FontSize="17" FontAttributes="Bold" TextColor="Black"/>
-                                    <Label Grid.Row="0" Grid.Column="1"
-                                           Text="{Binding GinnerID}"
-                                           FontSize="13" TextColor="#666666"
-                                           HorizontalTextAlignment="End"/>
-                                    <Label Grid.Row="1" Grid.ColumnSpan="2"
-                                           Text="{Binding Contact}"
-                                           FontSize="13" TextColor="#555555"/>
-                                    <Label Grid.Row="2" Grid.ColumnSpan="2"
-                                           Text="{Binding Station}"
-                                           FontSize="12" TextColor="#777777"/>
-                                </Grid>
+                            <Frame BackgroundColor="{StaticResource Neutral50}"
+                                   BorderColor="{StaticResource BorderStrong}"
+                                   CornerRadius="10" Padding="4" HasShadow="False">
+                                <SearchBar x:Name="ginnerSearchBar"
+                                           Placeholder="Search by Ginner Name or Ginner ID..."
+                                           TextChanged="OnGinnerSearchTextChanged"
+                                           BackgroundColor="Transparent"/>
                             </Frame>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
 
-            </VerticalStackLayout>
+                            <CollectionView x:Name="ginnerListView"
+                                            BackgroundColor="Transparent"
+                                            HeightRequest="520"
+                                            SelectionMode="Single"
+                                            SelectionChanged="OnGinnerSelected">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Frame Style="{StaticResource ListCard}">
+                                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                                  RowDefinitions="Auto,Auto,Auto"
+                                                  ColumnSpacing="14">
+                                                <Frame Grid.RowSpan="3" Grid.Column="0"
+                                                       BackgroundColor="{StaticResource Brand50}"
+                                                       BorderColor="{StaticResource Brand200}"
+                                                       CornerRadius="10"
+                                                       Padding="12,10"
+                                                       HasShadow="False"
+                                                       VerticalOptions="Center">
+                                                    <Label Text="G"
+                                                           FontFamily="OpenSansSemibold"
+                                                           FontSize="20"
+                                                           TextColor="{StaticResource Brand700}"
+                                                           HorizontalOptions="Center"/>
+                                                </Frame>
+                                                <Label Grid.Row="0" Grid.Column="1"
+                                                       Text="{Binding GinnerName}"
+                                                       FontFamily="OpenSansSemibold"
+                                                       FontSize="16"
+                                                       TextColor="{StaticResource TextPrimary}"/>
+                                                <Label Grid.Row="1" Grid.Column="1"
+                                                       Text="{Binding Contact}"
+                                                       FontSize="12"
+                                                       TextColor="{StaticResource TextSecondary}"/>
+                                                <Label Grid.Row="2" Grid.Column="1"
+                                                       Text="{Binding Station}"
+                                                       FontSize="11"
+                                                       TextColor="{StaticResource TextMuted}"/>
+                                                <Label Grid.RowSpan="3" Grid.Column="2"
+                                                       Text="{Binding GinnerID}"
+                                                       FontFamily="OpenSansSemibold"
+                                                       FontSize="12"
+                                                       TextColor="{StaticResource Brand700}"
+                                                       VerticalOptions="Center"/>
+                                            </Grid>
+                                        </Frame>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                </VerticalStackLayout>
+            </ScrollView>
 
             <!-- ============ DETAIL VIEW (Tabs) ============ -->
             <Grid x:Name="DetailView" IsVisible="False"
-                  RowDefinitions="Auto,Auto,Auto,*"
-                  Padding="20" RowSpacing="10">
+                  RowDefinitions="Auto,Auto,*"
+                  Padding="36,32" RowSpacing="18">
 
                 <!-- Header -->
-                <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
-                    <Button Grid.Column="0" Text="← Back" BackgroundColor="#333333" TextColor="White" CornerRadius="5" Clicked="OnBackClicked"/>
-                    <VerticalStackLayout Grid.Column="1" Padding="15,0,0,0" VerticalOptions="Center">
-                        <Label x:Name="GinnerNameHeader" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                        <Label x:Name="GinnerInfoHeader" FontSize="13" TextColor="#666666"/>
+                <Grid Grid.Row="0" ColumnDefinitions="Auto,*">
+                    <Button Grid.Column="0"
+                            Text="Back"
+                            Style="{StaticResource SecondaryButton}"
+                            Clicked="OnBackClicked"
+                            VerticalOptions="Center"/>
+                    <VerticalStackLayout Grid.Column="1"
+                                         Padding="16,0,0,0"
+                                         VerticalOptions="Center"
+                                         Spacing="2">
+                        <Label Text="GINNER LEDGER" Style="{StaticResource Eyebrow}"/>
+                        <Label x:Name="GinnerNameHeader"
+                               Style="{StaticResource PageTitle}"/>
+                        <Label x:Name="GinnerInfoHeader"
+                               Style="{StaticResource PageSubtitle}"/>
                     </VerticalStackLayout>
                 </Grid>
 
-                <BoxView Grid.Row="1" HeightRequest="2" BackgroundColor="Black"/>
-
                 <!-- Tab Bar -->
-                <HorizontalStackLayout Grid.Row="2" Spacing="5" Margin="0,5,0,5">
-                    <Button x:Name="TabContractsBtn"  Text="Contracts"  BackgroundColor="#98cb00" TextColor="Black" CornerRadius="0" Clicked="OnTabContractsClicked"/>
-                    <Button x:Name="TabDashboardBtn"  Text="Dashboard"  BackgroundColor="#333333" TextColor="White" CornerRadius="0" Clicked="OnTabDashboardClicked"/>
-                    <Button x:Name="TabDeliveriesBtn" Text="Deliveries" BackgroundColor="#333333" TextColor="White" CornerRadius="0" Clicked="OnTabDeliveriesClicked"/>
-                    <Button x:Name="TabPaymentsBtn"   Text="Payments"   BackgroundColor="#333333" TextColor="White" CornerRadius="0" Clicked="OnTabPaymentsClicked"/>
-                </HorizontalStackLayout>
+                <Frame Grid.Row="1"
+                       BackgroundColor="{StaticResource SurfaceBackground}"
+                       BorderColor="{StaticResource BorderSubtle}"
+                       CornerRadius="10"
+                       Padding="6"
+                       HasShadow="False">
+                    <HorizontalStackLayout Spacing="4">
+                        <Button x:Name="TabContractsBtn"  Text="Contracts"  CornerRadius="8" Padding="16,8" BackgroundColor="#8AA800" TextColor="White" Clicked="OnTabContractsClicked"/>
+                        <Button x:Name="TabDashboardBtn"  Text="Dashboard"  CornerRadius="8" Padding="16,8" BackgroundColor="White"   TextColor="#334155" Clicked="OnTabDashboardClicked"/>
+                        <Button x:Name="TabDeliveriesBtn" Text="Deliveries" CornerRadius="8" Padding="16,8" BackgroundColor="White"   TextColor="#334155" Clicked="OnTabDeliveriesClicked"/>
+                        <Button x:Name="TabPaymentsBtn"   Text="Payments"   CornerRadius="8" Padding="16,8" BackgroundColor="White"   TextColor="#334155" Clicked="OnTabPaymentsClicked"/>
+                    </HorizontalStackLayout>
+                </Frame>
 
                 <!-- Tab Content Host -->
-                <Grid Grid.Row="3">
+                <Grid Grid.Row="2">
 
                     <!-- ======== CONTRACTS TAB ======== -->
                     <Grid x:Name="ContractsTab" RowDefinitions="Auto,*,Auto">
-                        <Label Grid.Row="0" Text="Contracts (edit cells, then press Save All)" FontSize="14" TextColor="#555555" Margin="0,0,0,6"/>
-                        <ScrollView Grid.Row="1" Orientation="Both" BackgroundColor="#FAFAFA">
-                            <VerticalStackLayout>
-                                <!-- Header Row -->
-                                <Grid BackgroundColor="#333333" Padding="6" ColumnSpacing="6"
-                                      ColumnDefinitions="140,140,80,110,120,110,120,180,180,220">
-                                    <Label Grid.Column="0" Text="Contract ID"   TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="1" Text="Mill ID"       TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="2" Text="Bales"         TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="3" Text="Price/Maund"   TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="4" Text="Total Amount"  TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="5" Text="Commission %"  TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="6" Text="Date Created"  TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="7" Text="Delivery Notes" TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="8" Text="Payment Notes"  TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="9" Text="Description"    TextColor="White" FontAttributes="Bold"/>
-                                </Grid>
+                        <Label Grid.Row="0"
+                               Text="Edit cells inline and press Save All when you're done."
+                               Style="{StaticResource PageSubtitle}"
+                               Margin="0,0,0,10"/>
+                        <Frame Grid.Row="1" Style="{StaticResource Card}" Padding="0">
+                            <ScrollView Orientation="Both">
+                                <VerticalStackLayout>
+                                    <Grid Style="{StaticResource TableHeaderRow}"
+                                          ColumnDefinitions="140,140,80,110,120,110,120,180,180,220">
+                                        <Label Grid.Column="0" Text="CONTRACT ID"    Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="1" Text="MILL ID"        Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="2" Text="BALES"          Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="3" Text="PRICE/MAUND"    Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="4" Text="TOTAL AMOUNT"   Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="5" Text="COMMISSION %"   Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="6" Text="DATE CREATED"   Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="7" Text="DELIVERY NOTES" Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="8" Text="PAYMENT NOTES"  Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="9" Text="DESCRIPTION"    Style="{StaticResource TableHeaderLabel}"/>
+                                    </Grid>
 
-                                <VerticalStackLayout x:Name="ContractsGrid" Spacing="2">
-                                    <BindableLayout.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Padding="6" ColumnSpacing="6"
-                                                  ColumnDefinitions="140,140,80,110,120,110,120,180,180,220"
-                                                  BackgroundColor="White">
-                                                <Label Grid.Column="0"  Text="{Binding ContractID}" TextColor="Black" VerticalTextAlignment="Center"/>
-                                                <Entry Grid.Column="1"  Text="{Binding MillID, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="2"  Text="{Binding TotalBales, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="3"  Text="{Binding PricePerBatch, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="4"  Text="{Binding TotalAmount, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="5"  Text="{Binding CommissionPercentage, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                                                <DatePicker Grid.Column="6" Date="{Binding DateCreated, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="7"  Text="{Binding DeliveryNotes, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="8"  Text="{Binding PaymentNotes, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="9"  Text="{Binding Description, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
+                                    <VerticalStackLayout x:Name="ContractsGrid" Spacing="1" BackgroundColor="{StaticResource BorderSubtle}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Padding="8,6" ColumnSpacing="8"
+                                                      ColumnDefinitions="140,140,80,110,120,110,120,180,180,220"
+                                                      BackgroundColor="White">
+                                                    <Label Grid.Column="0"  Text="{Binding ContractID}" TextColor="{StaticResource TextPrimary}" VerticalTextAlignment="Center"/>
+                                                    <Entry Grid.Column="1"  Text="{Binding MillID, Mode=TwoWay}"/>
+                                                    <Entry Grid.Column="2"  Text="{Binding TotalBales, Mode=TwoWay}" Keyboard="Numeric"/>
+                                                    <Entry Grid.Column="3"  Text="{Binding PricePerBatch, Mode=TwoWay}" Keyboard="Numeric"/>
+                                                    <Entry Grid.Column="4"  Text="{Binding TotalAmount, Mode=TwoWay}" Keyboard="Numeric"/>
+                                                    <Entry Grid.Column="5"  Text="{Binding CommissionPercentage, Mode=TwoWay}" Keyboard="Numeric"/>
+                                                    <DatePicker Grid.Column="6" Date="{Binding DateCreated, Mode=TwoWay}"/>
+                                                    <Entry Grid.Column="7"  Text="{Binding DeliveryNotes, Mode=TwoWay}"/>
+                                                    <Entry Grid.Column="8"  Text="{Binding PaymentNotes, Mode=TwoWay}"/>
+                                                    <Entry Grid.Column="9"  Text="{Binding Description, Mode=TwoWay}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+
+                                    <Label x:Name="ContractsEmptyLabel"
+                                           Text="No contracts found for this ginner."
+                                           Style="{StaticResource Caption}"
+                                           Padding="24"
+                                           IsVisible="False"/>
                                 </VerticalStackLayout>
-
-                                <Label x:Name="ContractsEmptyLabel" Text="No contracts found for this ginner." TextColor="#888888" Padding="20" IsVisible="False"/>
-                            </VerticalStackLayout>
-                        </ScrollView>
-                        <HorizontalStackLayout Grid.Row="2" Spacing="10" Margin="0,10,0,0">
-                            <Button Text="Save All Contracts" Clicked="OnSaveContractsClicked" BackgroundColor="#98cb00" TextColor="White" CornerRadius="5"/>
-                            <Button Text="Reload" Clicked="OnReloadClicked" BackgroundColor="#555555" TextColor="White" CornerRadius="5"/>
+                            </ScrollView>
+                        </Frame>
+                        <HorizontalStackLayout Grid.Row="2" Spacing="10" Margin="0,14,0,0" HorizontalOptions="End">
+                            <Button Text="Reload"             Style="{StaticResource SecondaryButton}" Clicked="OnReloadClicked"/>
+                            <Button Text="Save all contracts" Style="{StaticResource PrimaryButton}"   Clicked="OnSaveContractsClicked"/>
                         </HorizontalStackLayout>
                     </Grid>
 
                     <!-- ======== DASHBOARD TAB ======== -->
                     <ScrollView x:Name="DashboardTab" IsVisible="False">
-                        <VerticalStackLayout Spacing="15" Padding="0,10,0,10">
-                            <Label Text="Cumulative KPIs for this Ginner" FontSize="18" FontAttributes="Bold" TextColor="Black"/>
-                            <Grid ColumnDefinitions="*,*" RowSpacing="12" ColumnSpacing="12"
-                                  RowDefinitions="Auto,Auto,Auto,Auto">
+                        <VerticalStackLayout Spacing="18" Padding="0">
+                            <Label Text="Cumulative KPIs for this ginner" Style="{StaticResource SectionTitle}"/>
 
-                                <Frame Grid.Row="0" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
-                                    <VerticalStackLayout>
-                                        <Label Text="Total Contracts" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
-                                        <Label x:Name="KpiContractsLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
-                                    </VerticalStackLayout>
-                                </Frame>
-                                <Frame Grid.Row="0" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
-                                    <VerticalStackLayout>
-                                        <Label Text="Total Bales" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
-                                        <Label x:Name="KpiBalesLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
-                                    </VerticalStackLayout>
-                                </Frame>
+                            <Grid ColumnDefinitions="*,*,*,*"
+                                  RowSpacing="14" ColumnSpacing="14"
+                                  RowDefinitions="Auto,Auto">
 
-                                <Frame Grid.Row="1" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
-                                    <VerticalStackLayout>
-                                        <Label Text="Total Deal Amount" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
-                                        <Label x:Name="KpiDealAmountLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                <Frame Grid.Row="0" Grid.Column="0" Style="{StaticResource StatCard}">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="TOTAL CONTRACTS" Style="{StaticResource Eyebrow}"/>
+                                        <Label x:Name="KpiContractsLabel" FontFamily="OpenSansSemibold" FontSize="22" TextColor="{StaticResource TextPrimary}"/>
                                     </VerticalStackLayout>
                                 </Frame>
-                                <Frame Grid.Row="1" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
-                                    <VerticalStackLayout>
-                                        <Label Text="Total Commission" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
-                                        <Label x:Name="KpiCommissionLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                <Frame Grid.Row="0" Grid.Column="1" Style="{StaticResource StatCard}">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="TOTAL BALES" Style="{StaticResource Eyebrow}"/>
+                                        <Label x:Name="KpiBalesLabel" FontFamily="OpenSansSemibold" FontSize="22" TextColor="{StaticResource TextPrimary}"/>
                                     </VerticalStackLayout>
                                 </Frame>
-
-                                <Frame Grid.Row="2" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
-                                    <VerticalStackLayout>
-                                        <Label Text="Payments Made" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
-                                        <Label x:Name="KpiPaidLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                <Frame Grid.Row="0" Grid.Column="2" Style="{StaticResource StatCard}">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="TOTAL DEAL AMOUNT" Style="{StaticResource Eyebrow}"/>
+                                        <Label x:Name="KpiDealAmountLabel" FontFamily="OpenSansSemibold" FontSize="22" TextColor="{StaticResource TextPrimary}"/>
                                     </VerticalStackLayout>
                                 </Frame>
-                                <Frame Grid.Row="2" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
-                                    <VerticalStackLayout>
-                                        <Label Text="Payments Due" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
-                                        <Label x:Name="KpiDueLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                <Frame Grid.Row="0" Grid.Column="3" Style="{StaticResource StatCard}">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="TOTAL COMMISSION" Style="{StaticResource Eyebrow}"/>
+                                        <Label x:Name="KpiCommissionLabel" FontFamily="OpenSansSemibold" FontSize="22" TextColor="{StaticResource Brand600}"/>
                                     </VerticalStackLayout>
                                 </Frame>
 
-                                <Frame Grid.Row="3" Grid.Column="0" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
-                                    <VerticalStackLayout>
-                                        <Label Text="Total Deliveries" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
-                                        <Label x:Name="KpiDeliveriesLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                <Frame Grid.Row="1" Grid.Column="0" Style="{StaticResource StatCard}">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="PAYMENTS MADE" Style="{StaticResource Eyebrow}"/>
+                                        <Label x:Name="KpiPaidLabel" FontFamily="OpenSansSemibold" FontSize="22" TextColor="{StaticResource Success}"/>
                                     </VerticalStackLayout>
                                 </Frame>
-                                <Frame Grid.Row="3" Grid.Column="1" BackgroundColor="#FAFAFA" BorderColor="#EAEAEA" CornerRadius="8" Padding="15">
-                                    <VerticalStackLayout>
-                                        <Label Text="Avg. Commission Rate" FontSize="15" FontAttributes="Bold" TextColor="Black"/>
-                                        <Label x:Name="KpiAvgCommissionLabel" FontSize="22" FontAttributes="Bold" TextColor="#4B5563"/>
+                                <Frame Grid.Row="1" Grid.Column="1" Style="{StaticResource StatCard}">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="PAYMENTS DUE" Style="{StaticResource Eyebrow}"/>
+                                        <Label x:Name="KpiDueLabel" FontFamily="OpenSansSemibold" FontSize="22" TextColor="{StaticResource Warning}"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                                <Frame Grid.Row="1" Grid.Column="2" Style="{StaticResource StatCard}">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="TOTAL DELIVERIES" Style="{StaticResource Eyebrow}"/>
+                                        <Label x:Name="KpiDeliveriesLabel" FontFamily="OpenSansSemibold" FontSize="22" TextColor="{StaticResource TextPrimary}"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                                <Frame Grid.Row="1" Grid.Column="3" Style="{StaticResource StatCard}">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="AVG. COMMISSION" Style="{StaticResource Eyebrow}"/>
+                                        <Label x:Name="KpiAvgCommissionLabel" FontFamily="OpenSansSemibold" FontSize="22" TextColor="{StaticResource Brand600}"/>
                                     </VerticalStackLayout>
                                 </Frame>
                             </Grid>
@@ -216,93 +302,111 @@
 
                     <!-- ======== DELIVERIES TAB ======== -->
                     <Grid x:Name="DeliveriesTab" IsVisible="False" RowDefinitions="Auto,*,Auto">
-                        <Label Grid.Row="0" Text="Deliveries for this ginner's contracts (edit cells, then press Save All)" FontSize="14" TextColor="#555555" Margin="0,0,0,6"/>
-                        <ScrollView Grid.Row="1" Orientation="Both" BackgroundColor="#FAFAFA">
-                            <VerticalStackLayout>
-                                <Grid BackgroundColor="#333333" Padding="6" ColumnSpacing="6"
-                                      ColumnDefinitions="140,140,110,80,110,110,140,160,130,130">
-                                    <Label Grid.Column="0" Text="Delivery ID"    TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="1" Text="Contract ID"    TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="2" Text="Amount"         TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="3" Text="Bales"          TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="4" Text="Factory Wt"     TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="5" Text="Mill Wt"        TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="6" Text="Truck #"        TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="7" Text="Driver Contact" TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="8" Text="Departure"      TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="9" Text="Delivered"      TextColor="White" FontAttributes="Bold"/>
-                                </Grid>
+                        <Label Grid.Row="0"
+                               Text="Deliveries for this ginner's contracts (edit cells, then press Save All)."
+                               Style="{StaticResource PageSubtitle}"
+                               Margin="0,0,0,10"/>
+                        <Frame Grid.Row="1" Style="{StaticResource Card}" Padding="0">
+                            <ScrollView Orientation="Both">
+                                <VerticalStackLayout>
+                                    <Grid Style="{StaticResource TableHeaderRow}"
+                                          ColumnDefinitions="140,140,110,80,110,110,140,160,130,130">
+                                        <Label Grid.Column="0" Text="DELIVERY ID"    Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="1" Text="CONTRACT ID"    Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="2" Text="AMOUNT"         Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="3" Text="BALES"          Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="4" Text="FACTORY WT"     Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="5" Text="MILL WT"        Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="6" Text="TRUCK #"        Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="7" Text="DRIVER CONTACT" Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="8" Text="DEPARTURE"      Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="9" Text="DELIVERED"      Style="{StaticResource TableHeaderLabel}"/>
+                                    </Grid>
 
-                                <VerticalStackLayout x:Name="DeliveriesGrid" Spacing="2">
-                                    <BindableLayout.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Padding="6" ColumnSpacing="6"
-                                                  ColumnDefinitions="140,140,110,80,110,110,140,160,130,130"
-                                                  BackgroundColor="White">
-                                                <Label Grid.Column="0" Text="{Binding DeliveryID}" TextColor="Black" VerticalTextAlignment="Center"/>
-                                                <Label Grid.Column="1" Text="{Binding ContractID}" TextColor="Black" VerticalTextAlignment="Center"/>
-                                                <Entry Grid.Column="2" Text="{Binding Amount, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="3" Text="{Binding TotalBales, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="4" Text="{Binding FactoryWeight, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="5" Text="{Binding MillWeight, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="6" Text="{Binding TruckNumber, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="7" Text="{Binding DriverContact, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
-                                                <DatePicker Grid.Column="8" Date="{Binding DepartureDate, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
-                                                <DatePicker Grid.Column="9" Date="{Binding DeliveryDate, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
+                                    <VerticalStackLayout x:Name="DeliveriesGrid" Spacing="1" BackgroundColor="{StaticResource BorderSubtle}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Padding="8,6" ColumnSpacing="8"
+                                                      ColumnDefinitions="140,140,110,80,110,110,140,160,130,130"
+                                                      BackgroundColor="White">
+                                                    <Label Grid.Column="0" Text="{Binding DeliveryID}" TextColor="{StaticResource TextPrimary}" VerticalTextAlignment="Center"/>
+                                                    <Label Grid.Column="1" Text="{Binding ContractID}" TextColor="{StaticResource TextSecondary}" VerticalTextAlignment="Center"/>
+                                                    <Entry Grid.Column="2" Text="{Binding Amount, Mode=TwoWay}" Keyboard="Numeric"/>
+                                                    <Entry Grid.Column="3" Text="{Binding TotalBales, Mode=TwoWay}" Keyboard="Numeric"/>
+                                                    <Entry Grid.Column="4" Text="{Binding FactoryWeight, Mode=TwoWay}" Keyboard="Numeric"/>
+                                                    <Entry Grid.Column="5" Text="{Binding MillWeight, Mode=TwoWay}" Keyboard="Numeric"/>
+                                                    <Entry Grid.Column="6" Text="{Binding TruckNumber, Mode=TwoWay}"/>
+                                                    <Entry Grid.Column="7" Text="{Binding DriverContact, Mode=TwoWay}"/>
+                                                    <DatePicker Grid.Column="8" Date="{Binding DepartureDate, Mode=TwoWay}"/>
+                                                    <DatePicker Grid.Column="9" Date="{Binding DeliveryDate, Mode=TwoWay}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+
+                                    <Label x:Name="DeliveriesEmptyLabel"
+                                           Text="No deliveries found for this ginner."
+                                           Style="{StaticResource Caption}"
+                                           Padding="24"
+                                           IsVisible="False"/>
                                 </VerticalStackLayout>
-
-                                <Label x:Name="DeliveriesEmptyLabel" Text="No deliveries found for this ginner." TextColor="#888888" Padding="20" IsVisible="False"/>
-                            </VerticalStackLayout>
-                        </ScrollView>
-                        <HorizontalStackLayout Grid.Row="2" Spacing="10" Margin="0,10,0,0">
-                            <Button Text="Save All Deliveries" Clicked="OnSaveDeliveriesClicked" BackgroundColor="#98cb00" TextColor="White" CornerRadius="5"/>
-                            <Button Text="Reload" Clicked="OnReloadClicked" BackgroundColor="#555555" TextColor="White" CornerRadius="5"/>
+                            </ScrollView>
+                        </Frame>
+                        <HorizontalStackLayout Grid.Row="2" Spacing="10" Margin="0,14,0,0" HorizontalOptions="End">
+                            <Button Text="Reload"              Style="{StaticResource SecondaryButton}" Clicked="OnReloadClicked"/>
+                            <Button Text="Save all deliveries" Style="{StaticResource PrimaryButton}"   Clicked="OnSaveDeliveriesClicked"/>
                         </HorizontalStackLayout>
                     </Grid>
 
                     <!-- ======== PAYMENTS TAB ======== -->
                     <Grid x:Name="PaymentsTab" IsVisible="False" RowDefinitions="Auto,*,Auto">
-                        <Label Grid.Row="0" Text="Payments for this ginner's contracts (edit cells, then press Save All)" FontSize="14" TextColor="#555555" Margin="0,0,0,6"/>
-                        <ScrollView Grid.Row="1" Orientation="Both" BackgroundColor="#FAFAFA">
-                            <VerticalStackLayout>
-                                <Grid BackgroundColor="#333333" Padding="6" ColumnSpacing="6"
-                                      ColumnDefinitions="140,140,130,130,80,130,160">
-                                    <Label Grid.Column="0" Text="Payment ID"     TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="1" Text="Contract ID"    TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="2" Text="Total Amount"   TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="3" Text="Amount Paid"    TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="4" Text="Bales"          TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="5" Text="Date"           TextColor="White" FontAttributes="Bold"/>
-                                    <Label Grid.Column="6" Text="Transaction ID" TextColor="White" FontAttributes="Bold"/>
-                                </Grid>
+                        <Label Grid.Row="0"
+                               Text="Payments for this ginner's contracts (edit cells, then press Save All)."
+                               Style="{StaticResource PageSubtitle}"
+                               Margin="0,0,0,10"/>
+                        <Frame Grid.Row="1" Style="{StaticResource Card}" Padding="0">
+                            <ScrollView Orientation="Both">
+                                <VerticalStackLayout>
+                                    <Grid Style="{StaticResource TableHeaderRow}"
+                                          ColumnDefinitions="140,140,130,130,80,130,160">
+                                        <Label Grid.Column="0" Text="PAYMENT ID"     Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="1" Text="CONTRACT ID"    Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="2" Text="TOTAL AMOUNT"   Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="3" Text="AMOUNT PAID"    Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="4" Text="BALES"          Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="5" Text="DATE"           Style="{StaticResource TableHeaderLabel}"/>
+                                        <Label Grid.Column="6" Text="TRANSACTION ID" Style="{StaticResource TableHeaderLabel}"/>
+                                    </Grid>
 
-                                <VerticalStackLayout x:Name="PaymentsGrid" Spacing="2">
-                                    <BindableLayout.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Padding="6" ColumnSpacing="6"
-                                                  ColumnDefinitions="140,140,130,130,80,130,160"
-                                                  BackgroundColor="White">
-                                                <Label Grid.Column="0" Text="{Binding PaymentID}" TextColor="Black" VerticalTextAlignment="Center"/>
-                                                <Label Grid.Column="1" Text="{Binding ContractID}" TextColor="Black" VerticalTextAlignment="Center"/>
-                                                <Entry Grid.Column="2" Text="{Binding TotalAmount, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="3" Text="{Binding AmountPaid, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="4" Text="{Binding TotalBales, Mode=TwoWay}" Keyboard="Numeric" BackgroundColor="White" TextColor="Black"/>
-                                                <DatePicker Grid.Column="5" Date="{Binding Date, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
-                                                <Entry Grid.Column="6" Text="{Binding TransactionID, Mode=TwoWay}" BackgroundColor="White" TextColor="Black"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
+                                    <VerticalStackLayout x:Name="PaymentsGrid" Spacing="1" BackgroundColor="{StaticResource BorderSubtle}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Padding="8,6" ColumnSpacing="8"
+                                                      ColumnDefinitions="140,140,130,130,80,130,160"
+                                                      BackgroundColor="White">
+                                                    <Label Grid.Column="0" Text="{Binding PaymentID}" TextColor="{StaticResource TextPrimary}" VerticalTextAlignment="Center"/>
+                                                    <Label Grid.Column="1" Text="{Binding ContractID}" TextColor="{StaticResource TextSecondary}" VerticalTextAlignment="Center"/>
+                                                    <Entry Grid.Column="2" Text="{Binding TotalAmount, Mode=TwoWay}" Keyboard="Numeric"/>
+                                                    <Entry Grid.Column="3" Text="{Binding AmountPaid, Mode=TwoWay}" Keyboard="Numeric"/>
+                                                    <Entry Grid.Column="4" Text="{Binding TotalBales, Mode=TwoWay}" Keyboard="Numeric"/>
+                                                    <DatePicker Grid.Column="5" Date="{Binding Date, Mode=TwoWay}"/>
+                                                    <Entry Grid.Column="6" Text="{Binding TransactionID, Mode=TwoWay}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+
+                                    <Label x:Name="PaymentsEmptyLabel"
+                                           Text="No payments found for this ginner."
+                                           Style="{StaticResource Caption}"
+                                           Padding="24"
+                                           IsVisible="False"/>
                                 </VerticalStackLayout>
-
-                                <Label x:Name="PaymentsEmptyLabel" Text="No payments found for this ginner." TextColor="#888888" Padding="20" IsVisible="False"/>
-                            </VerticalStackLayout>
-                        </ScrollView>
-                        <HorizontalStackLayout Grid.Row="2" Spacing="10" Margin="0,10,0,0">
-                            <Button Text="Save All Payments" Clicked="OnSavePaymentsClicked" BackgroundColor="#98cb00" TextColor="White" CornerRadius="5"/>
-                            <Button Text="Reload" Clicked="OnReloadClicked" BackgroundColor="#555555" TextColor="White" CornerRadius="5"/>
+                            </ScrollView>
+                        </Frame>
+                        <HorizontalStackLayout Grid.Row="2" Spacing="10" Margin="0,14,0,0" HorizontalOptions="End">
+                            <Button Text="Reload"            Style="{StaticResource SecondaryButton}" Clicked="OnReloadClicked"/>
+                            <Button Text="Save all payments" Style="{StaticResource PrimaryButton}"   Clicked="OnSavePaymentsClicked"/>
                         </HorizontalStackLayout>
                     </Grid>
 

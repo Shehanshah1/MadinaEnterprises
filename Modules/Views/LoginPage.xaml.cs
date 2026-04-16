@@ -24,15 +24,14 @@ public partial class LoginPage : ContentPage
     private async void OnLoginButtonClicked(object sender, EventArgs e)
     {
         loginButton.IsEnabled = false;
-        errorMessageLabel.IsVisible = false;
+        HideError();
 
         var username = emailEntry.Text?.Trim() ?? string.Empty;
         var password = passwordEntry.Text ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
-            errorMessageLabel.Text = "Enter username and password.";
-            errorMessageLabel.IsVisible = true;
+            ShowError("Enter username and password.");
             loginButton.IsEnabled = true;
             return;
         }
@@ -42,13 +41,25 @@ public partial class LoginPage : ContentPage
 
         if (!usernameMatches || !passwordMatches)
         {
-            errorMessageLabel.Text = "Invalid login credentials.";
-            errorMessageLabel.IsVisible = true;
+            ShowError("Invalid login credentials.");
             loginButton.IsEnabled = true;
             return;
         }
 
         await App.NavigateToPage(new DashboardPage());
         loginButton.IsEnabled = true;
+    }
+
+    private void ShowError(string message)
+    {
+        errorMessageLabel.Text = message;
+        errorMessageLabel.IsVisible = true;
+        errorFrame.IsVisible = true;
+    }
+
+    private void HideError()
+    {
+        errorMessageLabel.IsVisible = false;
+        errorFrame.IsVisible = false;
     }
 }
