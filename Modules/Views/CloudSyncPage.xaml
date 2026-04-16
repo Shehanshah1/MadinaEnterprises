@@ -3,55 +3,106 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MadinaEnterprises.Modules.Views.CloudSyncPage"
              Title="Cloud Sync"
-             BackgroundColor="#242424">
+             BackgroundColor="{StaticResource PageBackground}"
+             NavigationPage.HasNavigationBar="False">
 
     <ScrollView>
-        <VerticalStackLayout Padding="30" Spacing="18" MaximumWidthRequest="800">
+        <VerticalStackLayout Padding="36,32"
+                             Spacing="24"
+                             HorizontalOptions="Center"
+                             MaximumWidthRequest="820">
 
-            <Label Text="Cloud Sync (Supabase)"
-                   FontSize="Header" FontAttributes="Bold" TextColor="White"/>
+            <!-- Header -->
+            <Grid ColumnDefinitions="Auto,*,Auto" VerticalOptions="Center">
+                <Button Grid.Column="0"
+                        Text="Back"
+                        Style="{StaticResource GhostButton}"
+                        Clicked="OnBackClicked"/>
+                <VerticalStackLayout Grid.Column="1"
+                                     Spacing="4"
+                                     Margin="8,0,0,0"
+                                     VerticalOptions="Center">
+                    <Label Text="SYSTEM" Style="{StaticResource Eyebrow}"/>
+                    <Label Text="Cloud sync" Style="{StaticResource PageTitle}"/>
+                </VerticalStackLayout>
+            </Grid>
 
-            <BoxView HeightRequest="2" BackgroundColor="#98cb00" Opacity="0.9"/>
+            <Label Style="{StaticResource PageSubtitle}"
+                   Text="Data is stored locally in SQLite and synced to Supabase so it survives reinstalls and is shared across devices. Writes are pushed automatically; the app pulls from the cloud on startup and when you resume."/>
 
-            <Label TextColor="#D1D5DB" FontSize="13"
-                   Text="Data is stored locally in SQLite and synced to Supabase so it survives reinstalls and is shared across devices. Writes are pushed automatically; the app pulls from the cloud on startup and when you hit Resume."/>
-
-            <Frame BackgroundColor="#1F2937" BorderColor="#374151" HasShadow="False" CornerRadius="10" Padding="18">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Status" FontAttributes="Bold" TextColor="White" FontSize="16"/>
-                    <Label x:Name="StatusLabel" TextColor="#D1D5DB" FontSize="14"/>
-                    <Label x:Name="LastSyncLabel" TextColor="#9CA3AF" FontSize="12"/>
-                    <Label x:Name="LastErrorLabel" TextColor="#F87171" FontSize="12" IsVisible="False"/>
+            <!-- Status card -->
+            <Frame Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                        <BoxView WidthRequest="8" HeightRequest="8"
+                                 CornerRadius="4"
+                                 BackgroundColor="{StaticResource Success}"
+                                 VerticalOptions="Center"/>
+                        <Label Text="Status" Style="{StaticResource SectionTitle}"/>
+                    </HorizontalStackLayout>
+                    <Label x:Name="StatusLabel"
+                           TextColor="{StaticResource TextPrimary}"
+                           FontSize="14"/>
+                    <Label x:Name="LastSyncLabel"
+                           Style="{StaticResource Caption}"/>
+                    <Frame x:Name="LastErrorFrame"
+                           IsVisible="False"
+                           BackgroundColor="{StaticResource DangerBg}"
+                           BorderColor="#FCA5A5"
+                           CornerRadius="8"
+                           Padding="12,10"
+                           HasShadow="False">
+                        <Label x:Name="LastErrorLabel"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="13"/>
+                    </Frame>
                 </VerticalStackLayout>
             </Frame>
 
-            <Frame BackgroundColor="#1F2937" BorderColor="#374151" HasShadow="False" CornerRadius="10" Padding="18">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Credentials" FontAttributes="Bold" TextColor="White" FontSize="16"/>
+            <!-- Credentials card -->
+            <Frame Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="14">
+                    <Label Text="Supabase credentials" Style="{StaticResource SectionTitle}"/>
+                    <Label Text="Paste the project URL and the anon API key from your Supabase project settings."
+                           Style="{StaticResource PageSubtitle}"/>
 
-                    <Label Text="Supabase Project URL" TextColor="#D1D5DB" FontSize="13"/>
-                    <Entry x:Name="UrlEntry" Placeholder="https://xxxx.supabase.co"
-                           BackgroundColor="#111827" TextColor="White" PlaceholderColor="#6B7280"/>
+                    <VerticalStackLayout Spacing="6" Margin="0,4,0,0">
+                        <Label Text="Project URL" Style="{StaticResource FormLabel}"/>
+                        <Entry x:Name="UrlEntry" Placeholder="https://xxxx.supabase.co"/>
+                    </VerticalStackLayout>
 
-                    <Label Text="Anon API Key" TextColor="#D1D5DB" FontSize="13"/>
-                    <Entry x:Name="AnonKeyEntry" Placeholder="eyJhbGciOi..."
-                           BackgroundColor="#111827" TextColor="White" PlaceholderColor="#6B7280"/>
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Anon API key" Style="{StaticResource FormLabel}"/>
+                        <Entry x:Name="AnonKeyEntry" Placeholder="eyJhbGciOi..."/>
+                    </VerticalStackLayout>
 
-                    <Button x:Name="SaveButton" Text="Save Credentials"
-                            BackgroundColor="#98cb00" TextColor="Black"
+                    <Button x:Name="SaveButton"
+                            Text="Save credentials"
+                            Style="{StaticResource PrimaryButton}"
+                            HorizontalOptions="Start"
                             Clicked="OnSaveClicked"/>
                 </VerticalStackLayout>
             </Frame>
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                <Button Grid.Column="0" x:Name="PullButton" Text="Pull from Cloud"
-                        BackgroundColor="Black" TextColor="White" Clicked="OnPullClicked"/>
-                <Button Grid.Column="1" x:Name="PushButton" Text="Push to Cloud"
-                        BackgroundColor="Black" TextColor="White" Clicked="OnPushClicked"/>
-            </Grid>
+            <!-- Sync actions card -->
+            <Frame Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="14">
+                    <Label Text="Sync actions" Style="{StaticResource SectionTitle}"/>
+                    <Label Text="Manually trigger a cloud pull or push any time."
+                           Style="{StaticResource PageSubtitle}"/>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,4,0,0">
+                        <Button Grid.Column="0" x:Name="PullButton"
+                                Text="Pull from cloud"
+                                Style="{StaticResource SecondaryButton}"
+                                Clicked="OnPullClicked"/>
+                        <Button Grid.Column="1" x:Name="PushButton"
+                                Text="Push to cloud"
+                                Style="{StaticResource PrimaryButton}"
+                                Clicked="OnPushClicked"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
 
-            <Button Text="Back" BackgroundColor="#374151" TextColor="White"
-                    Clicked="OnBackClicked"/>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

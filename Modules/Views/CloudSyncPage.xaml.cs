@@ -20,12 +20,12 @@ public partial class CloudSyncPage : ContentPage
         if (_db.Cloud.IsEnabled)
         {
             StatusLabel.Text = "Connected — auto-sync enabled.";
-            StatusLabel.TextColor = Color.FromArgb("#98cb00");
+            StatusLabel.TextColor = Color.FromArgb("#16A34A");
         }
         else
         {
             StatusLabel.Text = "Not configured. Save Supabase credentials below, then Pull from Cloud.";
-            StatusLabel.TextColor = Color.FromArgb("#FBBF24");
+            StatusLabel.TextColor = Color.FromArgb("#D97706");
         }
 
         LastSyncLabel.Text = _db.Cloud.LastSyncedAt.HasValue
@@ -35,11 +35,11 @@ public partial class CloudSyncPage : ContentPage
         if (!string.IsNullOrWhiteSpace(_db.Cloud.LastError))
         {
             LastErrorLabel.Text = _db.Cloud.LastError;
-            LastErrorLabel.IsVisible = true;
+            LastErrorFrame.IsVisible = true;
         }
         else
         {
-            LastErrorLabel.IsVisible = false;
+            LastErrorFrame.IsVisible = false;
         }
     }
 

@@ -2,148 +2,195 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MadinaEnterprises.Modules.Views.LoginPage"
-             BackgroundColor="#F4F4F4"
+             BackgroundColor="{StaticResource PageBackground}"
+             NavigationPage.HasNavigationBar="False"
              MinimumHeightRequest="700"
              MinimumWidthRequest="1000">
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="0" Padding="0">
+    <Grid>
+        <!-- Soft brand accent strip at top -->
+        <BoxView VerticalOptions="Start"
+                 HeightRequest="6"
+                 BackgroundColor="{StaticResource Brand400}"/>
 
-            <!-- Header (brand lime + dark text to match logo) -->
-            <Grid BackgroundColor="#A4C400" HeightRequest="96">
-                <Label Text="MADINA ENTERPRISES"
-                       FontAttributes="Bold"
-                       FontSize="52"
-                       TextColor="#333333"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center"/>
-            </Grid>
+        <ScrollView>
+            <Grid Padding="40,60"
+                  RowDefinitions="Auto,*,Auto"
+                  HorizontalOptions="Center"
+                  MaximumWidthRequest="1040">
 
-            <!-- Error Message -->
-            <Label x:Name="errorMessageLabel"
-                   TextColor="#DC2626"
-                   FontAttributes="Bold"
-                   FontSize="14"
-                   IsVisible="False"
-                   HorizontalOptions="Center"
-                   Margin="0,14,0,4"/>
-
-            <!-- Login Card -->
-            <Frame Margin="36,26"
-                   Padding="0"
-                   BackgroundColor="White"
-                   HasShadow="True"
-                   CornerRadius="18"
-                   HorizontalOptions="Center"
-                   WidthRequest="880">
-
-                <!-- Two columns: logo | divider | fields -->
-                <Grid ColumnDefinitions="Auto,24,*"
-                      VerticalOptions="Center"
-                      Padding="26">
-
-                    <!-- Logo -->
-                    <VerticalStackLayout Grid.Column="0"
-                                         Spacing="12"
-                                         HorizontalOptions="Center"
-                                         VerticalOptions="Center"
-                                         Padding="4,0,16,0">
-                        <Frame BackgroundColor="#F7F9FC"
-                               BorderColor="#E7E7E7"
-                               CornerRadius="14"
-                               Padding="14"
-                               HasShadow="False">
-                            <Image Source="madina_logo.png"
-                                   HeightRequest="180"
-                                   WidthRequest="180"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center"
-                                   Aspect="AspectFit"/>
-                        </Frame>
-                        <Label Text="Trusted Cotton Trading"
-                               FontSize="14"
-                               TextColor="#6B7280"
-                               HorizontalTextAlignment="Center"/>
-                    </VerticalStackLayout>
-
-                    <!-- Divider -->
-                    <BoxView Grid.Column="1"
-                             WidthRequest="1"
-                             BackgroundColor="#DDDDDD"
-                             HeightRequest="280"
-                             VerticalOptions="Center"
-                             Opacity="0.8"/>
-
-                    <!-- Fields -->
-                    <VerticalStackLayout Grid.Column="2"
-                                         Spacing="14"
-                                         VerticalOptions="Center"
-                                         Padding="14,0,0,0"
-                                         MinimumWidthRequest="340">
-
-                        <Label Text="Welcome back"
-                               FontAttributes="Bold"
-                               FontSize="30"
-                               TextColor="#333333"/>
-
-                        <Label Text="Sign in with your admin credentials"
+                <!-- Brand row -->
+                <Grid Grid.Row="0"
+                      ColumnDefinitions="Auto,*"
+                      ColumnSpacing="14"
+                      Margin="0,0,0,32">
+                    <Frame Grid.Column="0"
+                           BackgroundColor="{StaticResource Brand50}"
+                           BorderColor="{StaticResource Brand200}"
+                           CornerRadius="12"
+                           Padding="10"
+                           HasShadow="False"
+                           HeightRequest="56"
+                           WidthRequest="56">
+                        <Image Source="madina_logo.png"
+                               Aspect="AspectFit"/>
+                    </Frame>
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                        <Label Text="MADINA ENTERPRISES"
+                               FontFamily="OpenSansSemibold"
                                FontSize="16"
-                               TextColor="#666666"/>
-
-                        <!-- Email -->
-                        <VerticalStackLayout Spacing="6" Margin="0,8,0,0">
-                            <Label Text="Username"
-                                   TextColor="#5B6E00"
-                                   FontAttributes="Bold"/>
-                            <Entry x:Name="emailEntry"
-                                   Placeholder="Enter your username"
-                                   BackgroundColor="#F6F8FA"
-                                   TextColor="#333333"
-                                   PlaceholderColor="#9CA3AF"
-                                   HeightRequest="50"/>
-                        </VerticalStackLayout>
-
-                        <!-- Password + Show/Hide -->
-                        <VerticalStackLayout Spacing="6">
-                            <Label Text="Password"
-                                   TextColor="#5B6E00"
-                                   FontAttributes="Bold"/>
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                                <Entry x:Name="passwordEntry"
-                                       Placeholder="Enter your password"
-                                       IsPassword="True"
-                                       BackgroundColor="#F6F8FA"
-                                       TextColor="#333333"
-                                       PlaceholderColor="#9CA3AF"
-                                       HeightRequest="50"
-                                       Grid.Column="0"/>
-                                <Button x:Name="showHidePasswordButton"
-                                        Text="Show"
-                                        BackgroundColor="#A4C400"
-                                        TextColor="White"
-                                        FontAttributes="Bold"
-                                        CornerRadius="10"
-                                        Padding="14,8"
-                                        HeightRequest="50"
-                                        Clicked="showHidePasswordButton_Clicked"
-                                        Grid.Column="1"/>
-                            </Grid>
-                        </VerticalStackLayout>
-
-                        <!-- Login -->
-                        <Button x:Name="loginButton"
-                                Text="Login"
-                                BackgroundColor="#A4C400"
-                                TextColor="White"
-                                FontAttributes="Bold"
-                                FontSize="17"
-                                CornerRadius="12"
-                                HeightRequest="52"
-                                Margin="0,8,0,0"
-                                Clicked="OnLoginButtonClicked"/>
+                               CharacterSpacing="4"
+                               TextColor="{StaticResource TextPrimary}"/>
+                        <Label Text="Trusted Cotton Trading Platform"
+                               Style="{StaticResource Caption}"/>
                     </VerticalStackLayout>
                 </Grid>
-            </Frame>
-        </VerticalStackLayout>
-    </ScrollView>
+
+                <!-- Login card -->
+                <Frame Grid.Row="1"
+                       Style="{StaticResource Card}"
+                       Padding="0"
+                       HorizontalOptions="Center"
+                       WidthRequest="920">
+
+                    <Grid ColumnDefinitions="1.05*,1*" RowDefinitions="*">
+
+                        <!-- Left: brand panel -->
+                        <Grid Grid.Column="0"
+                              BackgroundColor="{StaticResource Neutral900}"
+                              Padding="40,48">
+                            <BoxView BackgroundColor="{StaticResource Brand400}"
+                                     HorizontalOptions="Start"
+                                     VerticalOptions="Start"
+                                     HeightRequest="64"
+                                     WidthRequest="4"
+                                     Margin="0,8,0,0"/>
+
+                            <VerticalStackLayout Spacing="20"
+                                                 VerticalOptions="Center"
+                                                 Margin="16,0,0,0">
+                                <Label Text="Welcome back."
+                                       FontFamily="OpenSansSemibold"
+                                       FontSize="34"
+                                       TextColor="#FFFFFF"/>
+                                <Label Text="Manage ginners, contracts, deliveries and payments from one clean workspace."
+                                       FontSize="15"
+                                       TextColor="#CBD5E1"
+                                       LineHeight="1.4"/>
+
+                                <VerticalStackLayout Spacing="10" Margin="0,24,0,0">
+                                    <HorizontalStackLayout Spacing="10">
+                                        <BoxView BackgroundColor="{StaticResource Brand400}"
+                                                 WidthRequest="6" HeightRequest="6"
+                                                 VerticalOptions="Center"/>
+                                        <Label Text="Unified ginner ledger &amp; dashboards"
+                                               TextColor="#E2E8F0" FontSize="13"/>
+                                    </HorizontalStackLayout>
+                                    <HorizontalStackLayout Spacing="10">
+                                        <BoxView BackgroundColor="{StaticResource Brand400}"
+                                                 WidthRequest="6" HeightRequest="6"
+                                                 VerticalOptions="Center"/>
+                                        <Label Text="Cloud-synced records across devices"
+                                               TextColor="#E2E8F0" FontSize="13"/>
+                                    </HorizontalStackLayout>
+                                    <HorizontalStackLayout Spacing="10">
+                                        <BoxView BackgroundColor="{StaticResource Brand400}"
+                                                 WidthRequest="6" HeightRequest="6"
+                                                 VerticalOptions="Center"/>
+                                        <Label Text="Export to DOCX and Excel in one click"
+                                               TextColor="#E2E8F0" FontSize="13"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <!-- Right: form -->
+                        <VerticalStackLayout Grid.Column="1"
+                                             Padding="44,48"
+                                             Spacing="18"
+                                             VerticalOptions="Center">
+
+                            <Label Text="SIGN IN" Style="{StaticResource Eyebrow}"/>
+                            <Label Text="Access your workspace"
+                                   Style="{StaticResource PageTitle}"/>
+                            <Label Text="Enter your admin credentials to continue."
+                                   Style="{StaticResource PageSubtitle}"
+                                   Margin="0,-8,0,8"/>
+
+                            <!-- Error Message -->
+                            <Frame x:Name="errorFrame"
+                                   IsVisible="False"
+                                   BackgroundColor="{StaticResource DangerBg}"
+                                   BorderColor="{StaticResource Danger}"
+                                   Padding="12,10"
+                                   CornerRadius="8">
+                                <Label x:Name="errorMessageLabel"
+                                       TextColor="{StaticResource Danger}"
+                                       FontFamily="OpenSansSemibold"
+                                       FontSize="13"/>
+                            </Frame>
+
+                            <!-- Username -->
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Username" Style="{StaticResource FormLabel}"/>
+                                <Frame Padding="12,2"
+                                       BackgroundColor="{StaticResource Neutral50}"
+                                       BorderColor="{StaticResource BorderStrong}"
+                                       CornerRadius="8"
+                                       HasShadow="False">
+                                    <Entry x:Name="emailEntry"
+                                           Placeholder="Enter your username"
+                                           BackgroundColor="Transparent"
+                                           HeightRequest="42"/>
+                                </Frame>
+                            </VerticalStackLayout>
+
+                            <!-- Password -->
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Password" Style="{StaticResource FormLabel}"/>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <Frame Grid.Column="0"
+                                           Padding="12,2"
+                                           BackgroundColor="{StaticResource Neutral50}"
+                                           BorderColor="{StaticResource BorderStrong}"
+                                           CornerRadius="8"
+                                           HasShadow="False">
+                                        <Entry x:Name="passwordEntry"
+                                               Placeholder="Enter your password"
+                                               IsPassword="True"
+                                               BackgroundColor="Transparent"
+                                               HeightRequest="42"/>
+                                    </Frame>
+                                    <Button x:Name="showHidePasswordButton"
+                                            Grid.Column="1"
+                                            Text="Show"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Clicked="showHidePasswordButton_Clicked"/>
+                                </Grid>
+                            </VerticalStackLayout>
+
+                            <Button x:Name="loginButton"
+                                    Text="Sign in"
+                                    Style="{StaticResource PrimaryButton}"
+                                    HeightRequest="48"
+                                    FontSize="15"
+                                    Margin="0,8,0,0"
+                                    Clicked="OnLoginButtonClicked"/>
+
+                            <Label Text="Protected by your administrator. Contact support if you cannot sign in."
+                                   Style="{StaticResource Caption}"
+                                   HorizontalTextAlignment="Center"
+                                   Margin="0,4,0,0"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Frame>
+
+                <Label Grid.Row="2"
+                       Text="© Madina Enterprises · Internal use only"
+                       Style="{StaticResource Caption}"
+                       HorizontalOptions="Center"
+                       Margin="0,28,0,0"/>
+            </Grid>
+        </ScrollView>
+    </Grid>
 </ContentPage>

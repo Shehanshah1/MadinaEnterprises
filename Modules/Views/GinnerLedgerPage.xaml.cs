@@ -16,10 +16,10 @@ public partial class GinnerLedgerPage : ContentPage
     private ObservableCollection<Payment> _paymentsView = new();
 
     // Unselected / selected tab button colors.
-    private static readonly Color TabActiveBg = Color.FromArgb("#98cb00");
-    private static readonly Color TabActiveFg = Colors.Black;
-    private static readonly Color TabInactiveBg = Color.FromArgb("#333333");
-    private static readonly Color TabInactiveFg = Colors.White;
+    private static readonly Color TabActiveBg = Color.FromArgb("#8AA800");
+    private static readonly Color TabActiveFg = Colors.White;
+    private static readonly Color TabInactiveBg = Color.FromArgb("#FFFFFF");
+    private static readonly Color TabInactiveFg = Color.FromArgb("#334155");
 
     public GinnerLedgerPage()
     {
