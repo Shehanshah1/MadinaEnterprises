@@ -158,4 +158,19 @@ to owner permission.
 
 ---
 
+## LinkedIn / CV
+
+### LinkedIn Project Description
+
+> Developed a cross-platform enterprise business management system for Madina Enterprises, a cotton brokerage firm, using .NET MAUI (C# / XAML). The application manages the full brokerage workflow — ginner and mill onboarding, contracts, deliveries, payments, and ledger tracking — backed by an offline-first SQLite database with Supabase cloud sync so data stays consistent across devices. Features an automated CI/CD release pipeline via GitHub Actions that builds, signs, and publishes MSIX packages to GitHub Releases with zero-touch auto-update for Windows clients.
+
+### CV Bullet Points
+
+- Architected a cross-platform cotton brokerage management system in C# / .NET MAUI handling 1,000+ yearly B2B transactions, covering the full lifecycle from contracts and deliveries to payments and ginner ledger tracking.
+- Designed an offline-first SQLite data layer with Supabase cloud sync (last-write-wins reconciliation on app start/resume), ensuring zero data loss across multi-device deployments.
+- Built an end-to-end CI/CD release pipeline with GitHub Actions — automated MSIX signing, versioned GitHub Releases, and `.appinstaller`-based auto-update, eliminating manual deployment overhead.
+- **Tech Stack:** C#, .NET 9 MAUI, XAML, SQLite, Supabase (PostgREST), GitHub Actions, MSIX/Windows packaging
+
+---
+
 **Built with .NET MAUI**
